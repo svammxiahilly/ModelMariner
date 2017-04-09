@@ -10,3 +10,7 @@ The first stable release. modelmariner compiles routing policies against
 recorded LLM traces, entirely offline.
 
 ### Added
+
+- **Trace ingestion** (`internal/trace`): provider-neutral JSONL reader with
+  strict per-record validation, quality clamping, comment/blank-line skipping,
+  deterministic sorting, and an ordered `PrivacyTier` enum
