@@ -13,3 +13,19 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/nauticalabs/modelmariner/internal/pareto"
+	"github.com/nauticalabs/modelmariner/internal/policy"
+	"github.com/nauticalabs/modelmariner/internal/reliability"
+	"github.com/nauticalabs/modelmariner/internal/report"
+	"github.com/nauticalabs/modelmariner/internal/routing"
+	"github.com/nauticalabs/modelmariner/internal/trace"
+)
+
+// version is overridable at build time via -ldflags "-X main.version=...".
+var version = "1.0.0"
+
