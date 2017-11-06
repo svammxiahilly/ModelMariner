@@ -10,3 +10,16 @@ import { render } from "./dashboard.js";
 import { Report } from "./types.js";
 
 function sampleReport(): Report {
+  return {
+    schema: "modelmariner/v1",
+    input: {
+      total_lines: 4,
+      accepted: 4,
+      rejected: 0,
+      models: ["cheap", "premium"],
+      tasks: ["t"],
+    },
+    reliability: [
+      {
+        model: "cheap", task: "t", samples: 2, successes: 2, failures: 0,
+        success_rate: 1, reliability_lower: 0.34, mean_cost_usd: 0.1,
