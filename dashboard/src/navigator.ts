@@ -8,3 +8,14 @@
 
 import {
   Decision,
+  ParetoFrontier,
+  PolicyReport,
+  ReliabilityAggregate,
+  Report,
+  SCHEMA_VERSION,
+} from "./types.js";
+
+/** Raised when a document does not conform to the expected schema. */
+export class SchemaError extends Error {}
+
+/** A concise per-task overview combining routing winners across policies. */
