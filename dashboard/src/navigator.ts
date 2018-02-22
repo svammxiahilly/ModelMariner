@@ -29,3 +29,14 @@ export interface TaskOverview {
 export interface RouteEntry {
   task: string;
   model: string;
+  score: number;
+  margin: number;
+}
+
+export class ReportNavigator {
+  readonly report: Report;
+
+  constructor(report: Report) {
+    if (!report || typeof report !== "object") {
+      throw new SchemaError("report is not an object");
+    }
