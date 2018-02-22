@@ -19,3 +19,13 @@ import {
 export class SchemaError extends Error {}
 
 /** A concise per-task overview combining routing winners across policies. */
+export interface TaskOverview {
+  task: string;
+  frontierModels: string[];
+  winnersByPolicy: { policy: string; winner: string | null; score: number }[];
+}
+
+/** A compiled route entry for the routing-table view. */
+export interface RouteEntry {
+  task: string;
+  model: string;
