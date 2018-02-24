@@ -9,3 +9,15 @@ export type PrivacyTier =
   | "internal"
   | "confidential"
   | "restricted";
+
+export interface InputSummary {
+  total_lines: number;
+  accepted: number;
+  rejected: number;
+  models: string[];
+  tasks: string[];
+  warnings?: string[];
+}
+
+export interface ReliabilityAggregate {
+  model: string;
