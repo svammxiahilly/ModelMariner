@@ -21,3 +21,15 @@ export interface InputSummary {
 
 export interface ReliabilityAggregate {
   model: string;
+  task: string;
+  samples: number;
+  successes: number;
+  failures: number;
+  success_rate: number;
+  reliability_lower: number;
+  mean_cost_usd: number;
+  mean_latency_ms: number;
+  p50_latency_ms: number;
+  p95_latency_ms: number;
+  p99_latency_ms: number;
+  mean_quality: number;
