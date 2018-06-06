@@ -1,0 +1,5 @@
+package pareto
+
+import (
+	"testing"
+
