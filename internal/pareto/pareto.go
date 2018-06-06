@@ -10,3 +10,16 @@ import (
 	"math"
 	"sort"
 
+	"github.com/nauticalabs/modelmariner/internal/reliability"
+)
+
+// Point is one model's position in objective space for a task.
+type Point struct {
+	Model       string  `json:"model"`
+	CostUSD     float64 `json:"cost_usd"`
+	LatencyMS   float64 `json:"latency_ms"`
+	Quality     float64 `json:"quality"`
+	Reliability float64 `json:"reliability"`
+	Dominated   bool    `json:"dominated"`
+	// DominatedBy lists models that dominate this point (empty if on frontier).
+	DominatedBy []string `json:"dominated_by,omitempty"`
