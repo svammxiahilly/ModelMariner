@@ -13,3 +13,8 @@ func agg(model string, cost, p95, qual, rel float64) reliability.Aggregate {
 	}
 }
 
+func TestDominatedPointRemoved(t *testing.T) {
+	// "cheap" dominates "worse" on every axis; "premium" trades cost for quality.
+	sum := reliability.Summary{
+		Tasks: []string{"t"},
+		Aggregates: []reliability.Aggregate{
