@@ -28,3 +28,34 @@ const SchemaVersion = "modelmariner/v1"
 // Report is the complete, self-describing analysis document.
 type Report struct {
 	Schema      string                  `json:"schema"`
+	Generated   string                  `json:"generated,omitempty"`
+	Input       InputSummary            `json:"input"`
+	Reliability []reliability.Aggregate `json:"reliability"`
+	Pareto      []pareto.Frontier       `json:"pareto"`
+	Policies    []PolicyReport          `json:"policies"`
+}
+
+// InputSummary describes what was ingested.
+type InputSummary struct {
+	TotalLines int      `json:"total_lines"`
+	Accepted   int      `json:"accepted"`
+	Rejected   int      `json:"rejected"`
+	Models     []string `json:"models"`
+	Tasks      []string `json:"tasks"`
+	Warnings   []string `json:"warnings,omitempty"`
+}
+
+// PolicyReport bundles a simulation with its explanations.
+type PolicyReport struct {
+	Name         string                `json:"name"`
+	Description  string                `json:"description,omitempty"`
+	Simulation   routing.Simulation    `json:"simulation"`
+	Explanations []explain.Explanation `json:"explanations"`
+}
+
+// BuildInput carries everything needed to assemble a report.
+type BuildInput struct {
+	Ingest      trace.IngestResult
+	Traces      []trace.Trace
+	Reliability reliability.Summary
+	Pareto      pareto.Analysis
