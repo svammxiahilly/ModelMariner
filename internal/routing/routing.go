@@ -10,3 +10,16 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/nauticalabs/modelmariner/internal/policy"
+	"github.com/nauticalabs/modelmariner/internal/reliability"
+	"github.com/nauticalabs/modelmariner/internal/trace"
+)
+
+// Decision is the routing choice for a single task under a policy.
+type Decision struct {
+	Task        string              `json:"task"`
+	Policy      string              `json:"policy"`
+	Winner      string              `json:"winner"`
+	Runnerup    string              `json:"runner_up,omitempty"`
+	Score       float64             `json:"score"`
+	Margin      float64             `json:"margin"`
