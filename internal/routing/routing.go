@@ -23,3 +23,16 @@ type Decision struct {
 	Runnerup    string              `json:"runner_up,omitempty"`
 	Score       float64             `json:"score"`
 	Margin      float64             `json:"margin"`
+	Eligible    []string            `json:"eligible"`
+	Rejected    []RejectedCandidate `json:"rejected,omitempty"`
+	Evaluations []policy.Evaluation `json:"evaluations"`
+	Realized    RealizedMetrics     `json:"realized"`
+	Baseline    RealizedMetrics     `json:"baseline"`
+	// NoEligible is true when the policy disqualified every candidate.
+	NoEligible bool `json:"no_eligible"`
+}
+
+// RejectedCandidate summarizes why a model was excluded.
+type RejectedCandidate struct {
+	Model      string             `json:"model"`
+	Violations []policy.Violation `json:"violations"`
