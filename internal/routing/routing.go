@@ -36,3 +36,16 @@ type Decision struct {
 type RejectedCandidate struct {
 	Model      string             `json:"model"`
 	Violations []policy.Violation `json:"violations"`
+}
+
+// RealizedMetrics reports the outcome of replaying traces through a routing
+// choice. Baseline uses the naive "cheapest model regardless of policy" pick so
+// the report can quantify what the policy bought or cost.
+type RealizedMetrics struct {
+	Model         string  `json:"model"`
+	Calls         int     `json:"calls"`
+	Successes     int     `json:"successes"`
+	SuccessRate   float64 `json:"success_rate"`
+	TotalCostUSD  float64 `json:"total_cost_usd"`
+	MeanLatencyMS float64 `json:"mean_latency_ms"`
+	MeanQuality   float64 `json:"mean_quality"`
