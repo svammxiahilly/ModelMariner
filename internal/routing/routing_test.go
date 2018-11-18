@@ -17,3 +17,12 @@ func buildTraces() []trace.Trace {
 	for i := 0; i < 10; i++ {
 		out = append(out, tr("cheap", "t", 0.10, 100, 0.80, false))
 		out = append(out, tr("premium", "t", 0.60, 400, 0.98, false))
+	}
+	return out
+}
+
+func TestSimulatePicksWinnerAndReplays(t *testing.T) {
+	traces := buildTraces()
+	sum := reliability.Compute(traces)
+	p := policy.Policy{
+		Name:       "quality",
