@@ -39,3 +39,24 @@ var privacyNames = [...]string{"public", "internal", "confidential", "restricted
 
 // String renders the tier as its canonical lowercase name.
 func (p PrivacyTier) String() string {
+	if p < 0 || int(p) >= len(privacyNames) {
+		return "unknown"
+	}
+	return privacyNames[p]
+}
+
+// ParsePrivacyTier converts a case-insensitive string into a PrivacyTier.
+func ParsePrivacyTier(s string) (PrivacyTier, error) {
+	norm := strings.ToLower(strings.TrimSpace(s))
+	for i, name := range privacyNames {
+		if name == norm {
+			return PrivacyTier(i), nil
+		}
+	}
+	return 0, fmt.Errorf("unknown privacy tier %q (want one of public, internal, confidential, restricted)", s)
+}
+
+// MarshalJSON encodes the tier as its name so reports read cleanly.
+func (p PrivacyTier) MarshalJSON() ([]byte, error) {
+	return json.Marshal(p.String())
+}
