@@ -18,3 +18,24 @@ import (
 	"sort"
 	"strings"
 )
+
+// PrivacyTier classifies the sensitivity of the data a task carried. Higher
+// tiers demand stricter routing (for example, forbidding models that ship data
+// off-premises). The ordering is meaningful: Public < Internal < Confidential < Restricted.
+type PrivacyTier int
+
+const (
+	// PrivacyPublic marks data safe for any destination.
+	PrivacyPublic PrivacyTier = iota
+	// PrivacyInternal marks data that must stay within the organization.
+	PrivacyInternal
+	// PrivacyConfidential marks sensitive business data.
+	PrivacyConfidential
+	// PrivacyRestricted marks the most sensitive data (PII, secrets, regulated).
+	PrivacyRestricted
+)
+
+var privacyNames = [...]string{"public", "internal", "confidential", "restricted"}
+
+// String renders the tier as its canonical lowercase name.
+func (p PrivacyTier) String() string {
