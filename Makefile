@@ -3,3 +3,9 @@
 
 BINARY      := modelmariner
 CMD         := ./cmd/modelmariner
+BIN_DIR     := bin
+TRACES      := testdata/fleet.jsonl
+POLICIES    := testdata/policies.json
+OUT_DIR     := testdata/output
+VERSION     := $(shell git describe --tags --always 2>/dev/null || echo 1.0.0)
+LDFLAGS     := -s -w -X main.version=$(VERSION)
