@@ -58,3 +58,34 @@ The distinction matters for three reasons a captain cares about:
 2. **Hard constraints are actually hard.** A budget cap, a latency ceiling, a
    privacy tier — these *disqualify* candidates. They are never "soft penalties"
    that a high enough quality score can bribe past. Regulated workloads demand
+   this, and so does anyone who has ever been paged at 3 a.m.
+3. **Reproducibility.** The same traces and the same policy always compile to the
+   same routing table, byte for byte. You can commit the output, diff it in code
+   review, and gate CI on it.
+
+ModelMariner never opens a socket to a provider. It cannot. That is the point.
+
+---
+
+## The voyage in one glance
+
+```
+   traces.jsonl ──▶ ingest & validate ──▶ reliability aggregation
+                                                    │
+                                                    ▼
+                                          Pareto frontier per task
+                                                    │
+        policy.json ──▶ hard-constraint evaluation ─┤
+                                                    ▼
+                                    routing simulation (replay traces)
+                                                    │
+                                                    ▼
+                              explanations  ◀──  deterministic report
+                                                    │
+                        report.json + report.txt + policies.json
+                                                    │
+                                                    ▼
+                              TypeScript navigation dashboard
+```
+
+Every arrow is a package with tests. Every box is a decision you can inspect.
