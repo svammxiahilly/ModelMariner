@@ -11,3 +11,9 @@ import (
 	"math/rand"
 	"os"
 	"time"
+)
+
+type profile struct {
+	model    string
+	provider string
+	region   string
