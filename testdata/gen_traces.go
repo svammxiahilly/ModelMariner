@@ -17,3 +17,10 @@ type profile struct {
 	model    string
 	provider string
 	region   string
+	// per-task behavior: cost per 1k tokens, base latency, latency jitter,
+	// base quality, error rate.
+	costPer1k float64
+	baseLatMS float64
+	jitterMS  float64
+	quality   float64
+	errRate   float64
