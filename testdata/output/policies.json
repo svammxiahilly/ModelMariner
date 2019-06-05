@@ -1,0 +1,8 @@
+[
+  {
+    "schema": "modelmariner/v1",
+    "policy": "budget-guard",
+    "routes": [
+      {
+        "task": "classify-intent",
+        "model": "harbor-mini",
