@@ -1,0 +1,11 @@
+========================================================================
+ MODELMARINER — offline routing-policy compilation report
+========================================================================
+Schema: modelmariner/v1
+Ingested: 1400 line(s) — 1400 accepted, 0 rejected
+Models: clipper-pro, galleon-max, harbor-mini, harbor-nano, lighthouse-local
+Tasks:  classify-intent, code-review-comment, draft-legal-clause, extract-pii-redaction, summarize-support-ticket
+
+========================================================================
+ RELIABILITY (per model / task)
+========================================================================
