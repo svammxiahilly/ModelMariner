@@ -9,3 +9,9 @@
         "min_quality": 0.7,
         "min_reliability": 0.8
       },
+      "preference": {
+        "weights": [
+          { "objective": "cost", "weight": 0.6 },
+          { "objective": "quality", "weight": 0.25 },
+          { "objective": "reliability", "weight": 0.15 }
+        ]
