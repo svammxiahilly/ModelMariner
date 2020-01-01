@@ -40,3 +40,13 @@ export class ReportNavigator {
     if (!report || typeof report !== "object") {
       throw new SchemaError("report is not an object");
     }
+    if (report.schema !== SCHEMA_VERSION) {
+      throw new SchemaError(
+        `unsupported schema ${JSON.stringify(report.schema)} (expected ${SCHEMA_VERSION})`,
+      );
+    }
+    if (!Array.isArray(report.reliability) || !Array.isArray(report.pareto)) {
+      throw new SchemaError("report is missing reliability or pareto sections");
+    }
+    this.report = report;
+  }
