@@ -76,3 +76,19 @@ func parseAnalyzeFlags(args []string) (analyzeFlags, error) {
 		next := func() (string, error) {
 			if i+1 >= len(args) {
 				return "", fmt.Errorf("flag %s requires a value", a)
+			}
+			i++
+			return args[i], nil
+		}
+		var err error
+		switch {
+		case a == "--traces" || a == "-t":
+			f.traces, err = next()
+		case strings.HasPrefix(a, "--traces="):
+			f.traces = strings.TrimPrefix(a, "--traces=")
+		case a == "--policy" || a == "-p":
+			f.policy, err = next()
+		case strings.HasPrefix(a, "--policy="):
+			f.policy = strings.TrimPrefix(a, "--policy=")
+		case a == "--out" || a == "-o":
+			f.outDir, err = next()
