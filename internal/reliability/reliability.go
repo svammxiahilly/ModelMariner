@@ -75,3 +75,22 @@ func Compute(traces []trace.Trace) Summary {
 		k := key{t.Model, t.Task}
 		b := buckets[k]
 		if b == nil {
+			b = &bucket{
+				agg:      Aggregate{Model: t.Model, Task: t.Task},
+				errKinds: map[string]int{},
+			}
+			buckets[k] = b
+		}
+		b.agg.Samples++
+		if t.Error {
+			b.agg.Failures++
+			if t.ErrorKind != "" {
+				b.errKinds[t.ErrorKind]++
+			}
+		} else {
+			b.agg.Successes++
+			// Only successful calls contribute to quality/latency/cost
+			// distributions, because a failed call's metrics are not
+			// representative of the service the model actually delivers.
+			b.latency = append(b.latency, t.LatencyMS)
+			b.costSum += t.CostUSD
