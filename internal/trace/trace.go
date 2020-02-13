@@ -101,3 +101,24 @@ type Record struct {
 	Timestamp string      `json:"timestamp,omitempty"`
 }
 
+// TokenUsage captures prompt and completion token counts.
+type TokenUsage struct {
+	Prompt     int `json:"prompt"`
+	Completion int `json:"completion"`
+}
+
+// Total returns the sum of prompt and completion tokens.
+func (t TokenUsage) Total() int { return t.Prompt + t.Completion }
+
+// Trace is the validated, normalized observation used throughout the engine.
+// Unlike Record, every field here is guaranteed valid and in canonical units.
+type Trace struct {
+	Model      string
+	Task       string
+	Provider   string
+	Region     string
+	Prompt     int
+	Completion int
+	CostUSD    float64
+	LatencyMS  float64
+	Quality    float64 // clamped to [0,1]
