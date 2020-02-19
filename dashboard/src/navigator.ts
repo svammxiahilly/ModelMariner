@@ -50,3 +50,14 @@ export class ReportNavigator {
     }
     this.report = report;
   }
+
+  /** Parse a JSON string into a validated navigator. */
+  static fromJSON(text: string): ReportNavigator {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      throw new SchemaError(`report is not valid JSON: ${(e as Error).message}`);
+    }
+    return new ReportNavigator(parsed as Report);
+  }
