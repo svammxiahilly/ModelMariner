@@ -24,3 +24,9 @@ type profile struct {
 	jitterMS  float64
 	quality   float64
 	errRate   float64
+	privacy   string
+}
+
+func main() {
+	rng := rand.New(rand.NewSource(20260831))
+
