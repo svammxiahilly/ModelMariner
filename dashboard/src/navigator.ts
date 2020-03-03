@@ -61,3 +61,13 @@ export class ReportNavigator {
     }
     return new ReportNavigator(parsed as Report);
   }
+
+  /** All task names, sorted. */
+  tasks(): string[] {
+    return [...this.report.input.tasks];
+  }
+
+  /** All model names, sorted. */
+  models(): string[] {
+    return [...this.report.input.models];
+  }
