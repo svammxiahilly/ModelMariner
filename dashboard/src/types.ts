@@ -33,3 +33,15 @@ export interface ReliabilityAggregate {
   p95_latency_ms: number;
   p99_latency_ms: number;
   mean_quality: number;
+  mean_tokens: number;
+  highest_privacy: PrivacyTier;
+  error_kinds?: Record<string, number>;
+}
+
+export interface ParetoPoint {
+  model: string;
+  cost_usd: number;
+  latency_ms: number;
+  quality: number;
+  reliability: number;
+  dominated: boolean;
