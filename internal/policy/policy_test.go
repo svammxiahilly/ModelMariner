@@ -16,3 +16,9 @@ func agg(model string, cost, p95, qual, rel float64, priv trace.PrivacyTier) rel
 	}
 }
 
+func TestLoadValidPolicy(t *testing.T) {
+	js := `{"policies":[{"name":"p","constraints":{"max_cost_usd":0.5},"preference":{"weights":[{"objective":"cost","weight":1}]}}]}`
+	set, err := Load(strings.NewReader(js))
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
