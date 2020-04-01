@@ -2,3 +2,4 @@
   "name": "modelmariner-dashboard",
   "version": "1.0.0",
   "description": "Terminal navigation dashboard for modelmariner routing-policy reports",
+  "type": "module",
