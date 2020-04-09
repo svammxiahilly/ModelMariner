@@ -22,3 +22,9 @@ func TestLoadValidPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
+	if len(set.Policies) != 1 || set.Version != 1 {
+		t.Fatalf("bad set: %+v", set)
+	}
+}
+
+func TestLoadRejectsInvalid(t *testing.T) {
