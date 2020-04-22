@@ -24,3 +24,17 @@ func TestIngestValidLine(t *testing.T) {
 	if tr.Privacy != PrivacyInternal {
 		t.Errorf("want internal privacy, got %v", tr.Privacy)
 	}
+}
+
+func TestIngestSkipsCommentsAndBlanks(t *testing.T) {
+	in := "# a comment\n\n" +
+		`{"model":"m","task":"t","tokens":{"prompt":1,"completion":1},"cost_usd":0,"latency_ms":1,"quality":0.5,"error":false,"privacy":"public"}` + "\n"
+	res, err := Ingest(strings.NewReader(in), DefaultOptions())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Total != 1 || len(res.Traces) != 1 {
+		t.Fatalf("comments/blanks not skipped: total=%d traces=%d", res.Total, len(res.Traces))
+	}
+}
+
