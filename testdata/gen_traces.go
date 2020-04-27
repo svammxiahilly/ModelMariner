@@ -30,3 +30,10 @@ type profile struct {
 func main() {
 	rng := rand.New(rand.NewSource(20260831))
 
+	tasks := []struct {
+		name    string
+		privacy string
+		volume  int
+	}{
+		{"summarize-support-ticket", "internal", 60},
+		{"classify-intent", "public", 70},
