@@ -122,3 +122,24 @@ type Trace struct {
 	CostUSD    float64
 	LatencyMS  float64
 	Quality    float64 // clamped to [0,1]
+	Error      bool
+	ErrorKind  string
+	Privacy    PrivacyTier
+	Timestamp  string
+	// Line records the 1-based source line for diagnostics.
+	Line int
+}
+
+// Tokens returns total token usage for the trace.
+func (t Trace) Tokens() int { return t.Prompt + t.Completion }
+
+// ValidationError describes exactly why a single source line was rejected.
+type ValidationError struct {
+	Line   int
+	Field  string
+	Reason string
+}
+
+func (e ValidationError) Error() string {
+	return fmt.Sprintf("line %d: field %q: %s", e.Line, e.Field, e.Reason)
+}
