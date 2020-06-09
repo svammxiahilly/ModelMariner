@@ -3,3 +3,5 @@
   "version": "1.0.0",
   "description": "Terminal navigation dashboard for modelmariner routing-policy reports",
   "type": "module",
+  "private": true,
+  "license": "MIT",
