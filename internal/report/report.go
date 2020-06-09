@@ -89,3 +89,34 @@ func Build(in BuildInput) Report {
 	sort.Strings(r.Input.Warnings)
 
 	byName := map[string]policy.Policy{}
+	for _, p := range in.Policies.Policies {
+		byName[p.Name] = p
+	}
+	for _, sim := range in.Simulations {
+		pr := PolicyReport{
+			Name:         sim.Policy,
+			Description:  byName[sim.Policy].Description,
+			Simulation:   sim,
+			Explanations: explain.All(sim),
+		}
+		r.Policies = append(r.Policies, pr)
+	}
+	sort.Slice(r.Policies, func(i, j int) bool { return r.Policies[i].Name < r.Policies[j].Name })
+	return r
+}
+
+// JSON renders the report as indented, deterministic JSON. HTML escaping is
+// disabled so operators (comparison symbols) render as themselves in diffs.
+func (r Report) JSON() ([]byte, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(r); err != nil {
+		return nil, fmt.Errorf("encoding report: %w", err)
+	}
+	return buf.Bytes(), nil
+}
+
+// Text renders a human-readable report suitable for a terminal or a log.
+func (r Report) Text() string {
