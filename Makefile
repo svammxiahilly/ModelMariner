@@ -15,3 +15,9 @@ LDFLAGS     := -s -w -X main.version=$(VERSION)
 .PHONY: help
 help: ## Show this help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
+
+.PHONY: build
+build: ## Compile the CLI into ./bin.
+	@mkdir -p $(BIN_DIR)
+	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/$(BINARY) $(CMD)
