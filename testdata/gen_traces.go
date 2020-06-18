@@ -37,3 +37,9 @@ func main() {
 	}{
 		{"summarize-support-ticket", "internal", 60},
 		{"classify-intent", "public", 70},
+		{"extract-pii-redaction", "restricted", 50},
+		{"draft-legal-clause", "confidential", 45},
+		{"code-review-comment", "internal", 55},
+	}
+
+	// Each model behaves differently per task class. We describe base profiles
