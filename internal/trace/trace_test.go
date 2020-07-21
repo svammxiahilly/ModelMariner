@@ -51,3 +51,16 @@ func TestValidationRejectsMissingFields(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			res, err := Ingest(strings.NewReader(line), DefaultOptions())
 			if err != nil {
+				t.Fatalf("ingest should not hard-fail in skip mode: %v", err)
+			}
+			if len(res.Traces) != 0 {
+				t.Fatalf("expected rejection, got trace: %+v", res.Traces)
+			}
+			if res.Rejected != 1 {
+				t.Fatalf("expected 1 rejection, got %d", res.Rejected)
+			}
+		})
+	}
+}
+
+func TestStrictModeAborts(t *testing.T) {
