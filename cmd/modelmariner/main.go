@@ -92,3 +92,18 @@ func parseAnalyzeFlags(args []string) (analyzeFlags, error) {
 			f.policy = strings.TrimPrefix(a, "--policy=")
 		case a == "--out" || a == "-o":
 			f.outDir, err = next()
+		case strings.HasPrefix(a, "--out="):
+			f.outDir = strings.TrimPrefix(a, "--out=")
+		case a == "--format":
+			f.format, err = next()
+		case strings.HasPrefix(a, "--format="):
+			f.format = strings.TrimPrefix(a, "--format=")
+		case a == "--strict":
+			f.strict = true
+		case a == "--with-timestamp":
+			f.deterministic = false
+		default:
+			return f, fmt.Errorf("unknown flag %q", a)
+		}
+		if err != nil {
+			return f, err
