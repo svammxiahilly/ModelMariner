@@ -40,3 +40,10 @@ func TestLoadRejectsInvalid(t *testing.T) {
 	for name, js := range cases {
 		t.Run(name, func(t *testing.T) {
 			if _, err := Load(strings.NewReader(js)); err == nil {
+				t.Errorf("expected load error for %q", name)
+			}
+		})
+	}
+}
+
+func TestBudgetConstraintDisqualifies(t *testing.T) {
