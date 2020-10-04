@@ -50,3 +50,9 @@ func main() {
 		{"clipper-pro", "openseas", "us-east", 0.55, 620, 260, 0.93, 0.015, ""},
 		{"galleon-max", "openseas", "us-east", 1.20, 1150, 400, 0.965, 0.01, ""},
 		{"lighthouse-local", "onprem", "on-prem", 0.09, 320, 140, 0.78, 0.04, ""},
+	}
+
+	baseTime := time.Date(2026, 8, 25, 8, 0, 0, 0, time.UTC)
+	var seq int
+
+	emit := func(rec string) { fmt.Fprintln(os.Stdout, rec) }
