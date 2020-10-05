@@ -107,3 +107,19 @@ func parseAnalyzeFlags(args []string) (analyzeFlags, error) {
 		}
 		if err != nil {
 			return f, err
+		}
+	}
+	if f.traces == "" {
+		return f, fmt.Errorf("--traces is required")
+	}
+	switch f.format {
+	case "json", "text", "both":
+	default:
+		return f, fmt.Errorf("--format must be json, text, or both (got %q)", f.format)
+	}
+	return f, nil
+}
+
+func cmdAnalyze(args []string) error {
+	f, err := parseAnalyzeFlags(args)
+	if err != nil {
