@@ -123,3 +123,19 @@ func parseAnalyzeFlags(args []string) (analyzeFlags, error) {
 func cmdAnalyze(args []string) error {
 	f, err := parseAnalyzeFlags(args)
 	if err != nil {
+		return err
+	}
+
+	ingest, err := loadTraces(f.traces, f.strict)
+	if err != nil {
+		return err
+	}
+	if len(ingest.Traces) == 0 {
+		return fmt.Errorf("no valid traces found in %s", f.traces)
+	}
+
+	sum := reliability.Compute(ingest.Traces)
+	par := pareto.Compute(sum)
+
+	var set policy.Set
+	var sims []routing.Simulation
