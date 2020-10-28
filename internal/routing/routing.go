@@ -49,3 +49,16 @@ type RealizedMetrics struct {
 	TotalCostUSD  float64 `json:"total_cost_usd"`
 	MeanLatencyMS float64 `json:"mean_latency_ms"`
 	MeanQuality   float64 `json:"mean_quality"`
+}
+
+// Simulation is the full routing result across all tasks for one policy.
+type Simulation struct {
+	Policy    string     `json:"policy"`
+	Decisions []Decision `json:"decisions"`
+	Totals    Totals     `json:"totals"`
+}
+
+// Totals aggregate realized vs baseline economics across all decided tasks.
+type Totals struct {
+	TasksDecided    int     `json:"tasks_decided"`
+	TasksUnrouted   int     `json:"tasks_unrouted"`
