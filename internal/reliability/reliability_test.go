@@ -22,3 +22,9 @@ func TestComputeBasic(t *testing.T) {
 	}
 	traces[2].ErrorKind = "timeout"
 	sum := Compute(traces)
+	if len(sum.Aggregates) != 1 {
+		t.Fatalf("want 1 aggregate, got %d", len(sum.Aggregates))
+	}
+	a := sum.Aggregates[0]
+	if a.Samples != 3 || a.Successes != 2 || a.Failures != 1 {
+		t.Errorf("bad counts: %+v", a)
