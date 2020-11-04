@@ -139,3 +139,18 @@ func cmdAnalyze(args []string) error {
 
 	var set policy.Set
 	var sims []routing.Simulation
+	if f.policy != "" {
+		pf, err := os.Open(f.policy)
+		if err != nil {
+			return fmt.Errorf("opening policy file: %w", err)
+		}
+		set, err = policy.Load(pf)
+		pf.Close()
+		if err != nil {
+			return err
+		}
+		sims = routing.SimulateAll(set, sum, ingest.Traces)
+	}
+
+	rep := report.Build(report.BuildInput{
+		Ingest:        ingest,
