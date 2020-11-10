@@ -23,3 +23,16 @@ type Point struct {
 	Dominated   bool    `json:"dominated"`
 	// DominatedBy lists models that dominate this point (empty if on frontier).
 	DominatedBy []string `json:"dominated_by,omitempty"`
+}
+
+// Frontier is the Pareto analysis for a single task.
+type Frontier struct {
+	Task     string  `json:"task"`
+	Points   []Point `json:"points"`
+	Frontier []Point `json:"frontier"`
+}
+
+// FrontierModels returns just the model names on the frontier.
+func (f Frontier) FrontierModels() []string {
+	out := make([]string, 0, len(f.Frontier))
+	for _, p := range f.Frontier {
