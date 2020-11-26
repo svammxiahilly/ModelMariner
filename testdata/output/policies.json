@@ -23,3 +23,11 @@
       },
       {
         "task": "extract-pii-redaction",
+        "model": "lighthouse-local",
+        "score": 0.7937876584279551,
+        "margin": 0.12348349876309483
+      },
+      {
+        "task": "summarize-support-ticket",
+        "model": "harbor-mini",
+        "score": 0.8127904290292911,
