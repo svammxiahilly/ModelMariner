@@ -36,3 +36,15 @@ type Frontier struct {
 func (f Frontier) FrontierModels() []string {
 	out := make([]string, 0, len(f.Frontier))
 	for _, p := range f.Frontier {
+		out = append(out, p.Model)
+	}
+	return out
+}
+
+// Analysis holds frontiers for every task.
+type Analysis struct {
+	Frontiers []Frontier `json:"frontiers"`
+}
+
+// ForTask returns the frontier for a named task and whether it exists.
+func (a Analysis) ForTask(task string) (Frontier, bool) {
