@@ -47,3 +47,9 @@ func TestLoadRejectsInvalid(t *testing.T) {
 }
 
 func TestBudgetConstraintDisqualifies(t *testing.T) {
+	p := Policy{
+		Name:        "budget",
+		Constraints: Constraints{MaxCostUSD: 0.30},
+		Preference:  Preference{Weights: []Weight{{ObjCost, 1}}},
+	}
+	aggs := []reliability.Aggregate{
