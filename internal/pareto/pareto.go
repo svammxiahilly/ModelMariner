@@ -48,3 +48,16 @@ type Analysis struct {
 
 // ForTask returns the frontier for a named task and whether it exists.
 func (a Analysis) ForTask(task string) (Frontier, bool) {
+	for _, f := range a.Frontiers {
+		if f.Task == task {
+			return f, true
+		}
+	}
+	return Frontier{}, false
+}
+
+// Compute derives Pareto frontiers per task from a reliability summary. Only
+// models with at least one successful sample participate; a model that never
+// succeeded has no meaningful cost/latency/quality position.
+func Compute(sum reliability.Summary) Analysis {
+	var an Analysis
