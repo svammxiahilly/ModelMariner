@@ -93,3 +93,13 @@ export class ReportNavigator {
   }
 
   /** A named policy report, if present. */
+  policy(name: string): PolicyReport | undefined {
+    return this.report.policies.find((p) => p.name === name);
+  }
+
+  /** The routing decision for a task under a policy, if present. */
+  decision(policy: string, task: string): Decision | undefined {
+    return this.policy(policy)?.simulation.decisions.find(
+      (d) => d.task === task,
+    );
+  }
