@@ -56,3 +56,10 @@ func main() {
 	var seq int
 
 	emit := func(rec string) { fmt.Fprintln(os.Stdout, rec) }
+	emit("# modelmariner synthetic trace corpus — provider-neutral JSONL")
+	emit("# deterministic seed 20260831; each line is one recorded observation")
+
+	for _, task := range tasks {
+		for _, m := range models {
+			// Task-specific perturbations so no single model wins everywhere.
+			p := m
