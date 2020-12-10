@@ -57,3 +57,23 @@ function renderOverview(nav: ReportNavigator): string {
   out.push("");
   out.push("  POLICY ECONOMICS (realized vs cheapest-model baseline)");
   for (const p of r.policies) {
+    const t = p.simulation.totals;
+    const verb = t.cost_delta_usd >= 0 ? "spent" : "saved";
+    out.push(
+      `  ${pad(p.name, 20)} ${verb} ${money(Math.abs(t.cost_delta_usd))} ` +
+        `for +${(t.realized_mean_quality - t.baseline_mean_quality).toFixed(3)} quality ` +
+        `(${t.tasks_decided} routed, ${t.tasks_unrouted} unrouted)`,
+    );
+  }
+  return out.join("\n");
+}
+
+function renderTask(nav: ReportNavigator, task: string): string {
+  const out: string[] = [];
+  out.push(BAR);
+  out.push(`  TASK: ${task}`);
+  out.push(BAR);
+  const rel = nav.reliabilityForTask(task);
+  if (rel.length === 0) {
+    return `no such task: ${task}`;
+  }
