@@ -61,3 +61,16 @@ func (a Analysis) ForTask(task string) (Frontier, bool) {
 // succeeded has no meaningful cost/latency/quality position.
 func Compute(sum reliability.Summary) Analysis {
 	var an Analysis
+	for _, task := range sum.Tasks {
+		aggs := sum.ForTask(task)
+		points := make([]Point, 0, len(aggs))
+		for _, a := range aggs {
+			if a.Successes == 0 {
+				continue
+			}
+			points = append(points, Point{
+				Model:       a.Model,
+				CostUSD:     a.MeanCostUSD,
+				LatencyMS:   a.P95LatencyMS,
+				Quality:     a.MeanQuality,
+				Reliability: a.WilsonLower,
