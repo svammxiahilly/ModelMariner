@@ -18,3 +18,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 	sum := reliability.Summary{
 		Tasks: []string{"t"},
 		Aggregates: []reliability.Aggregate{
+			agg("cheap", 0.10, 100, 0.90, 0.95),
+			agg("worse", 0.20, 200, 0.80, 0.90),   // dominated by cheap
+			agg("premium", 0.50, 300, 0.99, 0.99), // higher quality, not dominated
+		},
+	}
