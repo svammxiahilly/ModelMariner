@@ -53,3 +53,9 @@ func TestBudgetConstraintDisqualifies(t *testing.T) {
 		Preference:  Preference{Weights: []Weight{{ObjCost, 1}}},
 	}
 	aggs := []reliability.Aggregate{
+		agg("cheap", 0.10, 100, 0.9, 0.95, 0),
+		agg("pricey", 0.50, 100, 0.9, 0.95, 0),
+	}
+	evals := Evaluate(p, aggs)
+	byModel := map[string]Evaluation{}
+	for _, e := range evals {
