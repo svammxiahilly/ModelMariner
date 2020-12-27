@@ -28,3 +28,9 @@ func TestComputeBasic(t *testing.T) {
 	a := sum.Aggregates[0]
 	if a.Samples != 3 || a.Successes != 2 || a.Failures != 1 {
 		t.Errorf("bad counts: %+v", a)
+	}
+	if math.Abs(a.SuccessRate-2.0/3.0) > 1e-9 {
+		t.Errorf("bad success rate: %v", a.SuccessRate)
+	}
+	// Cost/quality means use only successes.
+	if math.Abs(a.MeanCostUSD-0.15) > 1e-9 {
