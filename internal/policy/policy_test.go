@@ -59,3 +59,9 @@ func TestBudgetConstraintDisqualifies(t *testing.T) {
 	evals := Evaluate(p, aggs)
 	byModel := map[string]Evaluation{}
 	for _, e := range evals {
+		byModel[e.Model] = e
+	}
+	if !byModel["cheap"].Eligible {
+		t.Error("cheap should be eligible")
+	}
+	if byModel["pricey"].Eligible {
