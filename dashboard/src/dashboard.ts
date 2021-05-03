@@ -77,3 +77,23 @@ function renderTask(nav: ReportNavigator, task: string): string {
   if (rel.length === 0) {
     return `no such task: ${task}`;
   }
+  out.push(`  ${pad("model", 18)}${pad("success", 10)}${pad("reliab.LB", 12)}${pad("p95 ms", 10)}${pad("quality", 10)}${pad("cost", 10)}`);
+  for (const a of rel) {
+    out.push(
+      `  ${pad(a.model, 18)}${pad(pct(a.success_rate), 10)}` +
+        `${pad(a.reliability_lower.toFixed(3), 12)}${pad(a.p95_latency_ms.toFixed(0), 10)}` +
+        `${pad(a.mean_quality.toFixed(3), 10)}${pad(money(a.mean_cost_usd), 10)}`,
+    );
+  }
+  const f = nav.frontier(task);
+  if (f) {
+    out.push("");
+    out.push(`  Pareto frontier: ${f.frontier.map((p) => p.model).join(", ")}`);
+    const dominated = f.points.filter((p) => p.dominated);
+    for (const p of dominated) {
+      out.push(`    ${p.model} dominated by ${(p.dominated_by ?? []).join("/")}`);
+    }
+  }
+  out.push("");
+  out.push("  POLICY SELECTIONS");
+  for (const policy of nav.policies()) {
