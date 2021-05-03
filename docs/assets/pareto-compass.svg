@@ -13,3 +13,8 @@
     </linearGradient>
   </defs>
 
+  <rect width="620" height="480" fill="url(#bg)"/>
+
+  <!-- axis labels -->
+  <text x="310" y="30" text-anchor="middle" font-family="monospace" font-size="16" fill="#f2d38a" letter-spacing="2">PARETO COMPASS</text>
+  <text x="310" y="466" text-anchor="middle" font-family="monospace" font-size="12" fill="#7dd3fc">→ increasing cost per call</text>
