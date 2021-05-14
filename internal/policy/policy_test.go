@@ -71,3 +71,9 @@ func TestBudgetConstraintDisqualifies(t *testing.T) {
 		t.Errorf("expected max_cost_usd violation: %+v", byModel["pricey"].Violations)
 	}
 }
+
+func TestPrivacyConstraintAndSafeList(t *testing.T) {
+	restricted := trace.PrivacyRestricted
+	internal := trace.PrivacyInternal
+	p := Policy{
+		Name: "privacy",
