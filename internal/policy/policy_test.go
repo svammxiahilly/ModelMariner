@@ -65,3 +65,9 @@ func TestBudgetConstraintDisqualifies(t *testing.T) {
 		t.Error("cheap should be eligible")
 	}
 	if byModel["pricey"].Eligible {
+		t.Error("pricey should be disqualified by budget")
+	}
+	if len(byModel["pricey"].Violations) == 0 || byModel["pricey"].Violations[0].Constraint != "max_cost_usd" {
+		t.Errorf("expected max_cost_usd violation: %+v", byModel["pricey"].Violations)
+	}
+}
