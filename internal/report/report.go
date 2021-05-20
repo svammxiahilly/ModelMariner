@@ -120,3 +120,33 @@ func (r Report) JSON() ([]byte, error) {
 
 // Text renders a human-readable report suitable for a terminal or a log.
 func (r Report) Text() string {
+	var sb strings.Builder
+	line := strings.Repeat("=", 72)
+	fmt.Fprintf(&sb, "%s\n MODELMARINER — offline routing-policy compilation report\n%s\n", line, line)
+	fmt.Fprintf(&sb, "Schema: %s\n", r.Schema)
+	if r.Generated != "" {
+		fmt.Fprintf(&sb, "Generated: %s\n", r.Generated)
+	}
+	fmt.Fprintf(&sb, "Ingested: %d line(s) — %d accepted, %d rejected\n",
+		r.Input.TotalLines, r.Input.Accepted, r.Input.Rejected)
+	fmt.Fprintf(&sb, "Models: %s\n", strings.Join(r.Input.Models, ", "))
+	fmt.Fprintf(&sb, "Tasks:  %s\n", strings.Join(r.Input.Tasks, ", "))
+	if len(r.Input.Warnings) > 0 {
+		fmt.Fprintf(&sb, "Warnings: %d rejected line(s)\n", len(r.Input.Warnings))
+	}
+
+	fmt.Fprintf(&sb, "\n%s\n RELIABILITY (per model / task)\n%s\n", line, line)
+	fmt.Fprintf(&sb, "%-18s %-14s %6s %8s %10s %9s %8s\n",
+		"task", "model", "n", "success", "reliab.LB", "p95 ms", "quality")
+	for _, a := range r.Reliability {
+		fmt.Fprintf(&sb, "%-18s %-14s %6d %7.1f%% %10.3f %9.0f %8.3f\n",
+			trunc(a.Task, 18), trunc(a.Model, 14), a.Samples,
+			a.SuccessRate*100, a.WilsonLower, a.P95LatencyMS, a.MeanQuality)
+	}
+
+	fmt.Fprintf(&sb, "\n%s\n PARETO FRONTIERS (non-dominated models per task)\n%s\n", line, line)
+	for _, f := range r.Pareto {
+		names := f.FrontierModels()
+		fmt.Fprintf(&sb, "%-18s frontier: %s\n", trunc(f.Task, 18), strings.Join(names, ", "))
+		for _, p := range f.Points {
+			flag := "  on-frontier"
