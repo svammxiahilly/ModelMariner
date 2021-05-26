@@ -74,3 +74,15 @@ func Compute(sum reliability.Summary) Analysis {
 				LatencyMS:   a.P95LatencyMS,
 				Quality:     a.MeanQuality,
 				Reliability: a.WilsonLower,
+			})
+		}
+		if len(points) == 0 {
+			continue
+		}
+		markDominance(points)
+		frontier := make([]Point, 0, len(points))
+		for _, p := range points {
+			if !p.Dominated {
+				frontier = append(frontier, p)
+			}
+		}
