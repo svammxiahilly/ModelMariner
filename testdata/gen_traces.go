@@ -63,3 +63,10 @@ func main() {
 		for _, m := range models {
 			// Task-specific perturbations so no single model wins everywhere.
 			p := m
+			switch task.name {
+			case "draft-legal-clause":
+				// Bigger models pull ahead on hard generative tasks.
+				if m.model == "harbor-nano" {
+					p.quality -= 0.12
+					p.errRate += 0.05
+				}
