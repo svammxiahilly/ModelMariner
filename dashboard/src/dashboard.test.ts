@@ -73,3 +73,15 @@ function sampleReport(): Report {
             realized_mean_quality: 0.975, baseline_mean_quality: 0.81,
           },
         },
+        explanations: [
+          {
+            task: "t", policy: "quality",
+            headline: 'route "t" to premium (score 1.0000)',
+            reasons: ["premium beat runner-up cheap"],
+            evidence: ["replayed 2 recorded call(s)"],
+          },
+        ],
+      },
+    ],
+  };
+}
