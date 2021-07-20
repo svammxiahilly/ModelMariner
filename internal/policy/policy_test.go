@@ -77,3 +77,9 @@ func TestPrivacyConstraintAndSafeList(t *testing.T) {
 	internal := trace.PrivacyInternal
 	p := Policy{
 		Name: "privacy",
+		Constraints: Constraints{
+			MaxPrivacy:        &internal,
+			PrivacySafeModels: []string{"onprem"},
+		},
+		Preference: Preference{Weights: []Weight{{ObjQuality, 1}}},
+	}
