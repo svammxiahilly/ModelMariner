@@ -86,3 +86,16 @@ func Compute(sum reliability.Summary) Analysis {
 				frontier = append(frontier, p)
 			}
 		}
+		// Sort frontier by ascending cost then descending quality for stable,
+		// human-friendly presentation.
+		sort.Slice(frontier, func(i, j int) bool {
+			if !almostEqual(frontier[i].CostUSD, frontier[j].CostUSD) {
+				return frontier[i].CostUSD < frontier[j].CostUSD
+			}
+			return frontier[i].Quality > frontier[j].Quality
+		})
+		sort.Slice(points, func(i, j int) bool { return points[i].Model < points[j].Model })
+		an.Frontiers = append(an.Frontiers, Frontier{
+			Task:     task,
+			Points:   points,
+			Frontier: frontier,
