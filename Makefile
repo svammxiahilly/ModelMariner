@@ -21,3 +21,9 @@ help: ## Show this help.
 build: ## Compile the CLI into ./bin.
 	@mkdir -p $(BIN_DIR)
 	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/$(BINARY) $(CMD)
+
+.PHONY: test
+test: ## Run all Go unit tests.
+	go test ./... -count=1
+
+.PHONY: cover
