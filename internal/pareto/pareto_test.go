@@ -23,3 +23,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 			agg("premium", 0.50, 300, 0.99, 0.99), // higher quality, not dominated
 		},
 	}
+	an := Compute(sum)
+	f, ok := an.ForTask("t")
+	if !ok {
+		t.Fatal("no frontier for task t")
+	}
