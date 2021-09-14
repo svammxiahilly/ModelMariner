@@ -27,3 +27,9 @@ test: ## Run all Go unit tests.
 	go test ./... -count=1
 
 .PHONY: cover
+cover: ## Run tests with a coverage summary.
+	go test ./... -cover -count=1
+
+.PHONY: vet
+vet: ## Run go vet across the module.
+	go vet ./...
