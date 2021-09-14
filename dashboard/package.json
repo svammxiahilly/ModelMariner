@@ -5,3 +5,4 @@
   "type": "module",
   "private": true,
   "license": "MIT",
+  "bin": {
