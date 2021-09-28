@@ -136,3 +136,23 @@ function renderModel(nav: ReportNavigator, model: string): string {
   return out.join("\n");
 }
 
+function renderPolicy(nav: ReportNavigator, name: string): string {
+  const pr = nav.policy(name);
+  if (!pr) return `no such policy: ${name}`;
+  const out: string[] = [];
+  out.push(BAR);
+  out.push(`  POLICY: ${name}`);
+  out.push(BAR);
+  if (pr.description) out.push(`  ${pr.description}`);
+  const t = pr.simulation.totals;
+  out.push("");
+  out.push(
+    `  Decided ${t.tasks_decided} task(s), ${t.tasks_unrouted} unrouted. ` +
+      `Realized ${money(t.realized_cost_usd)} vs baseline ${money(t.baseline_cost_usd)} ` +
+      `(delta ${money(t.cost_delta_usd)}).`,
+  );
+  out.push("");
+  for (const e of pr.explanations) {
+    out.push(`  • ${e.headline}`);
+    for (const reason of e.reasons) out.push(`      - ${reason}`);
+    for (const ev of e.evidence) out.push(`      evidence: ${ev}`);
