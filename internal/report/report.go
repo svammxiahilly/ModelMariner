@@ -150,3 +150,34 @@ func (r Report) Text() string {
 		fmt.Fprintf(&sb, "%-18s frontier: %s\n", trunc(f.Task, 18), strings.Join(names, ", "))
 		for _, p := range f.Points {
 			flag := "  on-frontier"
+			if p.Dominated {
+				flag = "  dominated by " + strings.Join(p.DominatedBy, "/")
+			}
+			fmt.Fprintf(&sb, "    %-14s cost $%.4f  p95 %.0fms  q %.3f  rel %.3f%s\n",
+				trunc(p.Model, 14), p.CostUSD, p.LatencyMS, p.Quality, p.Reliability, flag)
+		}
+	}
+
+	for _, pr := range r.Policies {
+		fmt.Fprintf(&sb, "\n%s\n POLICY: %s\n%s\n", line, pr.Name, line)
+		if pr.Description != "" {
+			fmt.Fprintf(&sb, "%s\n\n", pr.Description)
+		}
+		t := pr.Simulation.Totals
+		fmt.Fprintf(&sb, "Decided %d task(s), %d unrouted. ",
+			t.TasksDecided, t.TasksUnrouted)
+		fmt.Fprintf(&sb, "Realized cost $%.4f vs baseline $%.4f (delta $%+.4f). ",
+			t.RealizedCostUSD, t.BaselineCostUSD, t.CostDeltaUSD)
+		fmt.Fprintf(&sb, "Quality %.3f vs %.3f.\n\n", t.RealizedQuality, t.BaselineQuality)
+		for _, e := range pr.Explanations {
+			sb.WriteString(e.Text())
+		}
+	}
+	return sb.String()
+}
+
+// PolicyArtifact is the compiled, standalone routing table that a runtime could
+// load to make decisions. It contains only the essential winner-per-task map
+// plus provenance so it can be regenerated and verified.
+type PolicyArtifact struct {
+	Schema   string            `json:"schema"`
