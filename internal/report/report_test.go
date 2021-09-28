@@ -22,3 +22,9 @@ const policyJSON = `{"policies":[{"name":"quality","preference":{"weights":[{"ob
 
 func buildReport(t *testing.T) Report {
 	t.Helper()
+	ing, err := trace.Ingest(strings.NewReader(corpus), trace.DefaultOptions())
+	if err != nil {
+		t.Fatal(err)
+	}
+	sum := reliability.Compute(ing.Traces)
+	par := pareto.Compute(sum)
