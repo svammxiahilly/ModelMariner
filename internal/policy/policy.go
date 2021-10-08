@@ -123,3 +123,34 @@ func Load(r io.Reader) (Set, error) {
 		if err := validatePreference(p.Preference); err != nil {
 			return set, fmt.Errorf("policy %q: %w", p.Name, err)
 		}
+		if err := validateConstraints(p.Constraints); err != nil {
+			return set, fmt.Errorf("policy %q: %w", p.Name, err)
+		}
+	}
+	return set, nil
+}
+
+func validatePreference(pref Preference) error {
+	if len(pref.Weights) == 0 {
+		return fmt.Errorf("preference must define at least one weight")
+	}
+	seen := map[Objective]bool{}
+	var total float64
+	for _, w := range pref.Weights {
+		if !validObjectives[w.Objective] {
+			return fmt.Errorf("unknown objective %q (want cost, latency, quality, reliability)", w.Objective)
+		}
+		if seen[w.Objective] {
+			return fmt.Errorf("objective %q weighted more than once", w.Objective)
+		}
+		seen[w.Objective] = true
+		if w.Weight < 0 {
+			return fmt.Errorf("objective %q has negative weight", w.Objective)
+		}
+		total += w.Weight
+	}
+	if total <= 0 {
+		return fmt.Errorf("preference weights sum to zero")
+	}
+	return nil
+}
