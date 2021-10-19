@@ -83,3 +83,9 @@ func TestPrivacyConstraintAndSafeList(t *testing.T) {
 		},
 		Preference: Preference{Weights: []Weight{{ObjQuality, 1}}},
 	}
+	aggs := []reliability.Aggregate{
+		agg("cloud", 0.1, 100, 0.9, 0.9, restricted),  // exceeds cap, not safe
+		agg("onprem", 0.2, 200, 0.8, 0.9, restricted), // exceeds cap but cleared
+	}
+	evals := Evaluate(p, aggs)
+	byModel := map[string]Evaluation{}
