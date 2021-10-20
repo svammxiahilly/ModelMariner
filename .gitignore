@@ -1,3 +1,4 @@
 # Go build output
 /bin/
 *.exe
+*.test
