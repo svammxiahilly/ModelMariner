@@ -28,3 +28,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 	if !ok {
 		t.Fatal("no frontier for task t")
 	}
+	models := f.FrontierModels()
+	if contains(models, "worse") {
+		t.Errorf("dominated model should not be on frontier: %v", models)
+	}
+	if !contains(models, "cheap") || !contains(models, "premium") {
