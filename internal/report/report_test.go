@@ -28,3 +28,9 @@ func buildReport(t *testing.T) Report {
 	}
 	sum := reliability.Compute(ing.Traces)
 	par := pareto.Compute(sum)
+	set, err := policy.Load(strings.NewReader(policyJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sims := routing.SimulateAll(set, sum, ing.Traces)
+	return Build(BuildInput{
