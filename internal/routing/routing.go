@@ -62,3 +62,16 @@ type Simulation struct {
 type Totals struct {
 	TasksDecided    int     `json:"tasks_decided"`
 	TasksUnrouted   int     `json:"tasks_unrouted"`
+	RealizedCostUSD float64 `json:"realized_cost_usd"`
+	BaselineCostUSD float64 `json:"baseline_cost_usd"`
+	CostDeltaUSD    float64 `json:"cost_delta_usd"`
+	RealizedQuality float64 `json:"realized_mean_quality"`
+	BaselineQuality float64 `json:"baseline_mean_quality"`
+}
+
+// Simulate compiles a single policy into per-task routing decisions and replays
+// the recorded traces to measure realized outcomes.
+func Simulate(p policy.Policy, sum reliability.Summary, traces []trace.Trace) Simulation {
+	byTaskModel := indexTraces(traces)
+	sim := Simulation{Policy: p.Name}
+
