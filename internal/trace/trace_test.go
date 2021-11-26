@@ -64,3 +64,17 @@ func TestValidationRejectsMissingFields(t *testing.T) {
 }
 
 func TestStrictModeAborts(t *testing.T) {
+	in := `{"model":"","task":"t","tokens":{"prompt":1,"completion":1},"cost_usd":0,"latency_ms":1,"quality":0.5,"privacy":"public"}`
+	opts := DefaultOptions()
+	opts.SkipInvalid = false
+	_, err := Ingest(strings.NewReader(in), opts)
+	if err == nil {
+		t.Fatal("expected error in strict mode")
+	}
+}
+
+func TestQualityClamp(t *testing.T) {
+	in := `{"model":"m","task":"t","tokens":{"prompt":1,"completion":1},"cost_usd":0,"latency_ms":1,"quality":1.5,"privacy":"public"}`
+	res, err := Ingest(strings.NewReader(in), DefaultOptions())
+	if err != nil {
+		t.Fatal(err)
