@@ -103,3 +103,14 @@ export class ReportNavigator {
       (d) => d.task === task,
     );
   }
+
+  /** Compile the winner-per-task routing table for a policy. */
+  routingTable(policy: string): RouteEntry[] {
+    const pr = this.policy(policy);
+    if (!pr) return [];
+    return pr.simulation.decisions
+      .filter((d) => !d.no_eligible)
+      .map((d) => ({
+        task: d.task,
+        model: d.winner,
+        score: d.score,
