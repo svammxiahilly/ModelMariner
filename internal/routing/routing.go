@@ -75,3 +75,16 @@ func Simulate(p policy.Policy, sum reliability.Summary, traces []trace.Trace) Si
 	byTaskModel := indexTraces(traces)
 	sim := Simulation{Policy: p.Name}
 
+	var realizedQualitySum, baselineQualitySum float64
+	var qualityWeight int
+
+	for _, task := range sum.Tasks {
+		if !p.AppliesTo(task) {
+			continue
+		}
+		aggs := sum.ForTask(task)
+		evals := policy.Evaluate(p, aggs)
+
+		d := Decision{
+			Task:        task,
+			Policy:      p.Name,
