@@ -34,3 +34,9 @@ func buildReport(t *testing.T) Report {
 	}
 	sims := routing.SimulateAll(set, sum, ing.Traces)
 	return Build(BuildInput{
+		Ingest: ing, Traces: ing.Traces, Reliability: sum,
+		Pareto: par, Policies: set, Simulations: sims, Deterministic: true,
+	})
+}
+
+func TestReportJSONIsDeterministic(t *testing.T) {
