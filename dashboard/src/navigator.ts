@@ -114,3 +114,13 @@ export class ReportNavigator {
         task: d.task,
         model: d.winner,
         score: d.score,
+        margin: d.margin,
+      }))
+      .sort((a, b) => a.task.localeCompare(b.task));
+  }
+
+  /** Tasks a policy could not route (no eligible model). */
+  unroutedTasks(policy: string): string[] {
+    const pr = this.policy(policy);
+    if (!pr) return [];
+    return pr.simulation.decisions
