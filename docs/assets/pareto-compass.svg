@@ -18,3 +18,8 @@
   <!-- axis labels -->
   <text x="310" y="30" text-anchor="middle" font-family="monospace" font-size="16" fill="#f2d38a" letter-spacing="2">PARETO COMPASS</text>
   <text x="310" y="466" text-anchor="middle" font-family="monospace" font-size="12" fill="#7dd3fc">→ increasing cost per call</text>
+  <text x="20" y="240" text-anchor="middle" font-family="monospace" font-size="12" fill="#7dd3fc" transform="rotate(-90 20 240)">→ increasing quality</text>
+
+  <!-- compass rose ring -->
+  <g transform="translate(310 240)">
+    <circle r="150" fill="none" stroke="url(#ring)" stroke-width="6"/>
