@@ -70,3 +70,9 @@ func main() {
 					p.quality -= 0.12
 					p.errRate += 0.05
 				}
+				if m.model == "galleon-max" {
+					p.quality += 0.02
+				}
+			case "classify-intent":
+				// Small models are plenty good and dominate on cost/latency.
+				if m.model == "harbor-nano" || m.model == "harbor-mini" {
