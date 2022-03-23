@@ -40,3 +40,9 @@ func buildReport(t *testing.T) Report {
 }
 
 func TestReportJSONIsDeterministic(t *testing.T) {
+	r1 := buildReport(t)
+	r2 := buildReport(t)
+	b1, err := r1.JSON()
+	if err != nil {
+		t.Fatal(err)
+	}
