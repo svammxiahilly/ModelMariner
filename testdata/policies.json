@@ -27,3 +27,9 @@
       },
       "preference": {
         "weights": [
+          { "objective": "latency", "weight": 0.55 },
+          { "objective": "reliability", "weight": 0.25 },
+          { "objective": "quality", "weight": 0.2 }
+        ]
+      }
+    },
