@@ -143,3 +143,23 @@ type ValidationError struct {
 func (e ValidationError) Error() string {
 	return fmt.Sprintf("line %d: field %q: %s", e.Line, e.Field, e.Reason)
 }
+
+// IngestResult bundles the successfully parsed traces with any per-line errors.
+// Ingestion is intentionally lenient at the collection level (it keeps going
+// past bad lines) but strict per record, so callers can decide whether a run
+// with rejected lines should fail.
+type IngestResult struct {
+	Traces   []Trace
+	Errors   []ValidationError
+	Rejected int
+	Total    int
+}
+
+// Options tunes the ingestion pipeline.
+type Options struct {
+	// SkipInvalid keeps ingestion going past invalid lines instead of stopping.
+	SkipInvalid bool
+	// MaxQuality clamps quality to this ceiling (defaults to 1.0).
+	MaxQuality float64
+}
+
