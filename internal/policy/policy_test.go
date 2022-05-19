@@ -89,3 +89,10 @@ func TestPrivacyConstraintAndSafeList(t *testing.T) {
 	}
 	evals := Evaluate(p, aggs)
 	byModel := map[string]Evaluation{}
+	for _, e := range evals {
+		byModel[e.Model] = e
+	}
+	if byModel["cloud"].Eligible {
+		t.Error("cloud model must be disqualified on restricted data")
+	}
+	if !byModel["onprem"].Eligible {
