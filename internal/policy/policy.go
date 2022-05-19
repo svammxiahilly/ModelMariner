@@ -185,3 +185,35 @@ type Evaluation struct {
 	Eligible   bool        `json:"eligible"`
 	Score      float64     `json:"score"`
 	Violations []Violation `json:"violations,omitempty"`
+	// Components exposes the normalized per-objective contributions to Score.
+	Components map[string]float64 `json:"components,omitempty"`
+}
+
+// NormalizedWeights returns the preference weights scaled to sum to 1.
+func (p Preference) NormalizedWeights() map[Objective]float64 {
+	total := 0.0
+	for _, w := range p.Weights {
+		total += w.Weight
+	}
+	out := map[Objective]float64{}
+	if total <= 0 {
+		return out
+	}
+	for _, w := range p.Weights {
+		out[w.Objective] = w.Weight / total
+	}
+	return out
+}
+
+// Evaluate applies a policy to every candidate aggregate for a task and returns
+// per-model verdicts sorted by score (descending) then model name. Candidates
+// with no successful samples are always ineligible.
+func Evaluate(p Policy, aggs []reliability.Aggregate) []Evaluation {
+	deny := toSet(p.Constraints.DenyModels)
+	var allow map[string]bool
+	if len(p.Constraints.AllowModels) > 0 {
+		allow = toSet(p.Constraints.AllowModels)
+	}
+	safe := toSet(p.Constraints.PrivacySafeModels)
+
+	// Compute scaling extents for score normalization across the candidate set.
