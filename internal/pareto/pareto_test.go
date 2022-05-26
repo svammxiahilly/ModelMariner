@@ -33,3 +33,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 		t.Errorf("dominated model should not be on frontier: %v", models)
 	}
 	if !contains(models, "cheap") || !contains(models, "premium") {
+		t.Errorf("expected cheap and premium on frontier: %v", models)
+	}
+	// Verify DominatedBy is populated for the dominated point.
+	for _, p := range f.Points {
+		if p.Model == "worse" {
