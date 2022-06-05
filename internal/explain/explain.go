@@ -40,3 +40,14 @@ func For(d routing.Decision) Explanation {
 	if d.Runnerup != "" {
 		e.Reasons = append(e.Reasons, fmt.Sprintf(
 			"%s beat runner-up %s by a margin of %.4f in weighted score",
+			d.Winner, d.Runnerup, d.Margin))
+	} else {
+		e.Reasons = append(e.Reasons, fmt.Sprintf(
+			"%s was the only model to satisfy every hard constraint", d.Winner))
+	}
+
+	// Surface the winner's score component breakdown.
+	for _, ev := range d.Evaluations {
+		if ev.Model == d.Winner && len(ev.Components) > 0 {
+			e.Reasons = append(e.Reasons, "score components: "+componentBreakdown(ev.Components))
+		}
