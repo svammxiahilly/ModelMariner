@@ -34,3 +34,9 @@ func TestComputeBasic(t *testing.T) {
 	}
 	// Cost/quality means use only successes.
 	if math.Abs(a.MeanCostUSD-0.15) > 1e-9 {
+		t.Errorf("bad mean cost: %v", a.MeanCostUSD)
+	}
+	if a.HighestPrivacy != trace.PrivacyInternal {
+		t.Errorf("bad highest privacy: %v", a.HighestPrivacy)
+	}
+	if a.ErrorKinds["timeout"] != 1 {
