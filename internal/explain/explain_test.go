@@ -19,3 +19,10 @@ func TestExplainWinner(t *testing.T) {
 		Baseline: routing.RealizedMetrics{Model: "cheap", Calls: 10, MeanQuality: 0.80, TotalCostUSD: 1.0},
 	}
 	e := For(d)
+	if !strings.Contains(e.Headline, "premium") {
+		t.Errorf("headline missing winner: %q", e.Headline)
+	}
+	if len(e.Reasons) == 0 || !strings.Contains(strings.Join(e.Reasons, " "), "margin") {
+		t.Errorf("reasons missing margin: %+v", e.Reasons)
+	}
+	if len(e.Evidence) < 2 {
