@@ -38,3 +38,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 	// Verify DominatedBy is populated for the dominated point.
 	for _, p := range f.Points {
 		if p.Model == "worse" {
+			if !p.Dominated || !contains(p.DominatedBy, "cheap") {
+				t.Errorf("worse should be dominated by cheap: %+v", p)
+			}
+		}
+	}
