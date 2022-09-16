@@ -76,3 +76,10 @@ func main() {
 			case "classify-intent":
 				// Small models are plenty good and dominate on cost/latency.
 				if m.model == "harbor-nano" || m.model == "harbor-mini" {
+					p.quality += 0.08
+				}
+			case "extract-pii-redaction":
+				// Only the on-prem model is privacy-safe; cloud models still
+				// appear in traces (they were tried) but score lower on quality.
+				if m.model == "lighthouse-local" {
+					p.quality += 0.06
