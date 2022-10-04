@@ -46,3 +46,9 @@ func TestReportJSONIsDeterministic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	b2, err := r2.JSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(b1, b2) {
+		t.Fatal("report JSON is not deterministic across identical runs")
