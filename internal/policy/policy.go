@@ -217,3 +217,34 @@ func Evaluate(p Policy, aggs []reliability.Aggregate) []Evaluation {
 	safe := toSet(p.Constraints.PrivacySafeModels)
 
 	// Compute scaling extents for score normalization across the candidate set.
+	ranges := computeRanges(aggs)
+
+	out := make([]Evaluation, 0, len(aggs))
+	for _, a := range aggs {
+		ev := Evaluation{Model: a.Model, Eligible: true}
+		c := p.Constraints
+
+		if a.Successes == 0 {
+			ev.Eligible = false
+			ev.Violations = append(ev.Violations, Violation{
+				Constraint: "samples",
+				Detail:     "no successful samples recorded for this model/task",
+			})
+		}
+		if deny[a.Model] {
+			ev.Eligible = false
+			ev.Violations = append(ev.Violations, Violation{
+				Constraint: "deny_models",
+				Detail:     fmt.Sprintf("model %q is explicitly denied", a.Model),
+			})
+		}
+		if allow != nil && !allow[a.Model] {
+			ev.Eligible = false
+			ev.Violations = append(ev.Violations, Violation{
+				Constraint: "allow_models",
+				Detail:     fmt.Sprintf("model %q is not in the allow list", a.Model),
+			})
+		}
+		if c.MaxCostUSD > 0 && a.MeanCostUSD > c.MaxCostUSD+1e-9 {
+			ev.Eligible = false
+			ev.Violations = append(ev.Violations, Violation{
