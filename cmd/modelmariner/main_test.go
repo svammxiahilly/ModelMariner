@@ -24,3 +24,8 @@ const policyDoc = `{"policies":[{"name":"q","preference":{"weights":[{"objective
 func TestRunAnalyzeWritesArtifacts(t *testing.T) {
 	tp := writeTemp(t, "traces.jsonl", traceLines)
 	pp := writeTemp(t, "policy.json", policyDoc)
+	out := t.TempDir()
+	err := run([]string{"analyze", "--traces", tp, "--policy", pp, "--out", out, "--format", "json"})
+	if err != nil {
+		t.Fatalf("analyze failed: %v", err)
+	}
