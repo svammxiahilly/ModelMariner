@@ -51,3 +51,14 @@ func For(d routing.Decision) Explanation {
 		if ev.Model == d.Winner && len(ev.Components) > 0 {
 			e.Reasons = append(e.Reasons, "score components: "+componentBreakdown(ev.Components))
 		}
+	}
+
+	r := d.Realized
+	e.Evidence = append(e.Evidence, fmt.Sprintf(
+		"replayed %d recorded call(s): %.1f%% success, mean quality %.3f, mean latency %.0f ms, total cost $%.4f",
+		r.Calls, r.SuccessRate*100, r.MeanQuality, r.MeanLatencyMS, r.TotalCostUSD))
+
+	b := d.Baseline
+	if b.Model != "" && b.Model != r.Model {
+		delta := r.TotalCostUSD - b.TotalCostUSD
+		verb := "more"
