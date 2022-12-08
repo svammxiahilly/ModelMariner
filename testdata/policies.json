@@ -33,3 +33,8 @@
         ]
       }
     },
+    {
+      "name": "privacy-lockdown",
+      "description": "Restricted data must never leave on-premise infrastructure. Caps privacy at internal and clears only the on-prem model to handle stricter tiers; ranks on quality then reliability.",
+      "tasks": ["extract-pii-redaction", "draft-legal-clause"],
+      "constraints": {
