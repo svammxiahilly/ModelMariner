@@ -154,3 +154,19 @@ func cmdAnalyze(args []string) error {
 
 	rep := report.Build(report.BuildInput{
 		Ingest:        ingest,
+		Traces:        ingest.Traces,
+		Reliability:   sum,
+		Pareto:        par,
+		Policies:      set,
+		Simulations:   sims,
+		Deterministic: f.deterministic,
+		Now:           time.Now(),
+	})
+
+	// Emit to stdout in the requested format.
+	if f.format == "text" || f.format == "both" {
+		fmt.Print(rep.Text())
+	}
+	if f.format == "json" {
+		b, err := rep.JSON()
+		if err != nil {
