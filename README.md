@@ -271,3 +271,34 @@ survives. Here is the bundled `budget-guard`:
   objective is scaled across the candidate set before weighting, so a policy
   never accidentally compares dollars to milliseconds.
 - **`tasks`** (optional) — scope a policy to specific tasks; omit it to govern
+  the whole voyage.
+
+The full schema — input traces, policy language, and every output artifact —
+lives in [`docs/TRACE.md`](docs/TRACE.md).
+
+---
+
+## The navigation dashboard
+
+The `dashboard/` directory holds a strictly-typed TypeScript consumer of
+`report.json`. It has **zero runtime dependencies** (only the TypeScript
+compiler and Node's built-in test runner at dev time) and renders entirely in the
+terminal — no browser, no remote assets.
+
+```
+──────────────────────────────────────────────────────────────────────
+  MODELMARINER DASHBOARD — fleet overview
+──────────────────────────────────────────────────────────────────────
+  Traces: 1400 accepted / 1400 lines  |  5 models  |  5 tasks  |  4 policies
+
+  ROUTING WINNERS BY TASK
+  task                      budget-guard      latency-critical  privacy-lockdown  quality-first
+  classify-intent           harbor-mini       harbor-nano       —                 —
+  draft-legal-clause        lighthouse-local  —                 lighthouse-local  clipper-pro
+  extract-pii-redaction     lighthouse-local  —                 lighthouse-local  —
+
+  POLICY ECONOMICS (realized vs cheapest-model baseline)
+  budget-guard         spent $23.4950 for +0.137 quality (5 routed, 0 unrouted)
+  privacy-lockdown     spent $3.8977  for +0.167 quality (2 routed, 0 unrouted)
+  quality-first        spent $100.1142 for +0.297 quality (2 routed, 0 unrouted)
+```
