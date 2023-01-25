@@ -22,3 +22,7 @@ recorded LLM traces, entirely offline.
   error-kind histograms.
 - **Pareto frontiers** (`internal/pareto`): multi-objective dominance analysis
   over cost, p95 latency, quality, and reliability, reporting both the frontier
+  and, for each dominated model, exactly which models dominate it.
+- **Policy language & evaluator** (`internal/policy`): hard budget, latency,
+  quality, reliability, and privacy constraints plus allow/deny and
+  privacy-safe model lists; normalized weighted preferences for ranking
