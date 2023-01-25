@@ -29,3 +29,8 @@ func TestRunAnalyzeWritesArtifacts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("analyze failed: %v", err)
 	}
+	for _, name := range []string{"report.json", "report.txt", "policies.json"} {
+		if _, err := os.Stat(filepath.Join(out, name)); err != nil {
+			t.Errorf("expected artifact %s: %v", name, err)
+		}
+	}
