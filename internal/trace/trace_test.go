@@ -91,3 +91,16 @@ func TestPrivacyTierParsing(t *testing.T) {
 			t.Fatalf("parse %q: %v", name, err)
 		}
 		if tier.String() != name {
+			t.Errorf("round trip failed: %q -> %v -> %q", name, tier, tier.String())
+		}
+	}
+	if _, err := ParsePrivacyTier("nonsense"); err == nil {
+		t.Error("expected error for unknown tier")
+	}
+}
+
+func TestPrivacyOrdering(t *testing.T) {
+	if !(PrivacyPublic < PrivacyInternal && PrivacyInternal < PrivacyConfidential && PrivacyConfidential < PrivacyRestricted) {
+		t.Fatal("privacy tiers are not strictly ordered")
+	}
+}
