@@ -302,3 +302,33 @@ terminal — no browser, no remote assets.
   privacy-lockdown     spent $3.8977  for +0.167 quality (2 routed, 0 unrouted)
   quality-first        spent $100.1142 for +0.297 quality (2 routed, 0 unrouted)
 ```
+
+Views:
+
+| Command | Shows |
+|---------|-------|
+| `overview` | Fleet summary + winners-by-task grid + policy economics. |
+| `task <name>` | One task: reliability table, frontier, and each policy's pick. |
+| `model <name>` | One model across every task, and how often it is chosen. |
+| `policy <name>` | A policy's compiled decisions with full explanations. |
+| `routes <name>` | Just the compiled winner-per-task routing table. |
+
+```bash
+cd dashboard
+npm install && npm run build
+node dist/dashboard.js ../testdata/output/report.json task draft-legal-clause
+```
+
+---
+
+## Deckhand's manual: CLI reference
+
+```
+modelmariner analyze  --traces FILE [--policy FILE] [--out DIR]
+                      [--format json|text|both] [--strict] [--with-timestamp]
+modelmariner validate --traces FILE [--strict]
+modelmariner version
+```
+
+| Flag | Purpose |
+|------|---------|
