@@ -33,3 +33,9 @@ cover: ## Run tests with a coverage summary.
 .PHONY: vet
 vet: ## Run go vet across the module.
 	go vet ./...
+
+.PHONY: fmt
+fmt: ## Format all Go sources.
+	gofmt -w .
+
+.PHONY: fmt-check
