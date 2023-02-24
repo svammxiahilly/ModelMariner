@@ -96,3 +96,9 @@ func TestPrivacyConstraintAndSafeList(t *testing.T) {
 		t.Error("cloud model must be disqualified on restricted data")
 	}
 	if !byModel["onprem"].Eligible {
+		t.Error("privacy-safe on-prem model must remain eligible")
+	}
+}
+
+func TestScoringPrefersHigherWeightedObjective(t *testing.T) {
+	// Weight quality entirely; the higher-quality model must win.
