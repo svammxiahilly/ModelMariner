@@ -44,3 +44,9 @@
       },
       "preference": {
         "weights": [
+          { "objective": "quality", "weight": 0.5 },
+          { "objective": "reliability", "weight": 0.3 },
+          { "objective": "latency", "weight": 0.2 }
+        ]
+      }
+    },
