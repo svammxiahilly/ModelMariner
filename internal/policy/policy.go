@@ -279,3 +279,35 @@ func Evaluate(p Policy, aggs []reliability.Aggregate) []Evaluation {
 				Detail:     "reliability lower bound below floor",
 				Limit:      c.MinReliability,
 				Observed:   a.WilsonLower,
+			})
+		}
+		if c.MaxPrivacy != nil && a.HighestPrivacy > *c.MaxPrivacy && !safe[a.Model] {
+			ev.Eligible = false
+			ev.Violations = append(ev.Violations, Violation{
+				Constraint: "max_privacy",
+				Detail: fmt.Sprintf("task data reaches %q but policy caps at %q and model is not privacy-safe",
+					a.HighestPrivacy, c.MaxPrivacy.String()),
+			})
+		}
+
+		if ev.Eligible {
+			ev.Score, ev.Components = score(a, p.Preference.NormalizedWeights(), ranges)
+		}
+		out = append(out, ev)
+	}
+
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].Eligible != out[j].Eligible {
+			return out[i].Eligible // eligible first
+		}
+		if out[i].Eligible && !almostEqual(out[i].Score, out[j].Score) {
+			return out[i].Score > out[j].Score
+		}
+		return out[i].Model < out[j].Model
+	})
+	return out
+}
+
+// objectiveRange records the min/max of each objective across candidates so
+// scores can be normalized to [0,1] regardless of absolute units.
+type objectiveRange struct {
