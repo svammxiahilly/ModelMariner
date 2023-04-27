@@ -184,3 +184,24 @@ func Ingest(r io.Reader, opts Options) (IngestResult, error) {
 	for scanner.Scan() {
 		lineNo++
 		raw := strings.TrimSpace(scanner.Text())
+		if raw == "" || strings.HasPrefix(raw, "#") {
+			continue
+		}
+		res.Total++
+		var rec Record
+		dec := json.NewDecoder(strings.NewReader(raw))
+		dec.DisallowUnknownFields()
+		if err := dec.Decode(&rec); err != nil {
+			ve := ValidationError{Line: lineNo, Field: "<json>", Reason: err.Error()}
+			res.Errors = append(res.Errors, ve)
+			res.Rejected++
+			if !opts.SkipInvalid {
+				return res, ve
+			}
+			continue
+		}
+		tr, verrs := normalize(rec, lineNo, opts)
+		if len(verrs) > 0 {
+			res.Errors = append(res.Errors, verrs...)
+			res.Rejected++
+			if !opts.SkipInvalid {
