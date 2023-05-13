@@ -8,3 +8,4 @@
   "bin": {
     "modelmariner-dashboard": "dist/dashboard.js"
   },
+  "scripts": {
