@@ -44,3 +44,8 @@
     </g>
   </g>
 
+  <!-- scatter of models in cost(x) vs quality(y) space; frontier points pulse -->
+  <!-- frontier (non-dominated) -->
+  <g font-family="monospace" font-size="10">
+    <!-- harbor-nano: cheapest, lower quality -->
+    <g transform="translate(210 360)">
