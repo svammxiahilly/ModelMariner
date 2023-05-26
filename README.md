@@ -332,3 +332,34 @@ modelmariner version
 
 | Flag | Purpose |
 |------|---------|
+| `--traces, -t` | Path to the JSONL trace file (required). |
+| `--policy, -p` | Path to a JSON policy set. Omit for reliability + Pareto only. |
+| `--out, -o` | Directory for `report.json`, `report.txt`, `policies.json`. |
+| `--format` | What goes to stdout: `json`, `text`, or `both` (default `both`). |
+| `--strict` | Treat any invalid trace line as a fatal error. |
+| `--with-timestamp` | Stamp the report with wall-clock time (breaks determinism). |
+
+`validate` ingests and reports accepted/rejected counts without compiling —
+handy in a pre-commit hook to keep your trace logs seaworthy.
+
+---
+
+## How the hull is built
+
+ModelMariner is **pure Go standard library** — not a single third-party import.
+Each plank of the hull is an internal package with a single responsibility:
+
+| Package | Responsibility |
+|---------|----------------|
+| `internal/trace` | JSONL ingestion, validation, normalization, privacy tiers. |
+| `internal/reliability` | Success rates, Wilson bounds, latency percentiles. |
+| `internal/pareto` | Multi-objective dominance and frontier extraction. |
+| `internal/policy` | Policy language, hard-constraint evaluation, scoring. |
+| `internal/routing` | Winner selection + trace replay + baseline economics. |
+| `internal/explain` | Human-readable rationale for every decision. |
+| `internal/report` | Deterministic JSON/text assembly + compiled artifacts. |
+| `cmd/modelmariner` | The CLI that wires the voyage together. |
+
+---
+
+## Determinism: the ship's chronometer
