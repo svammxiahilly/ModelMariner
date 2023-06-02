@@ -9,3 +9,4 @@
     "modelmariner-dashboard": "dist/dashboard.js"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
