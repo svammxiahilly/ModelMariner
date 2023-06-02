@@ -104,3 +104,15 @@ Decided 5 task(s), 0 unrouted. Realized cost $44.6863 vs baseline $21.1913 (delt
     - score components: cost=0.5809, quality=0.1426, reliability=0.0703
     evidence: replayed 50 recorded call(s): 98.0% success, mean quality 0.852, mean latency 345 ms, total cost $5.8333
     evidence: versus cheapest-model baseline harbor-nano: $2.3063 more cost, 0.852 vs 0.708 mean quality
+    rejected: clipper-pro — max_cost_usd (limit 0.35, observed 0.7319)
+    rejected: galleon-max — max_cost_usd (limit 0.35, observed 1.534)
+• route "summarize-support-ticket" to harbor-mini (score 0.8128)
+    - harbor-mini beat runner-up lighthouse-local by a margin of 0.1684 in weighted score
+    - score components: cost=0.5545, quality=0.1083, reliability=0.1500
+    evidence: replayed 60 recorded call(s): 100.0% success, mean quality 0.821, mean latency 236 ms, total cost $10.5867
+    evidence: versus cheapest-model baseline harbor-nano: $6.2171 more cost, 0.821 vs 0.713 mean quality
+    rejected: clipper-pro — max_cost_usd (limit 0.35, observed 0.7181)
+    rejected: galleon-max — max_cost_usd (limit 0.35, observed 1.444)
+
+========================================================================
+ POLICY: latency-critical
