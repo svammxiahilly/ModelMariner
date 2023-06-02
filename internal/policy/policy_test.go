@@ -102,3 +102,9 @@ func TestPrivacyConstraintAndSafeList(t *testing.T) {
 
 func TestScoringPrefersHigherWeightedObjective(t *testing.T) {
 	// Weight quality entirely; the higher-quality model must win.
+	p := Policy{
+		Name:       "q",
+		Preference: Preference{Weights: []Weight{{ObjQuality, 1}}},
+	}
+	aggs := []reliability.Aggregate{
+		agg("low", 0.1, 100, 0.70, 0.9, 0),
