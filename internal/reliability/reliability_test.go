@@ -40,3 +40,9 @@ func TestComputeBasic(t *testing.T) {
 		t.Errorf("bad highest privacy: %v", a.HighestPrivacy)
 	}
 	if a.ErrorKinds["timeout"] != 1 {
+		t.Errorf("error kind not counted: %+v", a.ErrorKinds)
+	}
+}
+
+func TestWilsonLowerBoundRewardsEvidence(t *testing.T) {
+	small := wilsonLowerBound(9, 10)
