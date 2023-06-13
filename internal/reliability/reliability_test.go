@@ -46,3 +46,9 @@ func TestComputeBasic(t *testing.T) {
 
 func TestWilsonLowerBoundRewardsEvidence(t *testing.T) {
 	small := wilsonLowerBound(9, 10)
+	large := wilsonLowerBound(90, 100)
+	if !(large > small) {
+		t.Errorf("more evidence should raise the lower bound: 9/10=%.4f 90/100=%.4f", small, large)
+	}
+	if wilsonLowerBound(0, 0) != 0 {
+		t.Error("zero samples must yield 0")
