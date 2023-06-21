@@ -186,3 +186,18 @@ func cmdAnalyze(args []string) error {
 }
 
 func writeArtifacts(dir string, rep report.Report, sims []routing.Simulation) error {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("creating output dir: %w", err)
+	}
+	repJSON, err := rep.JSON()
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(dir, "report.json"), repJSON, 0o644); err != nil {
+		return fmt.Errorf("writing report.json: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "report.txt"), []byte(rep.Text()), 0o644); err != nil {
+		return fmt.Errorf("writing report.txt: %w", err)
+	}
+	if len(sims) > 0 {
+		arts := report.CompilePolicyArtifacts(sims)
