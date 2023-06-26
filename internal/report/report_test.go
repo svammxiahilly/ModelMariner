@@ -52,3 +52,9 @@ func TestReportJSONIsDeterministic(t *testing.T) {
 	}
 	if !bytes.Equal(b1, b2) {
 		t.Fatal("report JSON is not deterministic across identical runs")
+	}
+}
+
+func TestReportJSONIsValidAndSchema(t *testing.T) {
+	r := buildReport(t)
+	b, err := r.JSON()
