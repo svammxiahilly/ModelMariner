@@ -108,3 +108,9 @@ func TestScoringPrefersHigherWeightedObjective(t *testing.T) {
 	}
 	aggs := []reliability.Aggregate{
 		agg("low", 0.1, 100, 0.70, 0.9, 0),
+		agg("high", 0.5, 500, 0.99, 0.9, 0),
+	}
+	evals := Evaluate(p, aggs)
+	if evals[0].Model != "high" {
+		t.Errorf("highest quality should rank first, got %s", evals[0].Model)
+	}
