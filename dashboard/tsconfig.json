@@ -6,3 +6,5 @@
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
