@@ -43,3 +43,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestSkipsZeroSuccessModels(t *testing.T) {
+	a := agg("dead", 0.1, 100, 0.9, 0.9)
+	a.Successes = 0
