@@ -48,3 +48,8 @@ func TestDominatedPointRemoved(t *testing.T) {
 func TestSkipsZeroSuccessModels(t *testing.T) {
 	a := agg("dead", 0.1, 100, 0.9, 0.9)
 	a.Successes = 0
+	sum := reliability.Summary{
+		Tasks:      []string{"t"},
+		Aggregates: []reliability.Aggregate{a, agg("live", 0.2, 200, 0.8, 0.8)},
+	}
+	an := Compute(sum)
