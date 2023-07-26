@@ -58,3 +58,9 @@ func TestReportJSONIsDeterministic(t *testing.T) {
 func TestReportJSONIsValidAndSchema(t *testing.T) {
 	r := buildReport(t)
 	b, err := r.JSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(b, &decoded); err != nil {
+		t.Fatalf("report is not valid JSON: %v", err)
