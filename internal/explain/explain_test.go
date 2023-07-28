@@ -33,3 +33,10 @@ func TestExplainWinner(t *testing.T) {
 		t.Errorf("text missing evidence marker:\n%s", txt)
 	}
 }
+
+func TestExplainNoEligible(t *testing.T) {
+	d := routing.Decision{
+		Task: "t", Policy: "p", NoEligible: true,
+		Rejected: []routing.RejectedCandidate{
+			{Model: "m", Violations: []policy.Violation{{Constraint: "min_quality", Detail: "too low", Limit: 0.9, Observed: 0.5}}},
+		},
