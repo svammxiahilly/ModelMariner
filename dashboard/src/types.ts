@@ -69,3 +69,15 @@ export interface Evaluation {
   components?: Record<string, number>;
 }
 
+export interface RejectedCandidate {
+  model: string;
+  violations: Violation[];
+}
+
+export interface RealizedMetrics {
+  model: string;
+  calls: number;
+  successes: number;
+  success_rate: number;
+  total_cost_usd: number;
+  mean_latency_ms: number;
