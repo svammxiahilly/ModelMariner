@@ -135,3 +135,13 @@ export class ReportNavigator {
     const winnersByPolicy = this.report.policies
       .map((p) => {
         const d = p.simulation.decisions.find((x) => x.task === task);
+        if (!d) return null;
+        return {
+          policy: p.name,
+          winner: d.no_eligible ? null : d.winner,
+          score: d.score,
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null);
+    return {
+      task,
