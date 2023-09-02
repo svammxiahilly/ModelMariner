@@ -152,3 +152,23 @@ func Compute(traces []trace.Trace) Summary {
 func (s Summary) ForTask(task string) []Aggregate {
 	var out []Aggregate
 	for _, a := range s.Aggregates {
+		if a.Task == task {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// mean returns the arithmetic mean of xs, or 0 for an empty slice.
+func mean(xs []float64) float64 {
+	if len(xs) == 0 {
+		return 0
+	}
+	var sum float64
+	for _, x := range xs {
+		sum += x
+	}
+	return sum / float64(len(xs))
+}
+
+// percentile returns the p-th percentile (0..1) of a sorted slice using linear
