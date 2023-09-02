@@ -30,3 +30,7 @@ recorded LLM traces, entirely offline.
 - **Routing simulation** (`internal/routing`): compiles a winner per task and
   replays every recorded trace through the choice to measure realized cost,
   latency, quality, and success rate, compared against a cheapest-model
+  baseline.
+- **Explanations** (`internal/explain`): human-readable rationale for every
+  selection, including margins over runners-up, score breakdowns, replayed
+  evidence, and the specific constraint each rejected candidate violated.
