@@ -126,3 +126,16 @@ func Simulate(p policy.Policy, sum reliability.Summary, traces []trace.Trace) Si
 
 		sim.Totals.TasksDecided++
 		sim.Totals.RealizedCostUSD += d.Realized.TotalCostUSD
+		sim.Totals.BaselineCostUSD += d.Baseline.TotalCostUSD
+		realizedQualitySum += d.Realized.MeanQuality
+		baselineQualitySum += d.Baseline.MeanQuality
+		qualityWeight++
+
+		sim.Decisions = append(sim.Decisions, d)
+	}
+
+	sort.Slice(sim.Decisions, func(i, j int) bool { return sim.Decisions[i].Task < sim.Decisions[j].Task })
+	sim.Totals.CostDeltaUSD = sim.Totals.RealizedCostUSD - sim.Totals.BaselineCostUSD
+	if qualityWeight > 0 {
+		sim.Totals.RealizedQuality = realizedQualitySum / float64(qualityWeight)
+		sim.Totals.BaselineQuality = baselineQualitySum / float64(qualityWeight)
