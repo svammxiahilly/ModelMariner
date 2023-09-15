@@ -40,3 +40,8 @@ func TestRunValidateReportsCounts(t *testing.T) {
 	tp := writeTemp(t, "traces.jsonl", traceLines)
 	if err := run([]string{"validate", "--traces", tp}); err != nil {
 		t.Fatalf("validate failed: %v", err)
+	}
+}
+
+func TestRunValidateStrictFailsOnBadLine(t *testing.T) {
+	tp := writeTemp(t, "bad.jsonl", `{"model":"","task":"t","tokens":{"prompt":1,"completion":1},"cost_usd":0,"latency_ms":1,"quality":0.5,"privacy":"public"}`)
