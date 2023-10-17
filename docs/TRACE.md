@@ -69,3 +69,17 @@ distributions; a failed call's metrics are not representative of the service a
 model delivers. Failures still count toward the success rate and reliability
 bound.
 
+---
+
+## 2. Report output: `report.json`
+
+`analyze --out DIR` writes three files. `report.json` is the complete document
+(schema `modelmariner/v1`) with these top-level sections:
+
+- `input` — line counts, discovered models/tasks, and any rejection warnings.
+- `reliability` — one entry per model/task with success rate, `reliability_lower`
+  (Wilson 95% lower bound), latency `p50/p95/p99`, mean cost/quality/tokens,
+  the `highest_privacy` tier observed, and an `error_kinds` histogram.
+- `pareto` — per task, every point in objective space plus the non-dominated
+  `frontier`; each dominated point lists the models that dominate it.
+- `policies` — per policy, the full `simulation` (decisions + realized/baseline
