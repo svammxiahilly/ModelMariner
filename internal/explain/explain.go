@@ -72,3 +72,14 @@ func For(d routing.Decision) Explanation {
 	}
 
 	for _, rej := range d.Rejected {
+		e.Rejections = append(e.Rejections, rejectionLine(rej))
+	}
+	return e
+}
+
+// Text renders the explanation as a readable block.
+func (e Explanation) Text() string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "• %s\n", e.Headline)
+	for _, r := range e.Reasons {
+		fmt.Fprintf(&sb, "    - %s\n", r)
