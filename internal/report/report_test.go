@@ -64,3 +64,9 @@ func TestReportJSONIsValidAndSchema(t *testing.T) {
 	var decoded map[string]any
 	if err := json.Unmarshal(b, &decoded); err != nil {
 		t.Fatalf("report is not valid JSON: %v", err)
+	}
+	if decoded["schema"] != SchemaVersion {
+		t.Errorf("bad schema: %v", decoded["schema"])
+	}
+	if r.Generated != "" {
+		t.Error("deterministic report must omit generation timestamp")
