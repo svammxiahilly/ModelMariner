@@ -83,3 +83,9 @@ func main() {
 				// appear in traces (they were tried) but score lower on quality.
 				if m.model == "lighthouse-local" {
 					p.quality += 0.06
+				}
+			case "code-review-comment":
+				if m.model == "clipper-pro" {
+					p.quality += 0.03
+				}
+			}
