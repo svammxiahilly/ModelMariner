@@ -81,3 +81,15 @@ export interface RealizedMetrics {
   success_rate: number;
   total_cost_usd: number;
   mean_latency_ms: number;
+  mean_quality: number;
+}
+
+export interface Decision {
+  task: string;
+  policy: string;
+  winner: string;
+  runner_up?: string;
+  score: number;
+  margin: number;
+  eligible: string[];
+  rejected?: RejectedCandidate[];
