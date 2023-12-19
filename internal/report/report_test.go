@@ -70,3 +70,9 @@ func TestReportJSONIsValidAndSchema(t *testing.T) {
 	}
 	if r.Generated != "" {
 		t.Error("deterministic report must omit generation timestamp")
+	}
+}
+
+func TestReportTextContainsSelection(t *testing.T) {
+	r := buildReport(t)
+	txt := r.Text()
