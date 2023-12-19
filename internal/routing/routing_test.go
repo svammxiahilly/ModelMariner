@@ -45,3 +45,13 @@ func TestSimulatePicksWinnerAndReplays(t *testing.T) {
 	}
 	if d.Realized.TotalCostUSD <= d.Baseline.TotalCostUSD {
 		t.Error("premium realized cost should exceed cheap baseline")
+	}
+}
+
+func TestSimulateBudgetForcesCheaperWinner(t *testing.T) {
+	traces := buildTraces()
+	sum := reliability.Compute(traces)
+	p := policy.Policy{
+		Name:        "budget",
+		Constraints: policy.Constraints{MaxCostUSD: 0.30},
+		Preference:  policy.Preference{Weights: []policy.Weight{{Objective: policy.ObjQuality, Weight: 1}}},
