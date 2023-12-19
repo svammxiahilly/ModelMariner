@@ -176,3 +176,23 @@ function renderRoutes(nav: ReportNavigator, name: string): string {
   }
   const unrouted = nav.unroutedTasks(name);
   if (unrouted.length > 0) {
+    out.push("");
+    out.push(`  UNROUTED (no eligible model): ${unrouted.join(", ")}`);
+  }
+  return out.join("\n");
+}
+
+export function render(nav: ReportNavigator, args: string[]): string {
+  const [command, arg] = args;
+  switch (command) {
+    case undefined:
+    case "overview":
+      return renderOverview(nav);
+    case "task":
+      if (!arg) return "usage: task <name>";
+      return renderTask(nav, arg);
+    case "model":
+      if (!arg) return "usage: model <name>";
+      return renderModel(nav, arg);
+    case "policy":
+      if (!arg) return "usage: policy <name>";
