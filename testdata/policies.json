@@ -50,3 +50,9 @@
         ]
       }
     },
+    {
+      "name": "quality-first",
+      "description": "Accuracy-sensitive generative tasks. Demands a high quality floor and strong reliability, then ranks on quality with cost as a secondary consideration.",
+      "tasks": ["draft-legal-clause", "code-review-comment"],
+      "constraints": {
+        "min_quality": 0.85,
