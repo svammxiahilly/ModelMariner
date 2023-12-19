@@ -40,3 +40,10 @@ func TestExplainNoEligible(t *testing.T) {
 		Rejected: []routing.RejectedCandidate{
 			{Model: "m", Violations: []policy.Violation{{Constraint: "min_quality", Detail: "too low", Limit: 0.9, Observed: 0.5}}},
 		},
+	}
+	e := For(d)
+	if !strings.Contains(e.Headline, "NO eligible") {
+		t.Errorf("headline should flag no eligible: %q", e.Headline)
+	}
+	if len(e.Rejections) != 1 || !strings.Contains(e.Rejections[0], "min_quality") {
+		t.Errorf("rejection detail missing: %+v", e.Rejections)
