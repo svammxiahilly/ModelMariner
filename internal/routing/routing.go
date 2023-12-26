@@ -139,3 +139,16 @@ func Simulate(p policy.Policy, sum reliability.Summary, traces []trace.Trace) Si
 	if qualityWeight > 0 {
 		sim.Totals.RealizedQuality = realizedQualitySum / float64(qualityWeight)
 		sim.Totals.BaselineQuality = baselineQualitySum / float64(qualityWeight)
+	}
+	return sim
+}
+
+// SimulateAll runs every policy in a set and returns simulations in order.
+func SimulateAll(set policy.Set, sum reliability.Summary, traces []trace.Trace) []Simulation {
+	out := make([]Simulation, 0, len(set.Policies))
+	for _, p := range set.Policies {
+		out = append(out, Simulate(p, sum, traces))
+	}
+	return out
+}
+
