@@ -7,3 +7,5 @@
 # Dashboard build output & deps
 dashboard/dist/
 dashboard/node_modules/
+dashboard/package-lock.json
+
