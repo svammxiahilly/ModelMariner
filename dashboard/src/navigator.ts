@@ -145,3 +145,14 @@ export class ReportNavigator {
       .filter((x): x is NonNullable<typeof x> => x !== null);
     return {
       task,
+      frontierModels: frontier ? frontier.frontier.map((p) => p.model) : [],
+      winnersByPolicy,
+    };
+  }
+
+  /**
+   * Total net savings (or cost) a policy realized versus the naive baseline,
+   * summed across all decided tasks. Negative means the policy saved money.
+   */
+  policyCostDelta(policy: string): number {
+    const pr = this.policy(policy);
