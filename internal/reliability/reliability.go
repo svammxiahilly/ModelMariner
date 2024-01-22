@@ -191,3 +191,22 @@ func percentile(sorted []float64, p float64) float64 {
 	lo := int(math.Floor(rank))
 	hi := int(math.Ceil(rank))
 	if lo == hi {
+		return sorted[lo]
+	}
+	frac := rank - float64(lo)
+	return sorted[lo]*(1-frac) + sorted[hi]*frac
+}
+
+// wilsonLowerBound computes the lower bound of the Wilson score interval at a
+// 95% confidence level for a binomial proportion. It rewards evidence: a model
+// that succeeded 9/10 times scores lower than one that succeeded 90/100 times,
+// which prevents thinly-sampled models from dominating routing decisions.
+func wilsonLowerBound(successes, total int) float64 {
+	if total == 0 {
+		return 0
+	}
+	const z = 1.959963984540054 // 95% two-sided
+	n := float64(total)
+	phat := float64(successes) / n
+	z2 := z * z
+	denom := 1 + z2/n
