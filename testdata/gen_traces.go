@@ -89,3 +89,10 @@ func main() {
 					p.quality += 0.03
 				}
 			}
+
+			for i := 0; i < task.volume; i++ {
+				seq++
+				prompt := 200 + rng.Intn(1400)
+				completion := 40 + rng.Intn(600)
+				tokens := prompt + completion
+				cost := p.costPer1k * float64(tokens) / 1000.0
