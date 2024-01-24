@@ -55,3 +55,12 @@ func TestSimulateBudgetForcesCheaperWinner(t *testing.T) {
 		Name:        "budget",
 		Constraints: policy.Constraints{MaxCostUSD: 0.30},
 		Preference:  policy.Preference{Weights: []policy.Weight{{Objective: policy.ObjQuality, Weight: 1}}},
+	}
+	sim := Simulate(p, sum, traces)
+	d := sim.Decisions[0]
+	if d.Winner != "cheap" {
+		t.Errorf("budget should force cheap winner even though quality prefers premium, got %s", d.Winner)
+	}
+	// premium must be recorded as rejected.
+	found := false
+	for _, r := range d.Rejected {
