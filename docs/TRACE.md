@@ -97,3 +97,18 @@ reports are safe to commit and diff.
 Passed via `--policy`. A policy set is `{ "version": 1, "policies": [ ... ] }`.
 
 ```json
+{
+  "name": "budget-guard",
+  "description": "Minimize spend while keeping quality acceptable.",
+  "tasks": ["classify-intent"],
+  "constraints": {
+    "max_cost_usd": 0.35,
+    "max_latency_ms": 500,
+    "min_quality": 0.7,
+    "min_reliability": 0.8,
+    "max_privacy": "internal",
+    "deny_models": ["deprecated-galley"],
+    "allow_models": [],
+    "privacy_safe_models": ["lighthouse-local"]
+  },
+  "preference": {
