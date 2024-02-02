@@ -196,3 +196,23 @@ export function render(nav: ReportNavigator, args: string[]): string {
       return renderModel(nav, arg);
     case "policy":
       if (!arg) return "usage: policy <name>";
+      return renderPolicy(nav, arg);
+    case "routes":
+      if (!arg) return "usage: routes <name>";
+      return renderRoutes(nav, arg);
+    default:
+      return `unknown command: ${command}`;
+  }
+}
+
+function main(): void {
+  const argv = process.argv.slice(2);
+  if (argv.length === 0) {
+    console.error("usage: dashboard <report.json> [overview|task|model|policy|routes] [name]");
+    process.exit(2);
+  }
+  const [path, ...rest] = argv;
+  let text: string;
+  try {
+    text = readFileSync(path, "utf8");
+  } catch (e) {
