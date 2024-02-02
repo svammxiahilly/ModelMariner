@@ -114,3 +114,9 @@ func TestScoringPrefersHigherWeightedObjective(t *testing.T) {
 	if evals[0].Model != "high" {
 		t.Errorf("highest quality should rank first, got %s", evals[0].Model)
 	}
+}
+
+func TestNormalizedWeightsSumToOne(t *testing.T) {
+	pref := Preference{Weights: []Weight{{ObjCost, 3}, {ObjQuality, 1}}}
+	w := pref.NormalizedWeights()
+	sum := w[ObjCost] + w[ObjQuality]
