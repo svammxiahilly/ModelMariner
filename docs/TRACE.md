@@ -112,3 +112,17 @@ Passed via `--policy`. A policy set is `{ "version": 1, "policies": [ ... ] }`.
     "privacy_safe_models": ["lighthouse-local"]
   },
   "preference": {
+    "weights": [
+      { "objective": "cost", "weight": 0.6 },
+      { "objective": "quality", "weight": 0.25 },
+      { "objective": "reliability", "weight": 0.15 }
+    ]
+  }
+}
+```
+
+- **Constraints are hard.** A candidate violating any constraint is
+  *disqualified*, never merely penalized. Omitting a numeric constraint (or
+  setting it to zero) disables it.
+- `tasks` scopes a policy; omit it to apply to every task.
+- `max_privacy` caps the tier a model may handle. A model is disqualified if the
