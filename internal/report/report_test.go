@@ -76,3 +76,9 @@ func TestReportJSONIsValidAndSchema(t *testing.T) {
 func TestReportTextContainsSelection(t *testing.T) {
 	r := buildReport(t)
 	txt := r.Text()
+	if !strings.Contains(txt, "route \"t\" to premium") {
+		t.Errorf("text report missing expected routing selection:\n%s", txt)
+	}
+	if !strings.Contains(txt, "PARETO FRONTIERS") {
+		t.Error("text report missing pareto section")
+	}
