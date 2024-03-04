@@ -93,3 +93,15 @@ export interface Decision {
   margin: number;
   eligible: string[];
   rejected?: RejectedCandidate[];
+  evaluations: Evaluation[];
+  realized: RealizedMetrics;
+  baseline: RealizedMetrics;
+  no_eligible: boolean;
+}
+
+export interface Totals {
+  tasks_decided: number;
+  tasks_unrouted: number;
+  realized_cost_usd: number;
+  baseline_cost_usd: number;
+  cost_delta_usd: number;
