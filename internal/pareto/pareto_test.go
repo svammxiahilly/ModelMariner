@@ -53,3 +53,8 @@ func TestSkipsZeroSuccessModels(t *testing.T) {
 		Aggregates: []reliability.Aggregate{a, agg("live", 0.2, 200, 0.8, 0.8)},
 	}
 	an := Compute(sum)
+	f, _ := an.ForTask("t")
+	if len(f.Points) != 1 || f.Points[0].Model != "live" {
+		t.Errorf("zero-success model should be excluded: %+v", f.Points)
+	}
+}
