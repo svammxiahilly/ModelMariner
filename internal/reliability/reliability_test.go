@@ -52,3 +52,9 @@ func TestWilsonLowerBoundRewardsEvidence(t *testing.T) {
 	}
 	if wilsonLowerBound(0, 0) != 0 {
 		t.Error("zero samples must yield 0")
+	}
+	if lb := wilsonLowerBound(10, 10); lb <= 0 || lb > 1 {
+		t.Errorf("perfect record out of range: %v", lb)
+	}
+}
+
