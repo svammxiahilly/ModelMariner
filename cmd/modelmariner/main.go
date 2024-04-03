@@ -201,3 +201,19 @@ func writeArtifacts(dir string, rep report.Report, sims []routing.Simulation) er
 	}
 	if len(sims) > 0 {
 		arts := report.CompilePolicyArtifacts(sims)
+		artJSON, err := report.ArtifactsJSON(arts)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(dir, "policies.json"), artJSON, 0o644); err != nil {
+			return fmt.Errorf("writing policies.json: %w", err)
+		}
+	}
+	return nil
+}
+
+func cmdValidate(args []string) error {
+	var path string
+	strict := false
+	for i := 0; i < len(args); i++ {
+		switch {
