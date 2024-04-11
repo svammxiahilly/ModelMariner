@@ -210,3 +210,23 @@ func wilsonLowerBound(successes, total int) float64 {
 	phat := float64(successes) / n
 	z2 := z * z
 	denom := 1 + z2/n
+	center := phat + z2/(2*n)
+	margin := z * math.Sqrt((phat*(1-phat)+z2/(4*n))/n)
+	lb := (center - margin) / denom
+	if lb < 0 {
+		return 0
+	}
+	if lb > 1 {
+		return 1
+	}
+	return lb
+}
+
+func sortedKeys(m map[string]struct{}) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
