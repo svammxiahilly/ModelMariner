@@ -58,3 +58,9 @@ func TestWilsonLowerBoundRewardsEvidence(t *testing.T) {
 	}
 }
 
+func TestPercentileInterpolation(t *testing.T) {
+	xs := []float64{10, 20, 30, 40}
+	if p := percentile(xs, 0.5); math.Abs(p-25) > 1e-9 {
+		t.Errorf("p50 want 25, got %v", p)
+	}
+	if p := percentile(xs, 0); p != 10 {
