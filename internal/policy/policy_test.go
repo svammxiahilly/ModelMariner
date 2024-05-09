@@ -120,3 +120,9 @@ func TestNormalizedWeightsSumToOne(t *testing.T) {
 	pref := Preference{Weights: []Weight{{ObjCost, 3}, {ObjQuality, 1}}}
 	w := pref.NormalizedWeights()
 	sum := w[ObjCost] + w[ObjQuality]
+	if sum < 0.999999 || sum > 1.000001 {
+		t.Errorf("weights should normalize to 1, got %v", sum)
+	}
+}
+
+func TestAppliesToScoping(t *testing.T) {
