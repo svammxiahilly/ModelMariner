@@ -82,3 +82,9 @@ func TestReportTextContainsSelection(t *testing.T) {
 	if !strings.Contains(txt, "PARETO FRONTIERS") {
 		t.Error("text report missing pareto section")
 	}
+}
+
+func TestCompilePolicyArtifacts(t *testing.T) {
+	r := buildReport(t)
+	// Rebuild simulations to compile artifacts.
+	ing, _ := trace.Ingest(strings.NewReader(corpus), trace.DefaultOptions())
