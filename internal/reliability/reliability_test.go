@@ -64,3 +64,9 @@ func TestPercentileInterpolation(t *testing.T) {
 		t.Errorf("p50 want 25, got %v", p)
 	}
 	if p := percentile(xs, 0); p != 10 {
+		t.Errorf("p0 want 10, got %v", p)
+	}
+	if p := percentile(xs, 1); p != 40 {
+		t.Errorf("p100 want 40, got %v", p)
+	}
+	if p := percentile(nil, 0.5); p != 0 {
