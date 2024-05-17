@@ -55,3 +55,9 @@ func TestRunUnknownCommand(t *testing.T) {
 		t.Fatal("expected error for unknown command")
 	}
 }
+
+func TestRunRequiresTraces(t *testing.T) {
+	if err := run([]string{"analyze"}); err == nil {
+		t.Fatal("expected error when --traces missing")
+	}
+}
