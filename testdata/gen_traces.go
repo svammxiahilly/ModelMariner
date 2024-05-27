@@ -102,3 +102,10 @@ func main() {
 					lat = 20
 				}
 				isErr := rng.Float64() < p.errRate
+				quality := 0.0
+				errKind := ""
+				if isErr {
+					errKind = pickError(rng)
+				} else {
+					quality = clamp01(p.quality + rng.NormFloat64()*0.05)
+				}
