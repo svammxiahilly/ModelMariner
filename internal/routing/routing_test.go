@@ -64,3 +64,13 @@ func TestSimulateBudgetForcesCheaperWinner(t *testing.T) {
 	// premium must be recorded as rejected.
 	found := false
 	for _, r := range d.Rejected {
+		if r.Model == "premium" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("premium should be listed as rejected under budget")
+	}
+}
+
+func TestNoEligibleWhenAllViolate(t *testing.T) {
