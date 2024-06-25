@@ -226,3 +226,23 @@ func Ingest(r io.Reader, opts Options) (IngestResult, error) {
 			return a.Timestamp < b.Timestamp
 		}
 		return a.Line < b.Line
+	})
+	return res, nil
+}
+
+// normalize validates a raw record and converts it into a canonical Trace.
+func normalize(rec Record, line int, opts Options) (Trace, []ValidationError) {
+	var errs []ValidationError
+	add := func(field, reason string) {
+		errs = append(errs, ValidationError{Line: line, Field: field, Reason: reason})
+	}
+
+	model := strings.TrimSpace(rec.Model)
+	if model == "" {
+		add("model", "must be a non-empty identifier")
+	}
+	task := strings.TrimSpace(rec.Task)
+	if task == "" {
+		add("task", "must be a non-empty identifier")
+	}
+	if rec.Tokens == nil {
