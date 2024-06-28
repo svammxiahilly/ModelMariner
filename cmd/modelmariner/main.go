@@ -217,3 +217,19 @@ func cmdValidate(args []string) error {
 	strict := false
 	for i := 0; i < len(args); i++ {
 		switch {
+		case args[i] == "--traces" || args[i] == "-t":
+			if i+1 >= len(args) {
+				return fmt.Errorf("--traces requires a value")
+			}
+			i++
+			path = args[i]
+		case strings.HasPrefix(args[i], "--traces="):
+			path = strings.TrimPrefix(args[i], "--traces=")
+		case args[i] == "--strict":
+			strict = true
+		default:
+			return fmt.Errorf("unknown flag %q", args[i])
+		}
+	}
+	if path == "" {
+		return fmt.Errorf("--traces is required")
