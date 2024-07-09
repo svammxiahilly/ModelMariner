@@ -165,3 +165,16 @@ func indexTraces(traces []trace.Trace) map[string]map[string][]trace.Trace {
 }
 
 // replay computes realized metrics by replaying every recorded trace for the
+// chosen model on the given task.
+func replay(task, model string, idx map[string]map[string][]trace.Trace) RealizedMetrics {
+	m := RealizedMetrics{Model: model}
+	traces := idx[task][model]
+	var latSum, qualSum float64
+	var successCount int
+	for _, t := range traces {
+		m.Calls++
+		m.TotalCostUSD += t.CostUSD
+		if t.Error {
+			continue
+		}
+		successCount++
