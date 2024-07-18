@@ -58,3 +58,8 @@ func TestSkipsZeroSuccessModels(t *testing.T) {
 		t.Errorf("zero-success model should be excluded: %+v", f.Points)
 	}
 }
+
+func TestNoModelsProducesNoFrontier(t *testing.T) {
+	sum := reliability.Summary{Tasks: []string{"empty"}}
+	an := Compute(sum)
+	if _, ok := an.ForTask("empty"); ok {
