@@ -38,3 +38,7 @@ recorded LLM traces, entirely offline.
   JSON and text reports plus standalone compiled routing-table artifacts
   (`policies.json`).
 - **CLI** (`cmd/modelmariner`): `analyze`, `validate`, and `version` commands
+  with `--strict`, `--format`, `--out`, and `--with-timestamp` flags.
+- **TypeScript navigation dashboard** (`dashboard/`): strictly-typed,
+  dependency-light terminal consumer with `overview`, `task`, `model`,
+  `policy`, and `routes` views; schema-guarded against incompatible reports.
