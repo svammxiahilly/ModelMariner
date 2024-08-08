@@ -47,3 +47,10 @@ func TestExplainNoEligible(t *testing.T) {
 	}
 	if len(e.Rejections) != 1 || !strings.Contains(e.Rejections[0], "min_quality") {
 		t.Errorf("rejection detail missing: %+v", e.Rejections)
+	}
+}
+
+func TestExplainSoleSurvivor(t *testing.T) {
+	d := routing.Decision{
+		Task: "t", Policy: "p", Winner: "only", Score: 0.5,
+		Evaluations: []policy.Evaluation{{Model: "only", Eligible: true, Score: 0.5}},
