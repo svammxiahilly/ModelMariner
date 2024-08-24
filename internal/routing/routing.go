@@ -178,3 +178,16 @@ func replay(task, model string, idx map[string]map[string][]trace.Trace) Realize
 			continue
 		}
 		successCount++
+		latSum += t.LatencyMS
+		qualSum += t.Quality
+	}
+	m.Successes = successCount
+	if m.Calls > 0 {
+		m.SuccessRate = float64(successCount) / float64(m.Calls)
+	}
+	if successCount > 0 {
+		m.MeanLatencyMS = latSum / float64(successCount)
+		m.MeanQuality = qualSum / float64(successCount)
+	}
+	return m
+}
