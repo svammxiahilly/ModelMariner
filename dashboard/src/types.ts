@@ -105,3 +105,15 @@ export interface Totals {
   realized_cost_usd: number;
   baseline_cost_usd: number;
   cost_delta_usd: number;
+  realized_mean_quality: number;
+  baseline_mean_quality: number;
+}
+
+export interface Simulation {
+  policy: string;
+  decisions: Decision[];
+  totals: Totals;
+}
+
+export interface Explanation {
+  task: string;
