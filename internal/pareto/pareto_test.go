@@ -63,3 +63,8 @@ func TestNoModelsProducesNoFrontier(t *testing.T) {
 	sum := reliability.Summary{Tasks: []string{"empty"}}
 	an := Compute(sum)
 	if _, ok := an.ForTask("empty"); ok {
+		t.Error("empty task should not produce a frontier")
+	}
+}
+
+func TestDominanceIsStrict(t *testing.T) {
