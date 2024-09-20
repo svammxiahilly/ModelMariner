@@ -135,3 +135,16 @@ test("render overview contains headline and winners", () => {
   assert.match(out, /fleet overview/);
   assert.match(out, /premium/);
 });
+
+test("render task shows frontier and selections", () => {
+  const nav = new ReportNavigator(sampleReport());
+  const out = render(nav, ["task", "t"]);
+  assert.match(out, /Pareto frontier/);
+  assert.match(out, /quality.*premium/s);
+});
+
+test("render routes shows compiled table", () => {
+  const nav = new ReportNavigator(sampleReport());
+  const out = render(nav, ["routes", "quality"]);
+  assert.match(out, /COMPILED ROUTING TABLE/);
+  assert.match(out, /premium/);
