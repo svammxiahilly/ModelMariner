@@ -191,3 +191,16 @@ func replay(task, model string, idx map[string]map[string][]trace.Trace) Realize
 	}
 	return m
 }
+
+// cheapestModel returns the model with the lowest mean cost among those with
+// successful samples, used as the naive baseline the policy is compared against.
+func cheapestModel(aggs []reliability.Aggregate) string {
+	best := ""
+	bestCost := 0.0
+	for _, a := range aggs {
+		if a.Successes == 0 {
+			continue
+		}
+		if best == "" || a.MeanCostUSD < bestCost {
+			best = a.Model
+			bestCost = a.MeanCostUSD
