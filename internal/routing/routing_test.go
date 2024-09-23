@@ -74,3 +74,12 @@ func TestSimulateBudgetForcesCheaperWinner(t *testing.T) {
 }
 
 func TestNoEligibleWhenAllViolate(t *testing.T) {
+	traces := buildTraces()
+	sum := reliability.Compute(traces)
+	p := policy.Policy{
+		Name:        "impossible",
+		Constraints: policy.Constraints{MinQuality: 0.999},
+		Preference:  policy.Preference{Weights: []policy.Weight{{Objective: policy.ObjQuality, Weight: 1}}},
+	}
+	sim := Simulate(p, sum, traces)
+	if !sim.Decisions[0].NoEligible {
