@@ -126,3 +126,9 @@ func TestNormalizedWeightsSumToOne(t *testing.T) {
 }
 
 func TestAppliesToScoping(t *testing.T) {
+	global := Policy{Name: "g"}
+	scoped := Policy{Name: "s", Tasks: []string{"only"}}
+	if !global.AppliesTo("anything") {
+		t.Error("global policy should apply to all tasks")
+	}
+	if scoped.AppliesTo("other") || !scoped.AppliesTo("only") {
