@@ -70,3 +70,9 @@ func TestPercentileInterpolation(t *testing.T) {
 		t.Errorf("p100 want 40, got %v", p)
 	}
 	if p := percentile(nil, 0.5); p != 0 {
+		t.Errorf("empty want 0, got %v", p)
+	}
+}
+
+func TestForTaskFiltersDeterministically(t *testing.T) {
+	traces := []trace.Trace{
