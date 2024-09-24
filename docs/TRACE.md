@@ -126,3 +126,17 @@ Passed via `--policy`. A policy set is `{ "version": 1, "policies": [ ... ] }`.
   setting it to zero) disables it.
 - `tasks` scopes a policy; omit it to apply to every task.
 - `max_privacy` caps the tier a model may handle. A model is disqualified if the
+  task's observed privacy exceeds the cap **unless** it appears in
+  `privacy_safe_models` (e.g. an on-prem deployment that never egresses data).
+- `allow_models`, when non-empty, restricts routing to exactly those models;
+  `deny_models` forbids models outright.
+- `preference.weights` rank survivors. Objectives are `cost`, `latency`,
+  `quality`, `reliability`. Weights are normalized to sum to 1, so only their
+  ratios matter. Cost and latency are inverted (lower is better) during scoring;
+  quality and reliability are used directly. All contributions are normalized
+  across the candidate set to `[0, 1]` before weighting.
+
+---
+
+## 4. Compiled artifact: `policies.json`
+
