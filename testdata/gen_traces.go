@@ -122,3 +122,9 @@ func main() {
 						p.model, task.name, p.provider, p.region, prompt, completion, cost, lat, quality, task.privacy, ts)
 				}
 				emit(line)
+			}
+		}
+	}
+	_ = math.Pi
+}
+
