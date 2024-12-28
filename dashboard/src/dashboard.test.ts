@@ -148,3 +148,16 @@ test("render routes shows compiled table", () => {
   const out = render(nav, ["routes", "quality"]);
   assert.match(out, /COMPILED ROUTING TABLE/);
   assert.match(out, /premium/);
+});
+
+test("render model reports cross-task behavior", () => {
+  const nav = new ReportNavigator(sampleReport());
+  const out = render(nav, ["model", "premium"]);
+  assert.match(out, /MODEL: premium/);
+  assert.match(out, /Selected as winner in 1/);
+});
+
+test("render unknown command", () => {
+  const nav = new ReportNavigator(sampleReport());
+  assert.match(render(nav, ["bogus"]), /unknown command/);
+});
