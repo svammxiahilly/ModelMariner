@@ -14,3 +14,4 @@
     "exactOptionalPropertyTypes": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "declaration": true,
