@@ -68,3 +68,8 @@ func TestNoModelsProducesNoFrontier(t *testing.T) {
 }
 
 func TestDominanceIsStrict(t *testing.T) {
+	// Two identical points must not dominate each other (no strict improvement).
+	a := Point{Model: "x", CostUSD: 1, LatencyMS: 1, Quality: 1, Reliability: 1}
+	b := Point{Model: "y", CostUSD: 1, LatencyMS: 1, Quality: 1, Reliability: 1}
+	if dominates(a, b) || dominates(b, a) {
+		t.Error("identical points must not dominate each other")
