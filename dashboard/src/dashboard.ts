@@ -216,3 +216,23 @@ function main(): void {
   try {
     text = readFileSync(path, "utf8");
   } catch (e) {
+    console.error(`cannot read ${path}: ${(e as Error).message}`);
+    process.exit(1);
+    return;
+  }
+  try {
+    const nav = ReportNavigator.fromJSON(text);
+    console.log(render(nav, rest));
+  } catch (e) {
+    if (e instanceof SchemaError) {
+      console.error(`schema error: ${e.message}`);
+      process.exit(1);
+    }
+    throw e;
+  }
+}
+
+// Only run main when invoked directly, not when imported by tests.
+if (process.argv[1] && process.argv[1].endsWith("dashboard.js")) {
+  main();
+}
