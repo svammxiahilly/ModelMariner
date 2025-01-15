@@ -9,3 +9,4 @@ dashboard/dist/
 dashboard/node_modules/
 dashboard/package-lock.json
 
+# Editor/OS noise
