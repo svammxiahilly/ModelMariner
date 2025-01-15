@@ -233,3 +233,18 @@ func cmdValidate(args []string) error {
 	}
 	if path == "" {
 		return fmt.Errorf("--traces is required")
+	}
+	ingest, err := loadTraces(path, strict)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("validated %s: %d line(s), %d accepted, %d rejected\n",
+		path, ingest.Total, len(ingest.Traces), ingest.Rejected)
+	for _, ve := range ingest.Errors {
+		fmt.Printf("  reject: %s\n", ve.Error())
+	}
+	if ingest.Rejected > 0 && strict {
+		return fmt.Errorf("%d line(s) rejected under --strict", ingest.Rejected)
+	}
+	return nil
+}
