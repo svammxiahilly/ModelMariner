@@ -83,3 +83,14 @@ func (e Explanation) Text() string {
 	fmt.Fprintf(&sb, "• %s\n", e.Headline)
 	for _, r := range e.Reasons {
 		fmt.Fprintf(&sb, "    - %s\n", r)
+	}
+	for _, ev := range e.Evidence {
+		fmt.Fprintf(&sb, "    evidence: %s\n", ev)
+	}
+	for _, rej := range e.Rejections {
+		fmt.Fprintf(&sb, "    rejected: %s\n", rej)
+	}
+	return sb.String()
+}
+
+func rejectionLine(r routing.RejectedCandidate) string {
