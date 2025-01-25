@@ -83,3 +83,13 @@ func TestNoEligibleWhenAllViolate(t *testing.T) {
 	}
 	sim := Simulate(p, sum, traces)
 	if !sim.Decisions[0].NoEligible {
+		t.Error("expected no eligible model")
+	}
+	if sim.Totals.TasksUnrouted != 1 {
+		t.Errorf("expected 1 unrouted task, got %d", sim.Totals.TasksUnrouted)
+	}
+}
+
+func TestTotalsDelta(t *testing.T) {
+	traces := buildTraces()
+	sum := reliability.Compute(traces)
