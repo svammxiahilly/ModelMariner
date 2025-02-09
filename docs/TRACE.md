@@ -140,3 +140,18 @@ Passed via `--policy`. A policy set is `{ "version": 1, "policies": [ ... ] }`.
 
 ## 4. Compiled artifact: `policies.json`
 
+A standalone, minimal routing table per policy — the winner model for each task
+plus its score and margin — suitable for a runtime to load directly. Tasks with
+no eligible candidate appear under `unrouted` with the reason.
+
+```json
+[
+  {
+    "schema": "modelmariner/v1",
+    "policy": "budget-guard",
+    "routes": [
+      { "task": "classify-intent", "model": "harbor-mini", "score": 0.8157, "margin": 0.0698 }
+    ]
+  }
+]
+```
