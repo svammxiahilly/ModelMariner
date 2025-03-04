@@ -61,3 +61,8 @@ func TestRunRequiresTraces(t *testing.T) {
 		t.Fatal("expected error when --traces missing")
 	}
 }
+
+func TestParseAnalyzeFlags(t *testing.T) {
+	f, err := parseAnalyzeFlags([]string{"--traces=a.jsonl", "--policy=p.json", "--format=text", "--strict"})
+	if err != nil {
+		t.Fatal(err)
