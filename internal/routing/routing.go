@@ -204,3 +204,16 @@ func cheapestModel(aggs []reliability.Aggregate) string {
 		if best == "" || a.MeanCostUSD < bestCost {
 			best = a.Model
 			bestCost = a.MeanCostUSD
+		}
+	}
+	return best
+}
+
+// Validate checks that a simulation produced at least one decision, returning a
+// descriptive error otherwise (used by the CLI to fail loudly on empty inputs).
+func (s Simulation) Validate() error {
+	if len(s.Decisions) == 0 {
+		return fmt.Errorf("policy %q produced no decisions (no matching tasks)", s.Policy)
+	}
+	return nil
+}
