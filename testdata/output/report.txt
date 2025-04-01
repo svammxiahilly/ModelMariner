@@ -163,3 +163,15 @@ Decided 2 task(s), 0 unrouted. Realized cost $10.7927 vs baseline $6.8950 (delta
     rejected: galleon-max — max_privacy (task data reaches "restricted" but policy caps at "internal" and model is not privacy-safe)
     rejected: harbor-mini — max_privacy (task data reaches "restricted" but policy caps at "internal" and model is not privacy-safe)
     rejected: harbor-nano — max_privacy (task data reaches "restricted" but policy caps at "internal" and model is not privacy-safe)
+
+========================================================================
+ POLICY: quality-first
+========================================================================
+Accuracy-sensitive generative tasks. Demands a high quality floor and strong reliability, then ranks on quality with cost as a secondary consideration.
+
+Decided 2 task(s), 0 unrouted. Realized cost $108.0148 vs baseline $7.9007 (delta $+100.1142). Quality 0.951 vs 0.654.
+
+• route "code-review-comment" to galleon-max (score 0.8500)
+    - galleon-max beat runner-up clipper-pro by a margin of 0.0579 in weighted score
+    - score components: cost=0.0000, quality=0.6000, reliability=0.2500
+    evidence: replayed 55 recorded call(s): 100.0% success, mean quality 0.963, mean latency 1083 ms, total cost $80.3328
