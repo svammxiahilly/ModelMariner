@@ -51,3 +51,9 @@ report: build ## Analyze the sample corpus and write artifacts to testdata/outpu
 	$(BIN_DIR)/$(BINARY) analyze --traces $(TRACES) --policy $(POLICIES) --out $(OUT_DIR) --format text
 
 .PHONY: validate
+validate: build ## Validate the sample corpus.
+	$(BIN_DIR)/$(BINARY) validate --traces $(TRACES)
+
+.PHONY: dashboard
+dashboard: ## Build and test the TypeScript dashboard.
+	cd dashboard && npm install && npm test
