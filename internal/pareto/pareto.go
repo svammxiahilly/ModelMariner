@@ -112,3 +112,15 @@ func markDominance(points []Point) {
 		var dominators []string
 		for j := range points {
 			if i == j {
+				continue
+			}
+			if dominates(points[j], points[i]) {
+				dominators = append(dominators, points[j].Model)
+			}
+		}
+		if len(dominators) > 0 {
+			sort.Strings(dominators)
+			points[i].Dominated = true
+			points[i].DominatedBy = dominators
+		}
+	}
