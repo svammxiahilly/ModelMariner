@@ -76,3 +76,9 @@ func TestPercentileInterpolation(t *testing.T) {
 
 func TestForTaskFiltersDeterministically(t *testing.T) {
 	traces := []trace.Trace{
+		mk("b", "t1", 0.1, 100, 0.9, false, 0),
+		mk("a", "t1", 0.1, 100, 0.9, false, 0),
+		mk("a", "t2", 0.1, 100, 0.9, false, 0),
+	}
+	sum := Compute(traces)
+	t1 := sum.ForTask("t1")
