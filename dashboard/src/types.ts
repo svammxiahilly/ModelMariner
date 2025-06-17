@@ -117,3 +117,15 @@ export interface Simulation {
 
 export interface Explanation {
   task: string;
+  policy: string;
+  headline: string;
+  reasons: string[];
+  evidence: string[];
+  rejections?: string[];
+}
+
+export interface PolicyReport {
+  name: string;
+  description?: string;
+  simulation: Simulation;
+  explanations: Explanation[];
