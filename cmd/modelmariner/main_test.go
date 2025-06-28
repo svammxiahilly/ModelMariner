@@ -66,3 +66,8 @@ func TestParseAnalyzeFlags(t *testing.T) {
 	f, err := parseAnalyzeFlags([]string{"--traces=a.jsonl", "--policy=p.json", "--format=text", "--strict"})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if f.traces != "a.jsonl" || f.policy != "p.json" || f.format != "text" || !f.strict {
+		t.Errorf("bad flag parse: %+v", f)
+	}
+	if !f.deterministic {
