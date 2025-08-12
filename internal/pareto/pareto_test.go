@@ -73,3 +73,8 @@ func TestDominanceIsStrict(t *testing.T) {
 	b := Point{Model: "y", CostUSD: 1, LatencyMS: 1, Quality: 1, Reliability: 1}
 	if dominates(a, b) || dominates(b, a) {
 		t.Error("identical points must not dominate each other")
+	}
+}
+
+func contains(xs []string, s string) bool {
+	for _, x := range xs {
