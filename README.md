@@ -36,6 +36,7 @@
 <img src="prev/prev_3.png"  width="250">
 <img src="prev/prev_4.png"  width="250">
 <img src="prev/prev_5.png"  width="250">
+<img src="prev/prev_6.png"  width="250">
 
 </div>
 
