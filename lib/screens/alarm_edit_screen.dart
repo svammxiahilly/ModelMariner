@@ -239,20 +239,9 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                 vibrate: vibrate,
                 sound: sound,
               );
-              DateTime now = DateTime.now();
-              DateTime alarmTime = DateTime(
-                now.year,
-                now.month,
-                now.day,
-                time.hour,
-                time.minute,
-              );
+              DateTime alarmTime = getNextAlarmTime(time, repeatDays);
+              Duration diff = alarmTime.difference(DateTime.now());
 
-              if (alarmTime.isBefore(now)) {
-                alarmTime = alarmTime.add(Duration(days: 1));
-              }
-
-              Duration diff = alarmTime.difference(now);
               int totalMinutes = diff.inMinutes;
 
               int hours = totalMinutes ~/ 60;
@@ -318,4 +307,26 @@ String _getAmPm(TimeOfDay time, bool is24HourFormat, BuildContext context) {
     final formatted = time.format(context);
     return formatted.split(' ').length > 1 ? formatted.split(' ')[1] : '';
   }
+}
+
+DateTime getNextAlarmTime(TimeOfDay time, List<int> repeatDays) {
+  DateTime now = DateTime.now();
+  DateTime todayAlarm = DateTime(
+    now.year,
+    now.month,
+    now.day,
+    time.hour,
+    time.minute,
+  );
+
+  for (int i = 0; i <= 7; i++) {
+    DateTime candidate = todayAlarm.add(Duration(days: i));
+    int candidateWeekday = candidate.weekday; // 1 = Monday, ..., 7 = Sunday
+    if (repeatDays.isEmpty || repeatDays.contains(candidateWeekday)) {
+      if (candidate.isAfter(now)) {
+        return candidate;
+      }
+    }
+  }
+  return todayAlarm.add(Duration(days: 1));
 }
