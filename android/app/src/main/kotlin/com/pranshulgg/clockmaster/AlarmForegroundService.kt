@@ -35,6 +35,7 @@ class AlarmForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         if (intent?.action == ACTION_STOP) {
             stopSelf()
             return START_NOT_STICKY
@@ -70,8 +71,15 @@ class AlarmForegroundService : Service() {
 
         if (vibrate) {
             val pattern = longArrayOf(0, 500, 500)
-            vibrator?.vibrate(pattern, 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val effect = android.os.VibrationEffect.createWaveform(pattern, 0)
+                vibrator?.vibrate(effect)
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(pattern, 0)
+            }
         }
+
 
         return START_STICKY
     }
@@ -92,7 +100,7 @@ class AlarmForegroundService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun buildNotification(label: String): Notification {
-
+        val pattern = longArrayOf(0, 500, 500)
         val snoozeIntent = Intent(this, AlarmActionReceiver::class.java).apply {
             action = ACTION_SNOOZE
         }
@@ -125,11 +133,12 @@ class AlarmForegroundService : Service() {
         return  NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(label)
             .setContentText("Alarm ringing")
-            .setSmallIcon(R.drawable.baseline_timer_24)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .addAction(android.R.drawable.ic_lock_idle_alarm, "Snooze", snoozePendingIntent)
             .addAction(android.R.drawable.ic_media_pause, "Stop", stopPendingIntent)
             .setCategory(Notification.CATEGORY_ALARM)
             .setOngoing(true)
+            .setVibrate(pattern)
             .build()
     }
 

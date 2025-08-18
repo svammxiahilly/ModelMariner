@@ -55,6 +55,9 @@ class AlarmService {
         'vibrate': alarm.vibrate,
         'sound': alarm.sound,
         'recurring': alarm.repeatDays.isNotEmpty,
+        'hour': alarm.hour,
+        'minute': alarm.minute,
+        'repeatDays': alarm.repeatDays,
       });
     } on PlatformException {}
   }

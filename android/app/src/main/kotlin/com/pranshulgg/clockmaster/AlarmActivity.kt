@@ -19,6 +19,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -83,6 +84,8 @@ class AlarmActivity : ComponentActivity() {
 
         findViewById<TextView>(R.id.alarm_hour).text = hourText
         findViewById<TextView>(R.id.alarm_minute).text = minuteText
+
+        findViewById<TextView>(R.id.alarm_label).text = label
 
 
         findViewById<Button>(R.id.btn_dismiss).setOnClickListener {

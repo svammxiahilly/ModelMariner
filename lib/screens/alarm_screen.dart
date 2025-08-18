@@ -134,155 +134,159 @@ class AlarmScreenState extends State<AlarmScreen> {
                 ),
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 130),
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(13, 0, 13, 130),
+
               itemCount: alarms.length,
+              separatorBuilder: (context, i) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 final a = alarms[i];
                 final resultAlarms = getTimeAndAmPm(a);
                 final isLast = i == alarms.length - 1;
 
-                return Dismissible(
-                  key: ValueKey(a.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: colorTheme.errorContainer,
-                    ),
-                    child: Icon(
-                      Icons.delete,
-                      color: colorTheme.onErrorContainer,
-                    ),
-                  ),
-                  onDismissed: (direction) {
-                    _delete(a);
-                    SnackUtil.showSnackBar(
-                      context: context,
-                      message: "Alarm deleted",
-                    );
-                  },
-                  child: GestureDetector(
-                    child: Container(
-                      padding: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        bottom: 10,
-                        top: 10,
-                      ),
-                      margin: EdgeInsets.only(bottom: 8),
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Dismissible(
+                    key: ValueKey(a.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
-                        color: a.enabled
-                            ? colorTheme.surfaceContainerLow
-                            : colorTheme.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(20),
+                        color: colorTheme.errorContainer,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _repeatDaysText(a.repeatDays),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: colorTheme.onSurfaceVariant,
+                      child: Icon(
+                        Icons.delete,
+                        color: colorTheme.onErrorContainer,
+                      ),
+                    ),
+                    onDismissed: (direction) {
+                      _delete(a);
+                      SnackUtil.showSnackBar(
+                        context: context,
+                        message: "Alarm deleted",
+                      );
+                    },
+                    child: GestureDetector(
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 10,
+                          top: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: a.enabled
+                              ? colorTheme.surfaceContainerLow
+                              : colorTheme.surfaceContainerLowest,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _repeatDaysText(a.repeatDays),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: colorTheme.onSurfaceVariant,
+                                  ),
                                 ),
-                              ),
 
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: resultAlarms['time'],
-                                      style: TextStyle(
-                                        fontSize: 60,
-                                        fontWeight: FontWeight.w200,
-                                        color: colorTheme.onSurface,
-                                      ),
-                                    ),
-                                    TextSpan(text: " "),
-                                    WidgetSpan(
-                                      alignment: PlaceholderAlignment.baseline,
-                                      baseline: TextBaseline.alphabetic,
-                                      child: Text(
-                                        resultAlarms['ampm'].toString(),
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: resultAlarms['time'],
                                         style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          color: colorTheme.onSurfaceVariant,
+                                          fontSize: 55,
+                                          fontWeight: FontWeight.w200,
+                                          color: colorTheme.onSurface,
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      TextSpan(text: " "),
+                                      WidgetSpan(
+                                        alignment:
+                                            PlaceholderAlignment.baseline,
+                                        baseline: TextBaseline.alphabetic,
+                                        child: Text(
+                                          resultAlarms['ampm'].toString(),
+                                          style: TextStyle(
+                                            fontSize: 30,
+                                            fontWeight: FontWeight.w500,
+                                            color: colorTheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                a.label,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: colorTheme.secondary,
+                                Text(
+                                  a.label,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorTheme.secondary,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          // Column(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                          //   children: [
-                          Switch(
-                            value: a.enabled,
-                            thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-                              (states) => states.contains(WidgetState.selected)
-                                  ? Icon(
-                                      Icons.notifications_active,
-                                      color: colorTheme.primary,
-                                    )
-                                  : null,
+                              ],
                             ),
-                            onChanged: (v) async {
-                              a.enabled = v;
-                              await _saveAndSchedule(a);
-                              setState(() {});
-                            },
-                            // ),
-                            // ],
-                          ),
-                        ],
-                      ),
-                    ),
+                            // Column(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                    onTap: () {
-                      showModalBottomSheet<Alarm>(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: colorTheme.surface,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
+                            //   children: [
+                            Switch(
+                              value: a.enabled,
+                              thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                                (states) =>
+                                    states.contains(WidgetState.selected)
+                                    ? Icon(
+                                        Icons.notifications_active,
+                                        color: colorTheme.primary,
+                                      )
+                                    : null,
+                              ),
+                              onChanged: (v) async {
+                                a.enabled = v;
+                                await _saveAndSchedule(a);
+                                setState(() {});
+                              },
+                              // ),
+                              // ],
+                            ),
+                          ],
                         ),
-                        builder: (context) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+
+                      onTap: () {
+                        showModalBottomSheet<Alarm>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: colorTheme.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(28),
+                            ),
                           ),
-                          child: AlarmEditContent(
-                            alarm: a,
-                            is24HourFormat: is24HourFormat,
+                          builder: (context) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: AlarmEditContent(
+                              alarm: a,
+                              is24HourFormat: is24HourFormat,
+                            ),
                           ),
-                        ),
-                      ).then((result) async {
-                        if (result is Alarm) {
-                          await _saveAndSchedule(result);
-                        }
-                      });
-                    },
+                        ).then((result) async {
+                          if (result is Alarm) {
+                            await _saveAndSchedule(result);
+                          }
+                        });
+                      },
+                    ),
                   ),
                 );
               },

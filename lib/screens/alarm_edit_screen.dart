@@ -239,6 +239,42 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                 vibrate: vibrate,
                 sound: sound,
               );
+              DateTime now = DateTime.now();
+              DateTime alarmTime = DateTime(
+                now.year,
+                now.month,
+                now.day,
+                time.hour,
+                time.minute,
+              );
+
+              if (alarmTime.isBefore(now)) {
+                alarmTime = alarmTime.add(Duration(days: 1));
+              }
+
+              Duration diff = alarmTime.difference(now);
+              int totalMinutes = diff.inMinutes;
+
+              int hours = totalMinutes ~/ 60;
+              int minutes = totalMinutes % 60;
+
+              String hoursText = hours > 0
+                  ? '$hours hour${hours > 1 ? 's' : ''} '
+                  : '';
+              String minutesText = minutes > 0
+                  ? '$minutes minute${minutes > 1 ? 's' : ''}'
+                  : '';
+
+              String timeText = (hoursText.isEmpty && minutesText.isEmpty)
+                  ? 'less than a minute'
+                  : '$hoursText$minutesText';
+
+              final snackBar = SnackBar(
+                content: Text('Alarm set for $timeText from now'),
+                duration: Duration(seconds: 4),
+              );
+
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
               Navigator.pop(context, newAlarm);
             },
             icon: Icon(Icons.save, size: 20),

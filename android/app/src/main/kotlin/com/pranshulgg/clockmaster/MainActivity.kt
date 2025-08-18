@@ -26,7 +26,6 @@ class MainActivity: FlutterActivity() {
 
 
 
-
     MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
       when (call.method) {
         "checkNotificationPermission" -> {
@@ -41,7 +40,11 @@ class MainActivity: FlutterActivity() {
           val label = call.argument<String>("label") ?: "Alarm"
           val sound = call.argument<String>("sound")
           val recurring = call.argument<Boolean>("recurring") ?: false
-          scheduleAlarm(id, triggerAtMillisUtc, label, recurring, sound)
+          val hour = call.argument<Int>("hour") ?: 0
+          val minute = call.argument<Int>("minute") ?: 0
+          val repeatDays = call.argument<List<Int>>("repeatDays") ?: listOf<Int>()
+          val vibrate = call.argument<Boolean>("vibrate") ?: false
+          scheduleAlarm(id, triggerAtMillisUtc, label, recurring, sound, hour, minute, repeatDays, vibrate)
           result.success(null)
         }
         "cancelAlarm" -> {
@@ -105,7 +108,17 @@ class MainActivity: FlutterActivity() {
     }
   }
 
-  private fun scheduleAlarm(id: Int, triggerAtMillisUtc: Long, label: String, recurring: Boolean, sound: String?) {
+  private fun scheduleAlarm(
+    id: Int,
+    triggerAtMillisUtc: Long,
+    label: String,
+    recurring: Boolean,
+    sound: String?,
+    hour: Int,
+    minute: Int,
+    repeatDays: List<Int>,
+    vibrate: Boolean
+  ) {
     val am = getSystemService(ALARM_SERVICE) as AlarmManager
 
     val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
@@ -113,7 +126,14 @@ class MainActivity: FlutterActivity() {
       putExtra("id", id)
       putExtra("label", label)
       putExtra("sound", sound)
+      putExtra("hour", hour)
+      putExtra("minute", minute)
+      putIntegerArrayListExtra("daysOfWeek", ArrayList(repeatDays)) // Flutter -> Kotlin list
+      putExtra("recurring", recurring)
+      putExtra("vibrate", vibrate)
+
     }
+
     val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     val pendingAlarm = PendingIntent.getBroadcast(this, id, alarmIntent, flags)
 
@@ -123,9 +143,9 @@ class MainActivity: FlutterActivity() {
     val showPending = PendingIntent.getActivity(this, id + 1000000, showIntent, flags)
 
     val info = AlarmManager.AlarmClockInfo(triggerAtMillisUtc, showPending)
-
     am.setAlarmClock(info, pendingAlarm)
   }
+
 
   private fun cancelAlarm(id: Int) {
     val am = getSystemService(ALARM_SERVICE) as AlarmManager

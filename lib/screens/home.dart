@@ -65,6 +65,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       StopWatchScreen(),
       TimerScreen(key: _timersScreenKey),
     ];
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final isIgnoring =
+          await BatteryOptimizationHelper.isIgnoringBatteryOptimizations();
+      final bool grantedNoti = await NotificationService.checkPermission();
+
+      if (!isIgnoring || !grantedNoti) {
+        _showRequiredActionSheet(context);
+      }
+    });
   }
 
   final List<String> _pagesLabel = [

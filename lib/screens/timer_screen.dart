@@ -1,59 +1,51 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:material_color_utilities/quantize/quantizer_wu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-
-class TimerModel {
-  String id;
-  String label;
-  int initialSeconds;
-  bool isRunning;
-  int? lastStartEpochMs;
-
-  // Add this
-  final ValueNotifier<int> remainingNotifier;
-
-  TimerModel({
-    required this.id,
-    required this.label,
-    required int remainingSeconds,
-    required this.initialSeconds,
-    required this.isRunning,
-    required this.lastStartEpochMs,
-  }) : remainingNotifier = ValueNotifier(remainingSeconds);
-
-  int get remainingSeconds => remainingNotifier.value;
-  set remainingSeconds(int val) => remainingNotifier.value = val;
-
-  factory TimerModel.fromMap(Map<String, dynamic> m) => TimerModel(
-    id: m['id'],
-    label: m['label'],
-    remainingSeconds: m['remainingSeconds'],
-    initialSeconds: m['initialSeconds'],
-    isRunning: m['isRunning'],
-    lastStartEpochMs: m['lastStartEpochMs'],
-  );
-
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'label': label,
-    'remainingSeconds': remainingSeconds,
-    'initialSeconds': initialSeconds,
-    'isRunning': isRunning,
-    'lastStartEpochMs': lastStartEpochMs,
-  };
-}
+import 'package:animations/animations.dart';
+import '../models/timer_model.dart';
+import 'full_screen_timer.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 @pragma('vm:entry-point')
 void startCallback() {
   FlutterForegroundTask.setTaskHandler(MyTaskHandler());
+}
+
+class LoopingRingtone {
+  Timer? _loopTimer;
+
+  void play({int intervalSeconds = 3}) {
+    // First play immediately
+    FlutterRingtonePlayer().play(
+      android: AndroidSounds.notification,
+      ios: IosSounds.alarm,
+      looping:
+          false, // We'll loop manually, cause the plugin is broken and won't stop
+      volume: 1.0,
+    );
+
+    // Schedule repeats
+    _loopTimer = Timer.periodic(Duration(seconds: intervalSeconds), (_) {
+      FlutterRingtonePlayer().play(
+        android: AndroidSounds.notification,
+        ios: IosSounds.alarm,
+        looping: false,
+        volume: 1.0,
+      );
+    });
+  }
+
+  void stop() {
+    _loopTimer?.cancel();
+    _loopTimer = null;
+    FlutterRingtonePlayer().stop();
+  }
 }
 
 class MyTaskHandler extends TaskHandler {
@@ -95,16 +87,30 @@ class MyTaskHandler extends TaskHandler {
         if (elapsedSec > 0) {
           int newRemaining = m['remainingSeconds'] - elapsedSec;
           if (newRemaining <= 0) {
+            if (m['isRunning'] == true) {
+              LoopingRingtone().play(intervalSeconds: 3);
+              FlutterForegroundTask.updateService(
+                notificationTitle: 'Timer Finished',
+                notificationText: 'Timer',
+                notificationButtons: [
+                  NotificationButton(
+                    id: m['isRunning'] ? 'pause' : 'start',
+                    text: m['isRunning'] ? 'Pause' : 'Start',
+                  ),
+                  const NotificationButton(id: 'reset', text: 'Reset'),
+                ],
+              );
+            }
             m['remainingSeconds'] = 0;
             m['isRunning'] = false;
             m['lastStartEpochMs'] = null;
           } else {
             m['remainingSeconds'] = newRemaining;
             m['lastStartEpochMs'] = now;
+            LoopingRingtone().stop();
           }
         }
 
-        // Mark as changed even if elapsedSec == 0
         shouldUpdate = true;
       }
 
@@ -142,7 +148,7 @@ class MyTaskHandler extends TaskHandler {
           : pausedTimers.first;
     }
 
-    String title = 'Timer';
+    String title = 'Timer Finished';
     String text = 'Timer';
 
     if (t != null) {
@@ -568,7 +574,10 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       serviceId: 150,
       notificationTitle: 'Timers',
       notificationText: 'Foreground service running',
-      notificationIcon: null,
+      notificationIcon: const NotificationIcon(
+        metaDataName: "com.pranshulgg.service.timer_icon",
+      ),
+
       notificationButtons: _buildNotificationButtons(timers),
       notificationInitialRoute: '/',
       callback: startCallback,
@@ -653,6 +662,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final idx = timers.indexWhere((x) => x.id == t.id);
     if (idx == -1) return;
     timers[idx].remainingSeconds = timers[idx].initialSeconds;
+    timers[idx].currentDuration = timers[idx].initialSeconds;
     timers[idx].isRunning = false;
     timers[idx].lastStartEpochMs = null;
     await _persistTimers();
@@ -661,11 +671,25 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     await _stopServiceIfNoRunningTimers();
   }
 
+  bool startAfterAddingOneMin = false;
+
   Future<void> _addOneMinute(TimerModel t) async {
+    await FlutterForegroundTask.stopService();
     final idx = timers.indexWhere((x) => x.id == t.id);
     if (idx == -1) return;
     timers[idx].remainingSeconds += 60;
+    timers[idx].currentDuration += 60;
     await _persistTimers();
+    if (getRunningTimersCount() == 0) {
+      startAfterAddingOneMin = false;
+    } else {
+      startAfterAddingOneMin = true;
+    }
+
+    if (startAfterAddingOneMin) {
+      await _startServiceIfNotRunning();
+    }
+
     setState(() {});
   }
 
@@ -689,7 +713,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   }
 
   void showAddBottomSheet() {
-    int hours = 0, minutes = 1, seconds = 0;
+    int hours = 0, minutes = 0, seconds = 0;
     final colorTheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -900,12 +924,33 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     return WithForegroundTask(
       child: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          padding: const EdgeInsets.fromLTRB(13, 0, 13, 0),
           child: Column(
             children: [
               Expanded(
                 child: timers.isEmpty
-                    ? const Center(child: Text('No timers. Tap + to add.'))
+                    ? Center(
+                        child: Opacity(
+                          opacity: 0.6,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconWithWeight(
+                                Symbols.hourglass_disabled,
+                                color: colorTheme.onSurfaceVariant,
+                                size: 60,
+                              ),
+                              Text(
+                                "No timers",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  color: colorTheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     : ListView.builder(
                         itemCount: timers.length,
                         itemBuilder: (ctx, i) {
@@ -914,188 +959,156 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           return ValueListenableBuilder<int>(
                             valueListenable: t.remainingNotifier,
                             builder: (context, remaining, _) {
-                              final progress = t.initialSeconds > 0
-                                  ? 1 - (remaining / t.initialSeconds)
+                              final progress = t.currentDuration > 0
+                                  ? 1 - (t.remainingSeconds / t.currentDuration)
                                   : 0.0;
 
                               final tileColor = remaining == 0
-                                  ? Colors.grey.shade300
-                                  : Colors.white;
+                                  ? colorTheme.primaryContainer
+                                  : colorTheme.surfaceContainerLow;
+
+                              final finished = remaining == 0;
 
                               final isLast = i == timers.length - 1;
 
-                              return Container(
-                                margin: EdgeInsets.only(
+                              return Padding(
+                                padding: EdgeInsets.only(
                                   bottom: isLast ? 130 : 8,
                                 ),
-                                padding: const EdgeInsets.only(
-                                  top: 5,
-                                  bottom: 10,
-                                  right: 12,
-                                  left: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorTheme.surfaceContainerLow,
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          _format(remaining),
-                                          style: TextStyle(
-                                            fontSize: 45,
-                                            fontWeight: FontWeight.w600,
-                                            color: colorTheme.onSurface,
+                                child: OpenContainer(
+                                  closedElevation: 0,
+                                  closedColor: tileColor,
+                                  transitionDuration: Duration(
+                                    milliseconds: 500,
+                                  ),
+                                  transitionType:
+                                      ContainerTransitionType.fadeThrough,
+                                  openColor: colorTheme.surface,
+                                  closedShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  closedBuilder: (context, openContainer) {
+                                    return Container(
+                                      padding: const EdgeInsets.only(
+                                        top: 5,
+                                        bottom: 10,
+                                        right: 12,
+                                        left: 12,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                _format(remaining),
+                                                style: TextStyle(
+                                                  fontSize: 45,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: colorTheme.onSurface,
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 42,
+                                                    height: 42,
+                                                    child: IconButton(
+                                                      onPressed: () =>
+                                                          _deleteTimer(t),
+                                                      icon: IconWithWeight(
+                                                        Symbols.close,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 42,
-                                              height: 42,
-
-                                              child: IconButton(
-                                                onPressed: () {},
-                                                icon: IconWithWeight(
-                                                  Symbols.open_in_full,
-                                                ),
-                                              ),
-                                            ),
-
-                                            SizedBox(
-                                              width: 42,
-                                              height: 42,
-                                              child: IconButton(
-                                                onPressed: () =>
-                                                    _deleteTimer(t),
-                                                icon: IconWithWeight(
-                                                  Symbols.close,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 5),
-
-                                    LinearProgressIndicator(
-                                      value: progress,
-                                      year2023: false,
-                                    ),
-
-                                    SizedBox(height: 10),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        FilledButton.tonal(
-                                          onPressed: () => _addOneMinute(t),
-                                          child: Text("+1 Min"),
-                                        ),
-
-                                        Row(
-                                          spacing: 5,
-                                          children: [
-                                            SizedBox(
-                                              width: 42,
-                                              height: 42,
-                                              child: IconButton.filled(
-                                                tooltip: t.isRunning
-                                                    ? 'Stop'
-                                                    : 'Start',
-                                                onPressed: () =>
-                                                    _toggleStartStop(t),
-                                                icon: Icon(
-                                                  t.isRunning
-                                                      ? Icons.pause
-                                                      : Icons.play_arrow,
-                                                  color: t.isRunning
-                                                      ? colorTheme.primary
-                                                      : colorTheme.onPrimary,
-                                                ),
+                                          const SizedBox(height: 5),
+                                          LinearProgressIndicator(
+                                            value: progress,
+                                            year2023: false,
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              FilledButton.tonal(
                                                 style: ButtonStyle(
                                                   backgroundColor:
                                                       WidgetStateProperty.all(
-                                                        t.isRunning
-                                                            ? colorTheme
-                                                                  .surfaceContainerHighest
-                                                            : colorTheme
-                                                                  .primary,
+                                                        finished
+                                                            ? colorTheme.surface
+                                                            : null,
                                                       ),
                                                 ),
+                                                onPressed: () =>
+                                                    _addOneMinute(t),
+
+                                                child: const Text("+1 Min"),
                                               ),
-                                            ),
-                                            SizedBox(
-                                              width: 42,
-                                              height: 42,
-                                              child: IconButton.filledTonal(
-                                                tooltip: 'Reset',
-                                                onPressed: () => _resetTimer(t),
-                                                icon: const Icon(Icons.refresh),
+                                              Row(
+                                                spacing: 5,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 42,
+                                                    height: 42,
+                                                    child: IconButton.filled(
+                                                      tooltip: t.isRunning
+                                                          ? 'Stop'
+                                                          : 'Start',
+                                                      onPressed: () =>
+                                                          _toggleStartStop(t),
+                                                      icon: Icon(
+                                                        t.isRunning
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 42,
+                                                    height: 42,
+                                                    child: IconButton.filledTonal(
+                                                      style: ButtonStyle(
+                                                        backgroundColor:
+                                                            WidgetStateProperty.all(
+                                                              finished
+                                                                  ? colorTheme
+                                                                        .surface
+                                                                  : null,
+                                                            ),
+                                                      ),
+                                                      tooltip: 'Reset',
+                                                      onPressed: () =>
+                                                          _resetTimer(t),
+                                                      icon: const Icon(
+                                                        Icons.refresh,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  openBuilder: (context, _) {
+                                    return TimerDetailPage(
+                                      timer: t,
+                                      onToggle: () => _toggleStartStop(t),
+                                      onReset: () => _resetTimer(t),
+                                      onAddMinute: () => _addOneMinute(t),
+                                      onDelete: () => _deleteTimer(t),
+                                    );
+                                  },
                                 ),
                               );
-                              // return ListTile(
-                              //   leading: Stack(
-                              //     alignment: Alignment.center,
-                              //     children: [
-                              //       SizedBox(
-                              //         width: 50,
-                              //         height: 50,
-                              //         child: CircularProgressIndicator(
-                              //           value: progress,
-                              //           backgroundColor: Colors.grey.shade300,
-                              //           valueColor: AlwaysStoppedAnimation(
-                              //             t.isRunning ? Colors.green : Colors.red,
-                              //           ),
-                              //         ),
-                              //       ),
-                              //       Text('${i + 1}'),
-                              //     ],
-                              //   ),
-                              //   title: Text(t.label),
-                              //   subtitle: Text(_format(remaining)),
-                              //   trailing: Wrap(
-                              //     spacing: 6,
-                              //     children: [
-                              //       IconButton(
-                              //         tooltip: t.isRunning ? 'Stop' : 'Start',
-                              //         onPressed: () => _toggleStartStop(t),
-                              //         icon: Icon(
-                              //           t.isRunning
-                              //               ? Icons.pause
-                              //               : Icons.play_arrow,
-                              //         ),
-                              //       ),
-                              //       IconButton(
-                              //         tooltip: 'Reset',
-                              //         onPressed: () => _resetTimer(t),
-                              //         icon: const Icon(Icons.refresh),
-                              //       ),
-                              //       IconButton(
-                              //         tooltip: '+1:00',
-                              //         onPressed: () => _addOneMinute(t),
-                              //         icon: const Icon(Icons.add),
-                              //       ),
-                              //       IconButton(
-                              //         tooltip: 'Delete',
-                              //         onPressed: () => _deleteTimer(t),
-                              //         icon: const Icon(Icons.delete),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // );
                             },
                           );
                         },

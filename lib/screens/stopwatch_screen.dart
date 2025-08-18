@@ -5,7 +5,6 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import '../widgets/animated_fab.dart';
 
 @pragma('vm:entry-point')
 void startCallback() {
@@ -28,35 +27,39 @@ class StopwatchTaskHandler extends TaskHandler {
 
     timer?.cancel();
 
-    print('*** Foreground task STARTED ***');
-    timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      FlutterForegroundTask.sendDataToMain({
-        'elapsed': stopwatch.elapsedMilliseconds,
-      });
-
-      // Update notification text every second
-      if (stopwatch.elapsedMilliseconds % 1000 < 100) {
-        FlutterForegroundTask.updateService(
-          notificationTitle: _formatTime(stopwatch.elapsedMilliseconds),
-          notificationText: 'Stopwatch',
-          notificationButtons: [
-            NotificationButton(
-              id: stopwatch.isRunning ? 'pause' : 'start',
-              text: stopwatch.isRunning ? 'Pause' : 'Start',
-            ),
-            const NotificationButton(id: 'reset', text: 'Reset'),
-          ],
-        );
-      }
-    });
+    // timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    // });
   }
 
   @override
-  void onRepeatEvent(DateTime timestamp) {}
+  void onRepeatEvent(DateTime timestamp) {
+    FlutterForegroundTask.sendDataToMain({
+      'elapsed': stopwatch.elapsedMilliseconds,
+    });
+
+    FlutterForegroundTask.updateService(
+      notificationTitle: _formatTime(stopwatch.elapsedMilliseconds),
+      notificationText: 'Stopwatch',
+      notificationButtons: [
+        NotificationButton(
+          id: stopwatch.isRunning ? 'pause' : 'start',
+          text: stopwatch.isRunning ? 'Pause' : 'Start',
+        ),
+        const NotificationButton(id: 'reset', text: 'Reset'),
+      ],
+    );
+  }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     timer?.cancel();
+  }
+
+  void _sendState() {
+    FlutterForegroundTask.sendDataToMain({
+      'elapsed': stopwatch.elapsedMilliseconds,
+      'isRunning': stopwatch.isRunning,
+    });
   }
 
   @override
@@ -70,6 +73,7 @@ class StopwatchTaskHandler extends TaskHandler {
       } else if (action == 'reset') {
         stopwatch.reset();
       }
+      _sendState();
     }
   }
 
@@ -77,12 +81,15 @@ class StopwatchTaskHandler extends TaskHandler {
   void onNotificationButtonPressed(String id) async {
     if (id == 'pause') {
       stopwatch.stop();
+      FlutterForegroundTask.sendDataToMain("stopTimer");
     } else if (id == 'start') {
       stopwatch.start();
+      FlutterForegroundTask.sendDataToMain("startTimer");
     } else if (id == 'reset') {
       stopwatch.reset();
       _stopService();
     }
+    _sendState();
   }
 
   @override
@@ -142,9 +149,11 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
   void _onReceiveTaskData(Object data) {
     if (data is Map<String, dynamic>) {
       final int? elapsed = data['elapsed'] as int?;
+      final bool? isRunning = data['isRunning'] as bool?;
       if (elapsed != null) {
         setState(() {
           _elapsed = elapsed;
+          if (isRunning != null) _isRunning = isRunning;
         });
       }
     } else if (data is String) {
@@ -190,7 +199,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
         allowWakeLock: true,
         allowWifiLock: true,
         autoRunOnBoot: true,
-        eventAction: ForegroundTaskEventAction.nothing(),
+        eventAction: ForegroundTaskEventAction.repeat(1000),
       ),
     );
   }
@@ -246,6 +255,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
 
   void _reset() async {
     _sendAction('reset');
+    await _stopService();
     setState(() {
       _isRunning = false;
       _elapsed = 0;
@@ -265,7 +275,6 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
         duration: Duration(milliseconds: 200),
       );
     }
-    await _stopService();
   }
 
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
@@ -352,7 +361,44 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               spacing: 10,
               children: [
-                AnimatedFAB(isRunning: _isRunning, onPressed: _startPause),
+                GestureDetector(
+                  onTap: _startPause,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(
+                      end: _isRunning ? 28.0 : 50.0, // only end changes
+                    ),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutBack,
+                    builder: (context, borderRadiusValue, child) {
+                      return Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          color: _isRunning
+                              ? colorTheme.surfaceContainerHighest
+                              : colorTheme.primary,
+                          borderRadius: BorderRadius.circular(
+                            borderRadiusValue,
+                          ),
+                        ),
+                        child: child,
+                      );
+                    },
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Center(
+                        child: IconWithWeight(
+                          _isRunning ? Symbols.pause : Symbols.play_arrow,
+                          color: _isRunning
+                              ? colorTheme.primary
+                              : colorTheme.onPrimary,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
                 FloatingActionButton.large(
                   shape: const CircleBorder(),
                   onPressed: _reset,

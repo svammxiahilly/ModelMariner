@@ -167,70 +167,72 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                       bottom: isLast ? 130 : 0,
                       right: 10,
                     ),
-                    child: Dismissible(
-                      key: Key(tzName + index.toString()),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(firstRadius),
-                            topRight: Radius.circular(firstRadius),
-                            bottomLeft: Radius.circular(lastRadius),
-                            bottomRight: Radius.circular(lastRadius),
-                          ),
-                          color: colorTheme.errorContainer,
-                        ),
-                        padding: EdgeInsets.only(right: 20),
-                        child: Icon(
-                          Icons.delete,
-                          color: colorTheme.onErrorContainer,
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(firstRadius),
+                        topRight: Radius.circular(firstRadius),
+                        bottomLeft: Radius.circular(lastRadius),
+                        bottomRight: Radius.circular(lastRadius),
                       ),
 
-                      onDismissed: (direction) {
-                        final removedTz = savedTimezones[index];
-                        box.deleteAt(index);
+                      child: Dismissible(
+                        key: Key(tzName + index.toString()),
+                        direction: DismissDirection.endToStart,
 
-                        bool undoPressed = false;
-
-                        ScaffoldMessenger.of(context).clearSnackBars();
-
-                        final controller = ScaffoldMessenger.of(context)
-                            .showSnackBar(
-                              SnackBar(
-                                content: Text('$removedTz deleted'),
-                                action: SnackBarAction(
-                                  label: 'Undo',
-                                  onPressed: () {
-                                    undoPressed = true;
-                                    // Restore in Hive directly
-                                    box.add(removedTz);
-                                  },
-                                ),
-                                duration: const Duration(seconds: 3),
-                              ),
-                            );
-                      },
-
-                      child: ListTile(
-                        tileColor: colorTheme.surfaceContainerLowest,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(firstRadius),
-                            topRight: Radius.circular(firstRadius),
-                            bottomLeft: Radius.circular(lastRadius),
-                            bottomRight: Radius.circular(lastRadius),
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          decoration: BoxDecoration(
+                            color: colorTheme.errorContainer,
+                          ),
+                          padding: EdgeInsets.only(right: 20),
+                          child: Icon(
+                            Icons.delete,
+                            color: colorTheme.onErrorContainer,
                           ),
                         ),
-                        title: Text(formatCityName(tzName)),
-                        subtitle: Text(formatOffset(offset)),
-                        trailing: Text(
-                          formattedTzTime,
-                          style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width / 11,
-                            fontWeight: FontWeight.w500,
-                            color: colorTheme.secondary,
+
+                        onDismissed: (direction) {
+                          final removedTz = savedTimezones[index];
+                          box.deleteAt(index);
+
+                          bool undoPressed = false;
+
+                          ScaffoldMessenger.of(context).clearSnackBars();
+
+                          final controller = ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                                SnackBar(
+                                  content: Text('$removedTz deleted'),
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () {
+                                      undoPressed = true;
+                                      // Restore in Hive directly
+                                      box.add(removedTz);
+                                    },
+                                  ),
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                        },
+
+                        child: Container(
+                          clipBehavior: Clip.hardEdge,
+                          decoration: BoxDecoration(
+                            color: colorTheme.surfaceContainerLowest,
+                          ),
+                          child: ListTile(
+                            title: Text(formatCityName(tzName)),
+                            subtitle: Text(formatOffset(offset)),
+                            trailing: Text(
+                              formattedTzTime,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width / 11,
+                                fontWeight: FontWeight.w500,
+                                color: colorTheme.secondary,
+                              ),
+                            ),
                           ),
                         ),
                       ),
