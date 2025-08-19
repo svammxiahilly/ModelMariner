@@ -137,7 +137,7 @@ class _ScreenSaverState extends State<ScreenSaver> {
     double brightness =
         PreferencesHelper.getDouble("screensaverBrightness") ?? 0.3;
     return PopScope(
-      // canPop: false,
+      canPop: false,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: GestureDetector(
