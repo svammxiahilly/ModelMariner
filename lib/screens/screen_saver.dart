@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_analog_clock/flutter_analog_clock.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../helpers/preferences_helper.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +18,9 @@ class ScreenSaver extends StatefulWidget {
 }
 
 class _ScreenSaverState extends State<ScreenSaver> {
+  static const MethodChannel _channelBrightness = MethodChannel(
+    'com.pranshulgg.alarm/alarm',
+  );
   final Random _random = Random();
   double? _originalBrightness;
   double _top = 100;
@@ -31,11 +33,11 @@ class _ScreenSaverState extends State<ScreenSaver> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _immersiveActive = true;
       _startScreenSaverLoop();
-      _setDimBrightness();
       _keepImmersive();
     });
     Future.delayed(const Duration(milliseconds: 1000), () {
       _enableWakeLock();
+      _setDimBrightness();
     });
   }
 
@@ -57,19 +59,19 @@ class _ScreenSaverState extends State<ScreenSaver> {
 
   Future<void> _setDimBrightness() async {
     try {
-      _originalBrightness = await ScreenBrightness.instance.system;
+      await _channelBrightness.invokeMethod('setBrightness', {
+        "brightness": 0.0,
+      });
+    } on PlatformException catch (e) {
+      print("Failed to set brightness: ${e.message}");
+    }
+  }
 
-      print(ScreenBrightness.instance.system);
-
-      double brightness =
-          PreferencesHelper.getDouble("screensaverBrightness") ?? 0.3;
-      double scaledBrightness = brightness.round().toDouble();
-
-      await ScreenBrightness.instance.setSystemScreenBrightness(
-        scaledBrightness,
-      );
-    } catch (e) {
-      debugPrint('Failed to set brightness: $e');
+  Future<void> resetBrightness() async {
+    try {
+      await _channelBrightness.invokeMethod('resetBrightness');
+    } on PlatformException catch (e) {
+      print("Failed to reset brightness: ${e.message}");
     }
   }
 
@@ -110,9 +112,7 @@ class _ScreenSaverState extends State<ScreenSaver> {
   void dispose() {
     _immersiveActive = false;
     _timer?.cancel();
-    if (_originalBrightness != null) {
-      ScreenBrightness.instance.setSystemScreenBrightness(_originalBrightness!);
-    }
+    resetBrightness();
     if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
       WakelockPlus.toggle(enable: false);
     }
@@ -134,7 +134,8 @@ class _ScreenSaverState extends State<ScreenSaver> {
         PreferencesHelper.getBool("FullBlackScreenSaver") ?? false;
 
     final clockStyle = PreferencesHelper.getString("ScreenSaverClockStyle");
-
+    double brightness =
+        PreferencesHelper.getDouble("screensaverBrightness") ?? 0.3;
     return PopScope(
       // canPop: false,
       child: Scaffold(
@@ -198,6 +199,11 @@ class _ScreenSaverState extends State<ScreenSaver> {
                           ),
                         ),
                 ),
+              ),
+              Container(
+                color: Colors.black.withValues(alpha: 1.0 - brightness),
+                width: double.infinity,
+                height: double.infinity,
               ),
             ],
           ),

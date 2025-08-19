@@ -7,12 +7,14 @@ import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import java.util.*
 
 class MainActivity: FlutterActivity() {
   private val CHANNEL = "com.pranshulgg.alarm/alarm"
+
 
   private val REQUEST_CODE_POST_NOTIFICATIONS = 1044
 
@@ -31,6 +33,15 @@ class MainActivity: FlutterActivity() {
         }
         "requestNotificationPermission" -> {
           requestNotificationPermission(result)
+        }
+        "setBrightness" -> {
+          val brightness = call.argument<Double>("brightness") ?: 1.0
+          setBrightness(brightness)
+          result.success(null)
+        }
+        "resetBrightness" -> {
+          resetBrightness()
+          result.success(null)
         }
         "scheduleAlarm" -> {
           val id = call.argument<Int>("id")!!
@@ -185,7 +196,16 @@ class MainActivity: FlutterActivity() {
     val intent = Intent(this, AlwaysOnAlarmService::class.java)
     stopService(intent)
   }
+  private fun setBrightness(brightness: Double) {
+    val layoutParams = window.attributes
+    layoutParams.screenBrightness = brightness.toFloat()
+    window.attributes = layoutParams
+}
 
-
+  private fun resetBrightness() {
+    val layoutParams = window.attributes
+    layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+    window.attributes = layoutParams
+  }
 
 }
