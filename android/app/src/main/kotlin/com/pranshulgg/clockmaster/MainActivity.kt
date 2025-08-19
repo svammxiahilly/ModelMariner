@@ -24,8 +24,6 @@ class MainActivity: FlutterActivity() {
     super.onCreate(savedInstanceState)
 
 
-
-
     MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
       when (call.method) {
         "checkNotificationPermission" -> {
@@ -61,6 +59,13 @@ class MainActivity: FlutterActivity() {
           }
           startActivityForResult(intent, 1234)
         }
+        "refreshAlwaysRunning" -> {
+          refreshAlwaysOnService()
+        }
+        "StopAlwaysRunning" -> {
+          stopAlwaysOnService()
+        }
+
         else -> result.notImplemented()
       }
     }
@@ -144,6 +149,8 @@ class MainActivity: FlutterActivity() {
 
     val info = AlarmManager.AlarmClockInfo(triggerAtMillisUtc, showPending)
     am.setAlarmClock(info, pendingAlarm)
+    refreshAlwaysOnService()
+
   }
 
 
@@ -155,5 +162,30 @@ class MainActivity: FlutterActivity() {
     am.cancel(pending)
     val nm = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
     nm.cancel(id)
+    refreshAlwaysOnService()
+
   }
+
+
+  private fun refreshAlwaysOnService() {
+    val prefs = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
+    val alwaysRunService = prefs.getBoolean("flutter.alwaysRunService", false)
+
+    if (alwaysRunService) {
+      val intent = Intent(this, AlwaysOnAlarmService::class.java)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(intent)
+      } else {
+        startService(intent)
+      }
+    }
+  }
+
+  private fun stopAlwaysOnService() {
+    val intent = Intent(this, AlwaysOnAlarmService::class.java)
+    stopService(intent)
+  }
+
+
+
 }

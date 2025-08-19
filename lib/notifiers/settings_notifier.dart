@@ -5,10 +5,12 @@ class UnitSettingsNotifier extends ChangeNotifier {
   // Default values
   String _timeFormat = "12 hr";
   bool _showSeconds = false;
+  String _clockStyleMain = "Digital";
 
   // Getters
   String get timeFormat => _timeFormat;
   bool get showSeconds => _showSeconds;
+  String get clockStyleMain => _clockStyleMain;
 
   UnitSettingsNotifier() {
     _loadAllSettings();
@@ -19,6 +21,8 @@ class UnitSettingsNotifier extends ChangeNotifier {
         await PreferencesHelper.getString("timeFormat") ?? _timeFormat;
     _showSeconds =
         await PreferencesHelper.getBool("showSeconds") ?? _showSeconds;
+    _clockStyleMain =
+        await PreferencesHelper.getString("ClockStyle") ?? _clockStyleMain;
     notifyListeners();
   }
 
@@ -36,6 +40,14 @@ class UnitSettingsNotifier extends ChangeNotifier {
     if (_showSeconds != value) {
       _showSeconds = value;
       PreferencesHelper.setBool("showSeconds", value);
+      notifyListeners();
+    }
+  }
+
+  void updateClockStyleMain(String value) {
+    if (_clockStyleMain != value) {
+      _clockStyleMain = value;
+      PreferencesHelper.setString("ClockStyle", value);
       notifyListeners();
     }
   }

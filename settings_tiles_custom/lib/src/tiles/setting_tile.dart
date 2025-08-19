@@ -29,7 +29,6 @@ abstract class SettingTile extends StatelessWidget {
 
   final bool fullempty;
 
-
   /// The icon of the tile.
   ///
   /// Use the [SettingTileIcon] class to have the icon automatically styled.

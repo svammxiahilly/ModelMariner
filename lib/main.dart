@@ -5,12 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home.dart';
 import 'package:flutter/services.dart';
 import 'helpers/preferences_helper.dart';
-import 'utils/theme_controller.dart';
+import 'controllers/theme_controller.dart';
 import 'package:provider/provider.dart';
 import 'screens/alarm_screen.dart';
 import 'services/alarm_service.dart';
 import 'notifiers/settings_notifier.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,8 @@ void main() async {
   final themeController = ThemeController();
   await themeController.initialize();
   await themeController.checkDynamicColorSupport();
+
+  WakelockPlus.enable();
 
   // FlutterForegroundTask.init(
   //   androidNotificationOptions: AndroidNotificationOptions(

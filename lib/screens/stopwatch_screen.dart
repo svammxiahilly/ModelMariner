@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:material_color_utilities/quantize/quantizer_wu.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
@@ -318,7 +317,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                 key: ValueKey<String>(elapsedStr),
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.width / 3.5,
-                  fontWeight: FontWeight.bold,
+                  fontFamily: "FunFont2",
                 ),
               ),
             ),

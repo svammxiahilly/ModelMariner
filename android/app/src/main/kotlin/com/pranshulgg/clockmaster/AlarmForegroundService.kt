@@ -16,7 +16,7 @@ class AlarmForegroundService : Service() {
 
     companion object {
         const val CHANNEL_ID = "alarm_foreground_channel"
-        const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_ID = 10001
         const val ACTION_STOP = "com.pranshulgg.clockmaster.ACTION_STOP"
 
         const val ACTION_SNOOZE = "com.pranshulgg.clockmaster.ACTION_SNOOZE"

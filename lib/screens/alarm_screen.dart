@@ -40,8 +40,11 @@ class AlarmScreenState extends State<AlarmScreen> {
 
   Future<void> _delete(Alarm alarm) async {
     alarms.removeWhere((a) => a.id == alarm.id);
-    await AlarmService.instance.cancelAlarm(alarm.id);
+
     await AlarmService.instance.saveAlarms(alarms);
+
+    await AlarmService.instance.cancelAlarm(alarm.id);
+
     await load();
   }
 
@@ -135,7 +138,7 @@ class AlarmScreenState extends State<AlarmScreen> {
               ),
             )
           : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(13, 0, 13, 130),
+              padding: const EdgeInsets.fromLTRB(13, 10, 13, 130),
 
               itemCount: alarms.length,
               separatorBuilder: (context, i) => const SizedBox(height: 8),
@@ -177,8 +180,8 @@ class AlarmScreenState extends State<AlarmScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: a.enabled
-                              ? colorTheme.surfaceContainerLow
-                              : colorTheme.surfaceContainerLowest,
+                              ? colorTheme.onPrimary
+                              : colorTheme.surfaceContainerLow,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -195,16 +198,19 @@ class AlarmScreenState extends State<AlarmScreen> {
                                     color: colorTheme.onSurfaceVariant,
                                   ),
                                 ),
-
+                                SizedBox(height: 2),
                                 RichText(
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
                                         text: resultAlarms['time'],
                                         style: TextStyle(
-                                          fontSize: 55,
-                                          fontWeight: FontWeight.w200,
-                                          color: colorTheme.onSurface,
+                                          fontSize: 53,
+                                          fontFamily: "FunFont2",
+                                          color: a.enabled
+                                              ? colorTheme.onSurface
+                                              : colorTheme.onSurfaceVariant,
+                                          height: 1.25,
                                         ),
                                       ),
                                       TextSpan(text: " "),
@@ -215,7 +221,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                                         child: Text(
                                           resultAlarms['ampm'].toString(),
                                           style: TextStyle(
-                                            fontSize: 30,
+                                            fontSize: 26,
                                             fontWeight: FontWeight.w500,
                                             color: colorTheme.onSurfaceVariant,
                                           ),
@@ -227,6 +233,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                                 Text(
                                   a.label,
                                   style: TextStyle(
+                                    height: 1,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: colorTheme.secondary,

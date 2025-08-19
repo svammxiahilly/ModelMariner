@@ -3,7 +3,7 @@ import '../helpers/icon_helper.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import '../widgets/wave_circularprogress.dart';
 import '../models/timer_model.dart';
-import 'dart:async';
+import '../helpers/preferences_helper.dart';
 
 class TimerDetailPage extends StatefulWidget {
   final TimerModel timer;
@@ -26,6 +26,18 @@ class TimerDetailPage extends StatefulWidget {
 }
 
 class _TimerDetailPageState extends State<TimerDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    PreferencesHelper.setBool("isFullScreen", true);
+  }
+
+  @override
+  void dispose() {
+    PreferencesHelper.setBool("isFullScreen", false);
+    super.dispose();
+  }
+
   String _format(int seconds) {
     final h = seconds ~/ 3600;
     final m = (seconds % 3600) ~/ 60;
@@ -99,11 +111,16 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                           return Text(
                             text,
                             style: TextStyle(
+                              fontFamily: "FunFont2",
                               fontSize: fontSize,
                               fontWeight: FontWeight.bold,
                               color: colorTheme.onSurface,
                             ),
                             textAlign: TextAlign.center,
+                            textHeightBehavior: TextHeightBehavior(
+                              applyHeightToFirstAscent: false,
+                              applyHeightToLastDescent: false,
+                            ),
                           );
                         },
                       ),
@@ -220,7 +237,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
       onTap: () {
         widget.onToggle();
         setState(() {
-          _isRunning = !_isRunning; // instant animation
+          _isRunning = !_isRunning;
         });
       },
       child: TweenAnimationBuilder<double>(

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:settings_tiles/settings_tiles.dart';
-import '../utils/theme_controller.dart';
+import '../controllers/theme_controller.dart';
 import 'package:provider/provider.dart';
 import '../helpers/preferences_helper.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import '../helpers/icon_helper.dart';
 import '../notifiers/settings_notifier.dart';
+import 'package:flutter/services.dart';
+import '../services/alarm_service.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,6 +23,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _useCustomTile = PreferencesHelper.getBool("DynamicColors") == true
       ? false
       : true;
+
+  double _volume = 0.5;
+  AudioStream _audioStream = AudioStream.alarm;
+  @override
+  void initState() {
+    super.initState();
+    FlutterVolumeController.setAndroidAudioStream(stream: _audioStream);
+    FlutterVolumeController.updateShowSystemUI(false);
+    _initVolume();
+  }
+
+  Future<void> _initVolume() async {
+    double volume =
+        await FlutterVolumeController.getVolume(stream: _audioStream) ?? 0.5;
+    setState(() => _volume = volume);
+  }
+
+  void _setVolume(double value) {
+    setState(() => _volume = value);
+    FlutterVolumeController.setVolume(value, stream: _audioStream);
+  }
+
+  double _sliderValueFraction =
+      PreferencesHelper.getDouble("screensaverBrightness") ?? 0.3;
+
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
@@ -28,9 +57,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
         PreferencesHelper.getString("timeFormat") ?? "12 hr";
     final currentShowSeconds =
         PreferencesHelper.getBool("showSeconds") ?? false;
-
+    final currentScreenSaverClockStyle =
+        PreferencesHelper.getString("ScreenSaverClockStyle") ?? "Analog";
+    final currentClockStyle =
+        PreferencesHelper.getString("ClockStyle") ?? "Digital";
     final optionsTheme = {"Auto": "Auto", "Dark": "Dark", "Light": "Light"};
     final optionsTimeFormat = {"12 hr": "12 hr", "24 hr": "24 hr"};
+    final optionsScreenSaverClockStyle = {
+      "Analog": "Analog",
+      "Digital": "Digital",
+    };
+
+    final optionsClockStyle = {"Analog": "Analog", "Digital": "Digital"};
+
+    final alwaysRunService =
+        PreferencesHelper.getBool('alwaysRunService') ?? false;
+    final preventScreenSleep =
+        PreferencesHelper.getBool('PreventScreenSleep') ?? false;
+
+    final useFullBlackForScreenSaver =
+        PreferencesHelper.getBool('FullBlackScreenSaver') ?? false;
+
+    const MethodChannel _channel = MethodChannel('com.pranshulgg.alarm/alarm');
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -177,6 +225,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         });
                       },
                     ),
+
+                    SettingSwitchTile(
+                      icon: IconWithWeight(Symbols.lock_clock, fill: 1),
+                      title: Text("Prevent Screen Sleep"),
+                      description: Text(
+                        "Keeps the device awake while the app is running",
+                      ),
+                      toggled: preventScreenSleep,
+                      onChanged: (value) async {
+                        PreferencesHelper.setBool('PreventScreenSleep', value);
+
+                        WakelockPlus.toggle(enable: value);
+
+                        setState(() {});
+                      },
+                    ),
                   ],
                 ),
                 SizedBox(height: 10),
@@ -184,6 +248,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   styleTile: true,
                   title: SettingSectionTitle("Clock", noPadding: true),
                   tiles: [
+                    SettingSingleOptionTile(
+                      icon: IconWithWeight(Symbols.farsight_digital, fill: 1),
+                      title: Text('Clock style'),
+                      value: SettingTileValue(
+                        optionsClockStyle[currentClockStyle]!,
+                      ),
+                      dialogTitle: 'Clock style',
+                      options: optionsClockStyle.values.toList(),
+                      initialOption: optionsClockStyle[currentClockStyle]!,
+                      onSubmitted: (value) {
+                        final selectedKey = optionsClockStyle.entries
+                            .firstWhere((e) => e.value == value)
+                            .key;
+                        context
+                            .read<UnitSettingsNotifier>()
+                            .updateClockStyleMain(selectedKey);
+                        setState(() {});
+                      },
+                    ),
                     SettingSingleOptionTile(
                       icon: IconWithWeight(
                         Symbols.nest_clock_farsight_analog,
@@ -219,6 +302,121 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ],
                 ),
+
+                SizedBox(height: 10),
+                SettingSection(
+                  styleTile: true,
+                  title: SettingSectionTitle("Alarm", noPadding: true),
+                  tiles: [
+                    //                     Slider(
+                    //   value: _volume,
+                    //   min: 0.0,
+                    //   max: 1.0,
+                    //   onChanged: _setVolume,
+                    // ),
+                    SettingSliderTile(
+                      icon: IconWithWeight(Symbols.volume_up, fill: 1),
+                      title: Text("Alarm volume"),
+                      dialogTitle: "Alarm volume",
+                      initialValue: _volume,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      value: SettingTileValue("${(_volume * 100).round()}%"),
+                      label: (value) => "${(value * 100).round()}%",
+                      onSubmitted: (v) {
+                        _setVolume(v);
+                      },
+                    ),
+                    SettingSwitchTile(
+                      icon: IconWithWeight(Symbols.construction, fill: 1),
+                      title: Text("Always run background service"),
+                      description: Text(
+                        "Use this if alarms aren’t working; it may prevent the app from being killed but uses more battery",
+                      ),
+                      toggled: alwaysRunService,
+                      onChanged: (value) async {
+                        PreferencesHelper.setBool('alwaysRunService', value);
+
+                        final count = await AlarmService.instance
+                            .activeAlarmCount();
+
+                        if (value == true && count > 0) {
+                          _channel.invokeMethod('refreshAlwaysRunning');
+                        } else if (value == false) {
+                          _channel.invokeMethod('StopAlwaysRunning');
+                        }
+
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 10),
+                SettingSection(
+                  styleTile: true,
+                  title: SettingSectionTitle("Screen saver", noPadding: true),
+                  tiles: [
+                    SettingSliderTile(
+                      icon: IconWithWeight(Symbols.brightness_7, fill: 1),
+                      title: Text("Screen saver brightness"),
+                      dialogTitle: "Brightness",
+                      initialValue: _sliderValueFraction,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      value: SettingTileValue(
+                        "${(_sliderValueFraction * 100).round()}%",
+                      ),
+                      label: (value) => "${(value * 100).round()}%",
+                      onSubmitted: (v) {
+                        setState(() {
+                          _sliderValueFraction = v;
+                        });
+                        PreferencesHelper.setDouble('screensaverBrightness', v);
+                      },
+                    ),
+                    SettingSwitchTile(
+                      icon: IconWithWeight(Symbols.backlight_high_off, fill: 1),
+                      title: Text("Night mode"),
+                      description: Text(
+                        "Uses a full black scheme for dark rooms",
+                      ),
+                      toggled: useFullBlackForScreenSaver,
+                      onChanged: (value) async {
+                        PreferencesHelper.setBool(
+                          "FullBlackScreenSaver",
+                          value,
+                        );
+                        setState(() {});
+                      },
+                    ),
+                    SettingSingleOptionTile(
+                      icon: IconWithWeight(Symbols.farsight_digital, fill: 1),
+                      title: Text('Clock style'),
+                      value: SettingTileValue(
+                        optionsScreenSaverClockStyle[currentScreenSaverClockStyle]!,
+                      ),
+                      dialogTitle: 'Clock style',
+                      options: optionsScreenSaverClockStyle.values.toList(),
+                      initialOption:
+                          optionsScreenSaverClockStyle[currentScreenSaverClockStyle]!,
+                      onSubmitted: (value) {
+                        final selectedKey = optionsScreenSaverClockStyle.entries
+                            .firstWhere((e) => e.value == value)
+                            .key;
+                        PreferencesHelper.setString(
+                          'ScreenSaverClockStyle',
+                          selectedKey,
+                        );
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 30),
               ],
             ),
           ),

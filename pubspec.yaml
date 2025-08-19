@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0-beta.1+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.8.1
@@ -53,9 +53,15 @@ dependencies:
   uuid: ^4.5.1
   flutter_ringtone_player: ^4.0.0+4
   just_audio: ^0.10.4
+  screen_brightness: ^2.1.6
+  wakelock_plus: ^1.3.2
+  flutter_volume_controller: ^1.3.3
 
   settings_tiles:
     path: ./settings_tiles_custom
+
+  flutter_analog_clock:
+    path: ./flutter_analog_clock_custom
 
 dev_dependencies:
   flutter_test:
@@ -89,7 +95,10 @@ flutter:
       fonts:
         - asset: assets/fonts/fun_font_1.ttf
           weight: 400
-
+    - family: FunFont2
+      fonts:
+        - asset: assets/fonts/fun_font_2.ttf
+          weight: 400
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -6,7 +6,6 @@ import 'alarm_screen.dart';
 import 'stopwatch_screen.dart';
 import 'timer_screen.dart';
 import 'world_clock_screen.dart';
-import '../utils/snack_util.dart';
 import 'settings.dart';
 import 'timezone_search_page.dart';
 import 'package:hive/hive.dart';
@@ -18,8 +17,10 @@ import '../notifiers/settings_notifier.dart';
 import 'package:provider/provider.dart';
 import '../services/notificationservice_native.dart';
 import 'package:settings_tiles/settings_tiles.dart';
-import '../helpers/preferences_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../screens/screen_saver.dart';
+import '../helpers/preferences_helper.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class BatteryOptimizationHelper {
   static Future<bool> isIgnoringBatteryOptimizations() async {
@@ -72,6 +73,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       if (!isIgnoring || !grantedNoti) {
         _showRequiredActionSheet(context);
+      }
+
+      if (PreferencesHelper.getBool('PreventScreenSleep') == true) {
+        WakelockPlus.toggle(enable: true);
       }
     });
   }
@@ -141,6 +146,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 );
+              } else if (value == "openScreenSaver") {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const ScreenSaver()));
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -149,6 +158,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 padding: EdgeInsets.only(left: 14),
                 child: Text(
                   'Settings',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'openScreenSaver',
+                padding: EdgeInsets.only(left: 14),
+                child: Text(
+                  'Screen saver',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ),

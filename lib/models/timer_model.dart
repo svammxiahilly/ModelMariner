@@ -8,7 +8,6 @@ class TimerModel {
   int currentDuration;
   int? lastStartEpochMs;
 
-  // Add this
   final ValueNotifier<int> remainingNotifier;
 
   TimerModel({

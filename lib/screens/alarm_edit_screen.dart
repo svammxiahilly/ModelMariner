@@ -70,9 +70,10 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.7,
-      ),
+      // constraints: BoxConstraints(
+      //   minHeight: MediaQuery.of(context).size.height * 0.7,
+      // ),
+      height: MediaQuery.of(context).size.height * 0.7,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -190,7 +191,6 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
           ),
 
           SizedBox(height: 20),
-
           Expanded(
             child: SingleChildScrollView(
               child: SettingSection(
@@ -199,6 +199,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                   SettingTextFieldTile(
                     title: Text("Label"),
                     dialogTitle: "Label",
+
                     onSubmitted: (value) {
                       setState(() {
                         labelController.text = value;
@@ -222,6 +223,8 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
               ),
             ),
           ),
+
+          SizedBox(height: 16),
 
           FilledButton.icon(
             onPressed: () {

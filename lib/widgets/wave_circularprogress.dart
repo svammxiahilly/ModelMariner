@@ -31,8 +31,8 @@ class CircularWavePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    const amplitude = 5.0;
-    const frequency = 12.0;
+    final amplitude = progress < 0.02 ? 0 : 5.0;
+    final frequency = progress < 0.02 ? 0 : 12.0;
 
     final sweepAngle = 2 * pi;
     final gapAngle = progress < 0.02 ? 0 : 0.045;

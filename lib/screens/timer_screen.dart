@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:clockmaster/helpers/icon_helper.dart';
+import 'package:clockmaster/helpers/preferences_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,6 +89,7 @@ class MyTaskHandler extends TaskHandler {
           int newRemaining = m['remainingSeconds'] - elapsedSec;
           if (newRemaining <= 0) {
             if (m['isRunning'] == true) {
+              LoopingRingtone().stop();
               LoopingRingtone().play(intervalSeconds: 3);
               FlutterForegroundTask.updateService(
                 notificationTitle: 'Timer Finished',
@@ -322,6 +324,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     _startUITimer();
     _initForegroundTaskAndLoad();
+    PreferencesHelper.setBool("isFullScreen", false);
   }
 
   @override
@@ -335,22 +338,33 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   void _startUITimer() {
     _uiTimer?.cancel();
-    _uiTimer = Timer.periodic(Duration(seconds: 1), (_) {
-      final now = DateTime.now().millisecondsSinceEpoch;
 
-      for (var t in timers) {
-        if (t.isRunning && t.lastStartEpochMs != null) {
-          final elapsed = ((now - t.lastStartEpochMs!) / 1000).floor();
-          if (elapsed > 0) {
-            t.remainingSeconds = (t.remainingSeconds - elapsed).clamp(
-              0,
-              99999999,
-            );
-            t.lastStartEpochMs = now;
-          }
+    void scheduleNextTick() {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final msToNextSecond = 1000 - (now % 1000);
+
+      _uiTimer = Timer(Duration(milliseconds: msToNextSecond), () {
+        _onTick();
+        if (mounted) scheduleNextTick();
+      });
+    }
+
+    scheduleNextTick();
+  }
+
+  void _onTick() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    for (var t in timers) {
+      if (t.isRunning && t.lastStartEpochMs != null) {
+        final elapsed = ((now - t.lastStartEpochMs!) / 1000).floor();
+        final newRemaining = (t.initialSeconds - elapsed).clamp(0, 99999999);
+
+        if (newRemaining != t.remainingSeconds) {
+          t.remainingSeconds = newRemaining;
         }
       }
-    });
+    }
   }
 
   void _onReceiveTaskData(Object data) async {
@@ -367,6 +381,18 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           timers[idx] = updated;
         } else {
           timers.add(updated);
+        }
+      }
+
+      if (data['type'] == 'notified_btn_pressed') {
+        final id = data['id'];
+        if (id == 'btn_reset') {
+          if (mounted) {
+            if (PreferencesHelper.getBool("isFullScreen") == true) {
+              Navigator.pop(context);
+              print(PreferencesHelper.getBool("isFullScreen"));
+            }
+          }
         }
       }
 
@@ -396,20 +422,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
       if (mounted) setState(() {});
     }
-  }
-
-  Future<void> _loadTimersFromPrefsOnly() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(prefKey);
-    if (jsonString == null) {
-      timers = [];
-    } else {
-      final List data = jsonDecode(jsonString);
-      timers = data
-          .map((e) => TimerModel.fromMap(Map<String, dynamic>.from(e)))
-          .toList();
-    }
-    if (mounted) setState(() {});
   }
 
   Future<void> _initForegroundTaskAndLoad() async {
@@ -501,46 +513,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     await prefs.setString(prefKey, jsonEncode(data));
   }
 
-  Future<void> _updateNotification() async {
-    final runningCount = timers.where((t) => t.isRunning).length;
-
-    if (runningCount < 1) {
-      return;
-    }
-
-    List<NotificationButton> buttons;
-    if (runningCount > 1) {
-      buttons = [NotificationButton(id: 'btn_reset_all', text: 'Reset All')];
-    } else {
-      buttons = [
-        NotificationButton(
-          id: 'btn_start_stop',
-          text: timers.any((t) => t.isRunning) ? 'Pause' : 'Start',
-        ),
-        NotificationButton(id: 'btn_reset', text: 'Reset'),
-        NotificationButton(id: 'btn_add_minute', text: '+1:00'),
-      ];
-    }
-
-    String title = 'Timers';
-    String text;
-    if (runningCount > 1) {
-      text = 'Running $runningCount timers';
-    } else if (runningCount == 1) {
-      final t = timers.firstWhere((t) => t.isRunning);
-      text = 'Running';
-      title = _format(t.remainingSeconds);
-    } else {
-      text = 'Paused';
-    }
-
-    await FlutterForegroundTask.updateService(
-      notificationTitle: title,
-      notificationText: text,
-      notificationButtons: buttons,
-    );
-  }
-
   Future<void> _startServiceIfNotRunning() async {
     if (await FlutterForegroundTask.isRunningService) {
       await FlutterForegroundTask.updateService(
@@ -549,19 +521,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       );
       return;
     }
-
-    final notificationButtons = [
-      const NotificationButton(
-        id: MyTaskHandler.BTN_START_STOP,
-        text: 'Start/Stop',
-      ),
-      const NotificationButton(id: MyTaskHandler.BTN_RESET, text: 'Reset'),
-      const NotificationButton(id: MyTaskHandler.BTN_ADD_MIN, text: '+1:00'),
-      const NotificationButton(
-        id: MyTaskHandler.BTN_RESET_ALL,
-        text: 'Reset All',
-      ),
-    ];
 
     await FlutterForegroundTask.startService(
       serviceId: 150,
@@ -710,6 +669,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final colorTheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
+      showDragHandle: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -718,13 +678,8 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           builder: (ctx2, setSt) {
             final total = hours * 3600 + minutes * 60 + seconds;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                16,
-                16,
-                MediaQuery.of(context).padding.bottom + 20,
-              ),
+            return Container(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -732,15 +687,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                   // 'Add Timer — ${hours}h ${minutes}m ${seconds}s',
                   // style: const TextStyle(fontSize: 18),
                   // ),
-                  Container(
-                    width: 32,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colorTheme.onSurfaceVariant,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 8,
@@ -804,6 +750,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
                   Divider(),
                   const SizedBox(height: 12),
                   Row(
@@ -819,6 +766,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           min: 0,
                           max: 23,
                           divisions: 23,
+
                           value: hours.toDouble(),
                           year2023: false,
                           onChanged: (v) => setSt(() => hours = v.toInt()),
@@ -840,6 +788,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           max: 59,
                           divisions: 59,
                           value: minutes.toDouble(),
+
                           year2023: false,
                           onChanged: (v) => setSt(() => minutes = v.toInt()),
                         ),
@@ -902,6 +851,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       ),
                     ],
                   ),
+                  SizedBox(height: MediaQuery.of(ctx2).padding.bottom + 10),
                 ],
               ),
             );
@@ -999,7 +949,11 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                 style: TextStyle(
                                                   fontSize: 45,
                                                   fontWeight: FontWeight.w600,
-                                                  color: colorTheme.onSurface,
+                                                  fontFamily: "FunFont2",
+                                                  color: t.isRunning
+                                                      ? colorTheme.onSurface
+                                                      : colorTheme
+                                                            .onSurfaceVariant,
                                                 ),
                                               ),
                                               Row(
@@ -1019,7 +973,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 5),
                                           LinearProgressIndicator(
                                             value: progress,
                                             year2023: false,

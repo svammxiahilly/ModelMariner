@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../models/alarm_data_model.dart';
-import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
 
 class AlarmService {
@@ -21,9 +20,7 @@ class AlarmService {
 
   Future<void> init() async {
     tzdata.initializeTimeZones();
-    const android = AndroidInitializationSettings(
-      'baseline_timer_24',
-    ); // must be added in drawable
+    const android = AndroidInitializationSettings('baseline_timer_24');
     const ios = DarwinInitializationSettings();
     const settings = InitializationSettings(android: android, iOS: ios);
     await flutterLocalNotificationsPlugin.initialize(
@@ -42,6 +39,7 @@ class AlarmService {
     final sp = await SharedPreferences.getInstance();
     final encoded = alarms.map((a) => a.toJson()).toList();
     await sp.setStringList(_prefKey, encoded);
+    await sp.setString('${_prefKey}_json', jsonEncode(encoded));
   }
 
   Future<void> scheduleAlarm(Alarm alarm) async {
@@ -65,9 +63,7 @@ class AlarmService {
   Future<void> cancelAlarm(int id) async {
     try {
       await _channel.invokeMethod('cancelAlarm', {'id': id});
-    } on PlatformException {
-      // fallback: cancel local notification
-    }
+    } on PlatformException {}
   }
 
   Future<void> saveAndSchedule(Alarm alarm) async {
@@ -87,5 +83,10 @@ class AlarmService {
     } else {
       await cancelAlarm(alarm.id);
     }
+  }
+
+  Future<int> activeAlarmCount() async {
+    final alarms = await loadAlarms();
+    return alarms.where((alarm) => alarm.enabled).length;
   }
 }
