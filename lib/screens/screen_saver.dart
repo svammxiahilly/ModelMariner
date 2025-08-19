@@ -130,7 +130,7 @@ class _ScreenSaverState extends State<ScreenSaver> {
         body: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: (_) {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(true);
           },
           child: Stack(
             children: [
