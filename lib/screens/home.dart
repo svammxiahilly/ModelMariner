@@ -100,6 +100,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
+  static const MethodChannel _channelBrightness = MethodChannel(
+    'com.pranshulgg.alarm/alarm',
+  );
+
+  Future<void> resetBrightness() async {
+    try {
+      await _channelBrightness.invokeMethod('resetBrightness');
+    } on PlatformException catch (e) {
+      print("Failed to reset brightness: ${e.message}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
@@ -141,15 +153,40 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               borderRadius: BorderRadius.circular(13),
             ),
             clipBehavior: Clip.hardEdge,
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == "openSettings") {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 );
               } else if (value == "openScreenSaver") {
-                Navigator.of(
+                final result = await Navigator.of(
                   context,
                 ).push(MaterialPageRoute(builder: (_) => const ScreenSaver()));
+                if (result == true) {
+                  resetBrightness();
+                  if (PreferencesHelper.getBool('PreventScreenSleep') ==
+                      false) {
+                    WakelockPlus.toggle(enable: false);
+                  }
+                  SystemChrome.setSystemUIOverlayStyle(
+                    SystemUiOverlayStyle(
+                      statusBarColor: Color(0x01000000),
+                      statusBarIconBrightness: isLight
+                          ? Brightness.dark
+                          : Brightness.light,
+                      systemNavigationBarIconBrightness: isLight
+                          ? Brightness.dark
+                          : Brightness.light,
+                      systemNavigationBarColor:
+                          MediaQuery.of(context).systemGestureInsets.left > 0
+                          ? Color(0x01000000)
+                          : isLight
+                          ? Color(0x01000000)
+                          : Color.fromRGBO(0, 0, 0, 0.3),
+                    ),
+                  );
+                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                }
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[

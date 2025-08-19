@@ -67,14 +67,6 @@ class _ScreenSaverState extends State<ScreenSaver> {
     }
   }
 
-  Future<void> resetBrightness() async {
-    try {
-      await _channelBrightness.invokeMethod('resetBrightness');
-    } on PlatformException catch (e) {
-      print("Failed to reset brightness: ${e.message}");
-    }
-  }
-
   Timer? _timer;
 
   void _startScreenSaverLoop() {
@@ -112,11 +104,6 @@ class _ScreenSaverState extends State<ScreenSaver> {
   void dispose() {
     _immersiveActive = false;
     _timer?.cancel();
-    resetBrightness();
-    if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
-      WakelockPlus.toggle(enable: false);
-    }
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
