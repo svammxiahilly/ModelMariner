@@ -208,4 +208,5 @@ class MainActivity: FlutterActivity() {
     window.attributes = layoutParams
   }
 
+
 }

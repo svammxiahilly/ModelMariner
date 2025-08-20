@@ -21,7 +21,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../screens/screen_saver.dart';
 import '../helpers/preferences_helper.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'dart:developer';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class BatteryOptimizationHelper {
   static Future<bool> isIgnoringBatteryOptimizations() async {
@@ -114,55 +114,80 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final colorTheme = Theme.of(context).colorScheme;
+  Future<bool> _isAndroid9OrAbove() async {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    final isAndroid9OrAbove = androidInfo.version.sdkInt >= 28;
+    return isAndroid9OrAbove;
+  }
 
+  Future<void> _setupSystemUI() async {
     if (!loaded) {
+      final isAndroid9OrAbove = await _isAndroid9OrAbove();
       SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(
-          statusBarColor: Color(0x01000000),
-          statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
-          systemNavigationBarIconBrightness: isLight
+          statusBarColor: const Color(0x01000000),
+          statusBarIconBrightness:
+              Theme.of(context).brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
+          systemNavigationBarIconBrightness:
+              Theme.of(context).brightness == Brightness.light
               ? Brightness.dark
               : Brightness.light,
           systemNavigationBarColor:
               MediaQuery.of(context).systemGestureInsets.left > 0
-              ? Color(0x01000000)
-              : Color(0x01000000),
+              ? const Color(0x01000000)
+              : isAndroid9OrAbove
+              ? const Color(0x01000000)
+              : Theme.of(context).scaffoldBackgroundColor,
         ),
       );
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       loaded = true;
     }
+  }
 
-    void revertSettings() {
-      Future.delayed(const Duration(seconds: 1), () {
-        resetBrightness();
-        if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
-          WakelockPlus.toggle(enable: false);
-        }
-        SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(
-            statusBarColor: Color(0x01000000),
-            statusBarIconBrightness:
-                Theme.of(context).brightness == Brightness.light
-                ? Brightness.dark
-                : Brightness.light,
-            systemNavigationBarIconBrightness:
-                Theme.of(context).brightness == Brightness.light
-                ? Brightness.dark
-                : Brightness.light,
-            systemNavigationBarColor:
-                MediaQuery.of(context).systemGestureInsets.left > 0
-                ? Color(0x01000000)
-                : Color(0x01000000),
-          ),
-        );
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      });
-    }
+  void revertSettings() async {
+    final isAndroid9OrAbove = await _isAndroid9OrAbove();
+
+    Future.delayed(const Duration(seconds: 1), () {
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
+
+      resetBrightness();
+      if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
+        WakelockPlus.toggle(enable: false);
+      }
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Color(0x01000000),
+          statusBarIconBrightness:
+              Theme.of(context).brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
+          systemNavigationBarIconBrightness:
+              Theme.of(context).brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
+          systemNavigationBarColor:
+              MediaQuery.of(context).systemGestureInsets.left > 0
+              ? Color(0x01000000)
+              : isAndroid9OrAbove
+              ? Color(0x01000000)
+              : Theme.of(context).scaffoldBackgroundColor,
+        ),
+      );
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorTheme = Theme.of(context).colorScheme;
+
+    _setupSystemUI();
 
     return Scaffold(
       appBar: AppBar(
@@ -334,6 +359,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
+
         onDestinationSelected: _onItemTapped,
         labelTextStyle: WidgetStateProperty.all(
           TextStyle(fontWeight: FontWeight.w500),
