@@ -45,6 +45,8 @@ class AlarmService {
   Future<void> scheduleAlarm(Alarm alarm) async {
     final dt = alarm.nextTriggerDateTime().toUtc().millisecondsSinceEpoch;
 
+    final sortedDays = List<int>.from(alarm.repeatDays)..sort();
+
     try {
       await _channel.invokeMethod('scheduleAlarm', {
         'id': alarm.id,
@@ -55,7 +57,7 @@ class AlarmService {
         'recurring': alarm.repeatDays.isNotEmpty,
         'hour': alarm.hour,
         'minute': alarm.minute,
-        'repeatDays': alarm.repeatDays,
+        'repeatDays': sortedDays,
       });
     } on PlatformException {}
   }

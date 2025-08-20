@@ -549,12 +549,27 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   bool startAfterAdding = false;
 
-  Future<void> _addTimerFromDuration(int seconds) async {
+  String formatDefaultLabel(int totalSeconds) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    final parts = <String>[];
+    if (hours > 0) parts.add('${hours}h');
+    if (minutes > 0) parts.add('${minutes}m');
+    if (seconds > 0 || parts.isEmpty) parts.add('${seconds}s');
+
+    return parts.join(' ');
+  }
+
+  Future<void> _addTimerFromDuration(int seconds, {String? labelTimer}) async {
     final id = const Uuid().v4();
     final label = 'Timer ${timers.length + 1}';
+    final formattedLabel = formatDefaultLabel(seconds);
     final model = TimerModel(
       id: id,
       label: label,
+      uiLabel: labelTimer ?? "$formattedLabel timer",
       remainingSeconds: seconds,
       initialSeconds: seconds,
       isRunning: false,
@@ -662,6 +677,42 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     } else {
       return '${m.toString()}:${s.toString().padLeft(2, '0')}';
     }
+  }
+
+  void _showEditLabelDialog(TimerModel t) {
+    final controller = TextEditingController(text: t.uiLabel);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit Timer Label'),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: 'Enter label'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              t.uiLabel = controller.text.trim();
+              await _persistTimers();
+              setState(() {});
+              Navigator.pop(ctx);
+            },
+            child: Text(
+              'Save',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void showAddBottomSheet() {
@@ -899,163 +950,228 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                         itemBuilder: (ctx, i) {
                           final t = timers[i];
 
-                          return ValueListenableBuilder<int>(
-                            valueListenable: t.remainingNotifier,
-                            builder: (context, remaining, _) {
-                              final progress = t.currentDuration > 0
-                                  ? 1 - (t.remainingSeconds / t.currentDuration)
-                                  : 0.0;
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(18),
 
-                              final tileColor = remaining == 0
-                                  ? colorTheme.primaryContainer
-                                  : colorTheme.surfaceContainerLow;
-
-                              final finished = remaining == 0;
-
-                              final isLast = i == timers.length - 1;
-
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: isLast ? 130 : 8,
+                            child: Dismissible(
+                              key: ValueKey(t.id),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                alignment: Alignment.centerRight,
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: colorTheme.errorContainer,
                                 ),
-                                child: OpenContainer(
-                                  closedElevation: 0,
-                                  closedColor: tileColor,
-                                  transitionDuration: Duration(
-                                    milliseconds: 500,
-                                  ),
-                                  transitionType:
-                                      ContainerTransitionType.fadeThrough,
-                                  openColor: colorTheme.surface,
-                                  closedShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  closedBuilder: (context, openContainer) {
-                                    return Container(
-                                      padding: const EdgeInsets.only(
-                                        top: 5,
-                                        bottom: 10,
-                                        right: 12,
-                                        left: 12,
+                                child: Icon(
+                                  Icons.delete,
+                                  color: colorTheme.onErrorContainer,
+                                ),
+                              ),
+                              onDismissed: (_) {
+                                _deleteTimer(t);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Timer deleted')),
+                                );
+                              },
+                              child: ValueListenableBuilder<int>(
+                                valueListenable: t.remainingNotifier,
+                                builder: (context, remaining, _) {
+                                  final progress = t.currentDuration > 0
+                                      ? 1 -
+                                            (t.remainingSeconds /
+                                                t.currentDuration)
+                                      : 0.0;
+
+                                  final tileColor = remaining == 0
+                                      ? colorTheme.primaryContainer
+                                      : colorTheme.surfaceContainerLow;
+
+                                  final finished = remaining == 0;
+
+                                  final isLast = i == timers.length - 1;
+
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      // bottom: isLast ? 130 : 8,
+                                      // bottom: 8,
+                                    ),
+                                    child: OpenContainer(
+                                      closedElevation: 0,
+                                      closedColor: tileColor,
+                                      transitionDuration: Duration(
+                                        milliseconds: 500,
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                      transitionType:
+                                          ContainerTransitionType.fadeThrough,
+                                      openColor: colorTheme.surface,
+                                      closedShape: RoundedRectangleBorder(
+                                        // borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      closedBuilder: (context, openContainer) {
+                                        return Container(
+                                          padding: const EdgeInsets.only(
+                                            top: 5,
+                                            bottom: 10,
+                                            right: 12,
+                                            left: 12,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                _format(remaining),
-                                                style: TextStyle(
-                                                  fontSize: 45,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontFamily: "FunFont2",
-                                                  color: t.isRunning
-                                                      ? colorTheme.onSurface
-                                                      : colorTheme
-                                                            .onSurfaceVariant,
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 0,
+                                                  top: 10,
+                                                ),
+                                                child: Text(
+                                                  t.uiLabel.isNotEmpty
+                                                      ? t.uiLabel
+                                                      : 'Timer label',
+                                                  style: TextStyle(
+                                                    height: 1,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: colorTheme.secondary,
+                                                  ),
                                                 ),
                                               ),
                                               Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+
                                                 children: [
-                                                  SizedBox(
-                                                    width: 42,
-                                                    height: 42,
-                                                    child: IconButton(
-                                                      onPressed: () =>
-                                                          _deleteTimer(t),
-                                                      icon: IconWithWeight(
-                                                        Symbols.close,
-                                                      ),
+                                                  Text(
+                                                    _format(remaining),
+                                                    style: TextStyle(
+                                                      fontSize: 45,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily: "FunFont2",
+                                                      color: t.isRunning
+                                                          ? colorTheme.onSurface
+                                                          : colorTheme
+                                                                .onSurfaceVariant,
                                                     ),
+                                                  ),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 38,
+                                                        height: 38,
+                                                        child: IconButton(
+                                                          onPressed: () =>
+                                                              _showEditLabelDialog(
+                                                                t,
+                                                              ),
+                                                          icon: IconWithWeight(
+                                                            Symbols.edit,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ],
                                               ),
-                                            ],
-                                          ),
-                                          LinearProgressIndicator(
-                                            value: progress,
-                                            year2023: false,
-                                          ),
-                                          const SizedBox(height: 10),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              FilledButton.tonal(
-                                                style: ButtonStyle(
-                                                  backgroundColor:
-                                                      WidgetStateProperty.all(
-                                                        finished
-                                                            ? colorTheme.surface
-                                                            : null,
-                                                      ),
-                                                ),
-                                                onPressed: () =>
-                                                    _addOneMinute(t),
-
-                                                child: const Text("+1 Min"),
+                                              LinearProgressIndicator(
+                                                value: progress,
+                                                year2023: false,
                                               ),
+                                              const SizedBox(height: 4),
                                               Row(
-                                                spacing: 5,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
-                                                  SizedBox(
-                                                    width: 42,
-                                                    height: 42,
-                                                    child: IconButton.filled(
-                                                      tooltip: t.isRunning
-                                                          ? 'Stop'
-                                                          : 'Start',
-                                                      onPressed: () =>
-                                                          _toggleStartStop(t),
-                                                      icon: Icon(
-                                                        t.isRunning
-                                                            ? Icons.pause
-                                                            : Icons.play_arrow,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 42,
-                                                    height: 42,
-                                                    child: IconButton.filledTonal(
-                                                      style: ButtonStyle(
-                                                        backgroundColor:
-                                                            WidgetStateProperty.all(
+                                                  FilledButton.tonal(
+                                                    style:
+                                                        FilledButton.styleFrom(
+                                                          minimumSize: Size(
+                                                            46,
+                                                            35,
+                                                          ),
+                                                          backgroundColor:
                                                               finished
-                                                                  ? colorTheme
-                                                                        .surface
-                                                                  : null,
-                                                            ),
+                                                              ? colorTheme
+                                                                    .surface
+                                                              : null,
+                                                        ),
+                                                    onPressed: () =>
+                                                        _addOneMinute(t),
+
+                                                    child: const Text("+1 Min"),
+                                                  ),
+
+                                                  Row(
+                                                    spacing: 5,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 42,
+                                                        height: 35,
+                                                        child: IconButton.filled(
+                                                          tooltip: t.isRunning
+                                                              ? 'Stop'
+                                                              : 'Start',
+                                                          onPressed: () =>
+                                                              _toggleStartStop(
+                                                                t,
+                                                              ),
+                                                          icon: Icon(
+                                                            t.isRunning
+                                                                ? Icons.pause
+                                                                : Icons
+                                                                      .play_arrow,
+                                                            size: 18,
+                                                          ),
+                                                        ),
                                                       ),
-                                                      tooltip: 'Reset',
-                                                      onPressed: () =>
-                                                          _resetTimer(t),
-                                                      icon: const Icon(
-                                                        Icons.refresh,
+                                                      SizedBox(
+                                                        width: 42,
+                                                        height: 35,
+                                                        child: IconButton.filledTonal(
+                                                          style: ButtonStyle(
+                                                            backgroundColor:
+                                                                WidgetStateProperty.all(
+                                                                  finished
+                                                                      ? colorTheme
+                                                                            .surface
+                                                                      : null,
+                                                                ),
+                                                          ),
+                                                          tooltip: 'Reset',
+                                                          onPressed: () =>
+                                                              _resetTimer(t),
+                                                          icon: const Icon(
+                                                            Icons.refresh,
+                                                            size: 18,
+                                                          ),
+                                                        ),
                                                       ),
-                                                    ),
+                                                    ],
                                                   ),
                                                 ],
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  openBuilder: (context, _) {
-                                    return TimerDetailPage(
-                                      timer: t,
-                                      onToggle: () => _toggleStartStop(t),
-                                      onReset: () => _resetTimer(t),
-                                      onAddMinute: () => _addOneMinute(t),
-                                      onDelete: () => _deleteTimer(t),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
+                                        );
+                                      },
+                                      openBuilder: (context, _) {
+                                        return TimerDetailPage(
+                                          timer: t,
+                                          onToggle: () => _toggleStartStop(t),
+                                          onReset: () => _resetTimer(t),
+                                          onAddMinute: () => _addOneMinute(t),
+                                          onDelete: () => _deleteTimer(t),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           );
                         },
                       ),

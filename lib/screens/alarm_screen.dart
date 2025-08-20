@@ -139,7 +139,7 @@ class AlarmScreenState extends State<AlarmScreen> {
               ),
             )
           : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(13, 10, 13, 130),
+              padding: const EdgeInsets.fromLTRB(13, 0, 13, 130),
 
               itemCount: alarms.length,
               separatorBuilder: (context, i) => const SizedBox(height: 8),

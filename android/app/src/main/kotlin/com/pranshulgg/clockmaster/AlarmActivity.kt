@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.os.VibrationEffect
@@ -91,11 +92,13 @@ class AlarmActivity : ComponentActivity() {
         findViewById<Button>(R.id.btn_dismiss).setOnClickListener {
             stopAlarm()
             finish()
+            refreshAlwaysOnService()
         }
         findViewById<Button>(R.id.btn_snooze).setOnClickListener {
             stopAlarm()
-            scheduleSnooze(alarmId, 1, label)
+            scheduleSnooze(alarmId, 5, label)
             finish()
+            refreshAlwaysOnService()
         }
 
         // Play custom sound
@@ -166,4 +169,19 @@ class AlarmActivity : ComponentActivity() {
         super.onDestroy()
         stopAlarm()
     }
+
+    private fun refreshAlwaysOnService() {
+        val prefs = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
+        val alwaysRunService = prefs.getBoolean("flutter.alwaysRunService", false)
+
+        if (alwaysRunService) {
+            val intent = Intent(this, AlwaysOnAlarmService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        }
+    }
+
 }

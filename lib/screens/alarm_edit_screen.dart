@@ -160,6 +160,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
               final lastRadius = isLast ? 18.0 : 5.0;
 
               final selected = repeatDays.contains(dayNum);
+
               return SizedBox(
                 width: 40,
                 height: 40,
@@ -263,6 +264,8 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: () {
+                    final sortedDays = List<int>.from(repeatDays)..sort();
+
                     final id =
                         widget.alarm?.id ??
                         DateTime.now().millisecondsSinceEpoch;
@@ -274,11 +277,12 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                           ? 'Alarm'
                           : labelController.text,
                       enabled: true,
-                      repeatDays: repeatDays,
+                      repeatDays: sortedDays,
                       vibrate: vibrate,
                       sound: sound,
                     );
-                    DateTime alarmTime = getNextAlarmTime(time, repeatDays);
+
+                    DateTime alarmTime = getNextAlarmTime(time, sortedDays);
                     Duration diff = alarmTime.difference(DateTime.now());
 
                     int totalMinutes = diff.inMinutes;

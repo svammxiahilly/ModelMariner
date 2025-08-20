@@ -9,22 +9,31 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import java.util.Calendar
 
 class AlarmReceiver : BroadcastReceiver() {
 
     companion object {
-        private const val CHANNEL_ID = "alarm_channel"
+        private const val TAG = "AlarmReceiver"
+        private const val CHANNEL_ID_LOCKED = "alarm_channel_locked"
+        private const val CHANNEL_ID_DEFAULT = "alarm_channel"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val id = intent.getIntExtra("id", 0)
+        val idLong = intent.getLongExtra("id", 0L)
+        val requestCode = (idLong and 0x7FFFFFFFL).toInt()
+
         val label = intent.getStringExtra("label") ?: "Alarm"
         val vibrate = intent.getBooleanExtra("vibrate", false)
         val sound = intent.getStringExtra("sound")
         val hour = intent.getIntExtra("hour", 7)
         val minute = intent.getIntExtra("minute", 0)
-        val daysOfWeekFlutter = intent.getIntegerArrayListExtra("daysOfWeek") ?: arrayListOf()
+
+        val daysOfWeekFlutter = intent.getIntegerArrayListExtra("daysOfWeek")
+            ?: intent.getIntegerArrayListExtra("repeatDays")
+            ?: arrayListOf()
+
         val recurring = intent.getBooleanExtra("recurring", false)
 
         val daysOfWeek = daysOfWeekFlutter.map {
@@ -40,16 +49,16 @@ class AlarmReceiver : BroadcastReceiver() {
             }
         }
 
-
+        // Log received data for debugging
+        Log.d(TAG, "onReceive: idLong=$idLong requestCode=$requestCode label=$label hour=$hour minute=$minute recurring=$recurring days=$daysOfWeek")
 
         val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
         val isLocked = keyguardManager.isKeyguardLocked
 
         if (isLocked) {
-
             val alarmIntent = Intent(context, AlarmActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("id", id)
+                putExtra("id", idLong)
                 putExtra("label", label)
                 putExtra("vibrate", vibrate)
                 putExtra("sound", sound)
@@ -57,31 +66,28 @@ class AlarmReceiver : BroadcastReceiver() {
 
             val fullScreenPendingIntent = PendingIntent.getActivity(
                 context,
-                id,
+                requestCode,
                 alarmIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-
-            val channelId = "alarm_channel_locked"
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channel = NotificationChannel(
-                    channelId,
-                    "Alarms Locked",
+                    CHANNEL_ID_LOCKED,
+                    "Alarms (Locked)",
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
                     description = "Alarm notifications on lock screen"
                     enableVibration(vibrate)
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setSound(null, null)
                 }
                 notificationManager.createNotificationChannel(channel)
             }
 
             val notificationBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.Builder(context, channelId)
+                Notification.Builder(context, CHANNEL_ID_LOCKED)
             } else {
                 Notification.Builder(context).setPriority(Notification.PRIORITY_HIGH)
             }
@@ -92,15 +98,14 @@ class AlarmReceiver : BroadcastReceiver() {
                 .setContentText("Alarm is ringing")
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setFullScreenIntent(fullScreenPendingIntent, true)
-                .setAutoCancel(true)
+                .setAutoCancel(false)
                 .setOngoing(true)
                 .build()
 
-            notificationManager.notify(id, notification)
+            notificationManager.notify(requestCode, notification)
         } else {
-
             val serviceIntent = Intent(context, AlarmForegroundService::class.java).apply {
-                putExtra("id", id)
+                putExtra("id", idLong)
                 putExtra("label", label)
                 putExtra("vibrate", vibrate)
                 putExtra("sound", sound)
@@ -111,8 +116,6 @@ class AlarmReceiver : BroadcastReceiver() {
             } else {
                 context.startService(serviceIntent)
             }
-
-
         }
 
         if (recurring || daysOfWeek.isNotEmpty()) {
@@ -148,10 +151,12 @@ class AlarmReceiver : BroadcastReceiver() {
                 nextTriggerMillis = candidate.timeInMillis
             }
 
+            Log.d(TAG, "scheduling next alarm: nextTriggerMillis=$nextTriggerMillis (release)")
+
             val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
                 action = "com.pranshulgg.alarm.ALARM_TRIGGER"
-                putExtra("id", id)
+                putExtra("id", idLong)
                 putExtra("label", label)
                 putExtra("sound", sound)
                 putExtra("hour", hour)
@@ -159,22 +164,17 @@ class AlarmReceiver : BroadcastReceiver() {
                 putIntegerArrayListExtra("daysOfWeek", ArrayList(daysOfWeekFlutter))
                 putExtra("recurring", recurring)
             }
-            val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            val pendingAlarm = PendingIntent.getBroadcast(context, id, alarmIntent, flags)
 
-            // same showPending as MainActivity used:
+            val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            val pendingAlarm = PendingIntent.getBroadcast(context, requestCode, alarmIntent, flags)
+
             val showIntent = Intent(context, MainActivity::class.java).apply {
                 putExtra("fromAlarmIcon", true)
             }
-            val showPending = PendingIntent.getActivity(context, id + 1000000, showIntent, flags)
+            val showPending = PendingIntent.getActivity(context, requestCode + 1_000_000, showIntent, flags)
 
             val info = AlarmManager.AlarmClockInfo(nextTriggerMillis, showPending)
             am.setAlarmClock(info, pendingAlarm)
         }
     }
-
-
 }
-
-
-

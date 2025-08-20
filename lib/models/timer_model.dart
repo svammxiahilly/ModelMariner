@@ -7,12 +7,14 @@ class TimerModel {
   bool isRunning;
   int currentDuration;
   int? lastStartEpochMs;
+  String uiLabel;
 
   final ValueNotifier<int> remainingNotifier;
 
   TimerModel({
     required this.id,
     required this.label,
+    required this.uiLabel,
     required int remainingSeconds,
     required this.initialSeconds,
     required this.isRunning,
@@ -26,6 +28,7 @@ class TimerModel {
   factory TimerModel.fromMap(Map<String, dynamic> m) => TimerModel(
     id: m['id'],
     label: m['label'],
+    uiLabel: m['uilabel'],
     remainingSeconds: m['remainingSeconds'],
     initialSeconds: m['initialSeconds'],
     isRunning: m['isRunning'],
@@ -35,6 +38,7 @@ class TimerModel {
   Map<String, dynamic> toMap() => {
     'id': id,
     'label': label,
+    'uiLabel': uiLabel,
     'remainingSeconds': remainingSeconds,
     'initialSeconds': initialSeconds,
     'isRunning': isRunning,

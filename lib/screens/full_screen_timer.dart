@@ -67,6 +67,14 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
               ? colorTheme.inversePrimary
               : colorTheme.surface,
           appBar: AppBar(
+            title: Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Text(
+                widget.timer.uiLabel,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+
             automaticallyImplyLeading: false,
             backgroundColor: finished
                 ? colorTheme.inversePrimary
@@ -185,6 +193,7 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                   ),
                 ),
               ],
+
               // const SizedBox(height: 40),
               // TextButton(
               //   onPressed: () => Navigator.pop(context),

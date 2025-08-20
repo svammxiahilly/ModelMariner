@@ -128,6 +128,7 @@ class _ScreenSaverState extends State<ScreenSaver> {
         body: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: (_) {
+            _immersiveActive = false;
             Navigator.of(context).pop(true);
           },
           child: Stack(

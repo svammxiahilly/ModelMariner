@@ -150,37 +150,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void revertSettings() async {
     final isAndroid9OrAbove = await _isAndroid9OrAbove();
 
-    Future.delayed(const Duration(seconds: 1), () {
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      );
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
 
-      resetBrightness();
-      if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
-        WakelockPlus.toggle(enable: false);
-      }
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: Color(0x01000000),
-          statusBarIconBrightness:
-              Theme.of(context).brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light,
-          systemNavigationBarIconBrightness:
-              Theme.of(context).brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light,
-          systemNavigationBarColor:
-              MediaQuery.of(context).systemGestureInsets.left > 0
-              ? Color(0x01000000)
-              : isAndroid9OrAbove
-              ? Color(0x01000000)
-              : Theme.of(context).scaffoldBackgroundColor,
-        ),
-      );
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    });
+    resetBrightness();
+    if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
+      WakelockPlus.toggle(enable: false);
+    }
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Color(0x01000000),
+        statusBarIconBrightness:
+            Theme.of(context).brightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light,
+        systemNavigationBarIconBrightness:
+            Theme.of(context).brightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light,
+        systemNavigationBarColor:
+            MediaQuery.of(context).systemGestureInsets.left > 0
+            ? Color(0x01000000)
+            : isAndroid9OrAbove
+            ? Color(0x01000000)
+            : Theme.of(context).scaffoldBackgroundColor,
+      ),
+    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   @override
@@ -216,7 +214,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 );
                 if (result == true) {
-                  revertSettings();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Future.delayed(Duration(milliseconds: 500), () {
+                      revertSettings();
+                    });
+                  });
                 }
               } else if (value == "openScreenSaver") {
                 final result = await Navigator.of(
@@ -224,7 +226,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 ).push(MaterialPageRoute(builder: (_) => const ScreenSaver()));
 
                 if (result == true) {
-                  revertSettings();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Future.delayed(Duration(milliseconds: 500), () {
+                      revertSettings();
+                    });
+                  });
                 }
               }
             },
