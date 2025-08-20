@@ -2278,3 +2278,193 @@
             "versus cheapest-model baseline harbor-nano: $2.3063 more cost, 0.852 vs 0.708 mean quality"
           ],
           "rejections": [
+            "clipper-pro — max_privacy (task data reaches \"restricted\" but policy caps at \"internal\" and model is not privacy-safe)",
+            "galleon-max — max_privacy (task data reaches \"restricted\" but policy caps at \"internal\" and model is not privacy-safe)",
+            "harbor-mini — max_privacy (task data reaches \"restricted\" but policy caps at \"internal\" and model is not privacy-safe)",
+            "harbor-nano — max_privacy (task data reaches \"restricted\" but policy caps at \"internal\" and model is not privacy-safe)"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quality-first",
+      "description": "Accuracy-sensitive generative tasks. Demands a high quality floor and strong reliability, then ranks on quality with cost as a secondary consideration.",
+      "simulation": {
+        "policy": "quality-first",
+        "decisions": [
+          {
+            "task": "code-review-comment",
+            "policy": "quality-first",
+            "winner": "galleon-max",
+            "runner_up": "clipper-pro",
+            "score": 0.85,
+            "margin": 0.05792322303883979,
+            "eligible": [
+              "galleon-max",
+              "clipper-pro"
+            ],
+            "rejected": [
+              {
+                "model": "harbor-mini",
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.8309698113207546
+                  },
+                  {
+                    "constraint": "min_reliability",
+                    "detail": "reliability lower bound below floor",
+                    "limit": 0.9,
+                    "observed": 0.8767653602534898
+                  }
+                ]
+              },
+              {
+                "model": "harbor-nano",
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.718124074074074
+                  }
+                ]
+              },
+              {
+                "model": "lighthouse-local",
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.7862115384615382
+                  },
+                  {
+                    "constraint": "min_reliability",
+                    "detail": "reliability lower bound below floor",
+                    "limit": 0.9,
+                    "observed": 0.851469394559462
+                  }
+                ]
+              }
+            ],
+            "evaluations": [
+              {
+                "model": "galleon-max",
+                "eligible": true,
+                "score": 0.85,
+                "components": {
+                  "cost": 0,
+                  "quality": 0.6,
+                  "reliability": 0.25
+                }
+              },
+              {
+                "model": "clipper-pro",
+                "eligible": true,
+                "score": 0.7920767769611602,
+                "components": {
+                  "cost": 0.08496359829299967,
+                  "quality": 0.5495289367983622,
+                  "reliability": 0.15758424186979825
+                }
+              },
+              {
+                "model": "harbor-mini",
+                "eligible": false,
+                "score": 0,
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.8309698113207546
+                  },
+                  {
+                    "constraint": "min_reliability",
+                    "detail": "reliability lower bound below floor",
+                    "limit": 0.9,
+                    "observed": 0.8767653602534898
+                  }
+                ]
+              },
+              {
+                "model": "harbor-nano",
+                "eligible": false,
+                "score": 0,
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.718124074074074
+                  }
+                ]
+              },
+              {
+                "model": "lighthouse-local",
+                "eligible": false,
+                "score": 0,
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.7862115384615382
+                  },
+                  {
+                    "constraint": "min_reliability",
+                    "detail": "reliability lower bound below floor",
+                    "limit": 0.9,
+                    "observed": 0.851469394559462
+                  }
+                ]
+              }
+            ],
+            "realized": {
+              "model": "galleon-max",
+              "calls": 55,
+              "successes": 55,
+              "success_rate": 1,
+              "total_cost_usd": 80.33279999999998,
+              "mean_latency_ms": 1082.6981818181816,
+              "mean_quality": 0.9633927272727274
+            },
+            "baseline": {
+              "model": "harbor-nano",
+              "calls": 55,
+              "successes": 54,
+              "success_rate": 0.9818181818181818,
+              "total_cost_usd": 4.53264,
+              "mean_latency_ms": 171.4203703703704,
+              "mean_quality": 0.718124074074074
+            },
+            "no_eligible": false
+          },
+          {
+            "task": "draft-legal-clause",
+            "policy": "quality-first",
+            "winner": "clipper-pro",
+            "runner_up": "galleon-max",
+            "score": 0.9047886549802896,
+            "margin": 0.05478865498028962,
+            "eligible": [
+              "clipper-pro",
+              "galleon-max"
+            ],
+            "rejected": [
+              {
+                "model": "harbor-mini",
+                "violations": [
+                  {
+                    "constraint": "min_quality",
+                    "detail": "mean quality below floor",
+                    "limit": 0.85,
+                    "observed": 0.8189772727272726
+                  },
+                  {
+                    "constraint": "min_reliability",
+                    "detail": "reliability lower bound below floor",
+                    "limit": 0.9,
