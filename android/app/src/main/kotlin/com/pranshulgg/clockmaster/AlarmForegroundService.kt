@@ -6,19 +6,18 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
-import android.os.IBinder
-import android.os.PowerManager
-import android.os.Vibrator
+import android.os.*
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
+import android.app.Service
+
 class AlarmForegroundService : Service() {
 
     companion object {
         const val CHANNEL_ID = "alarm_foreground_channel"
         const val NOTIFICATION_ID = 10001
-        const val ACTION_STOP = "com.pranshulgg.clockmaster.ACTION_STOP"
 
+        const val ACTION_STOP = "com.pranshulgg.clockmaster.ACTION_STOP"
         const val ACTION_SNOOZE = "com.pranshulgg.clockmaster.ACTION_SNOOZE"
     }
 
@@ -30,25 +29,78 @@ class AlarmForegroundService : Service() {
         super.onCreate()
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "clockmaster:alarm_service_wakelock")
-        wakeLock?.acquire(10 * 60 * 1000L) // max 10 minutes wake lock
+        wakeLock?.acquire(10 * 60 * 1000L) // 10 minutes max
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createNotificationChannel()
+
+        val alarmId = intent?.getIntExtra("id", 0) ?: 0
+        val label = intent?.getStringExtra("label") ?: "Alarm"
+        val vibrate = intent?.getBooleanExtra("vibrate", false) ?: false
+        val soundUriString = intent?.getStringExtra("sound")
+        val soundUri = soundUriString?.let { Uri.parse(it) } ?: Settings.System.DEFAULT_ALARM_ALERT_URI
 
         if (intent?.action == ACTION_STOP) {
             stopSelf()
             return START_NOT_STICKY
         }
 
-        createNotificationChannel()
 
-        val label = intent?.getStringExtra("label") ?: "Alarm"
-        val vibrate = intent?.getBooleanExtra("vibrate", false) ?: false
-        val soundUriString = intent?.getStringExtra("sound")
-        val soundUri = soundUriString?.let { Uri.parse(it) } ?: Settings.System.DEFAULT_ALARM_ALERT_URI
+        val snoozeIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = ACTION_SNOOZE
+            putExtra("id", alarmId)
+            putExtra("label", label)
+            putExtra("vibrate", vibrate)
+            putExtra("sound", soundUri.toString())
+        }
+        val snoozePendingIntent = PendingIntent.getBroadcast(
+            this,
+            alarmId,
+            snoozeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-        val notification = buildNotification(label)
+
+        val stopIntent = Intent(this, AlarmForegroundService::class.java).apply {
+            action = ACTION_STOP
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this,
+            alarmId,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val fullScreenIntent = Intent(this, AlarmActivity::class.java).apply {
+            putExtra("id", alarmId)
+            putExtra("label", label)
+            putExtra("vibrate", vibrate)
+            putExtra("sound", soundUri.toString())
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            this,
+            alarmId,
+            fullScreenIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val pattern = longArrayOf(0, 500, 500)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(label)
+            .setContentText("Alarm ringing")
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .addAction(android.R.drawable.ic_lock_idle_alarm, "Snooze", snoozePendingIntent)
+            .addAction(android.R.drawable.ic_media_pause, "Stop", stopPendingIntent)
+            .setCategory(Notification.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setOngoing(true)
+            .setVibrate(pattern)
+            .build()
+
         startForeground(NOTIFICATION_ID, notification)
 
         try {
@@ -69,17 +121,16 @@ class AlarmForegroundService : Service() {
             stopSelf()
         }
 
+
         if (vibrate) {
-            val pattern = longArrayOf(0, 500, 500)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val effect = android.os.VibrationEffect.createWaveform(pattern, 0)
+                val effect = VibrationEffect.createWaveform(pattern, 0)
                 vibrator?.vibrate(effect)
             } else {
                 @Suppress("DEPRECATION")
                 vibrator?.vibrate(pattern, 0)
             }
         }
-
 
         return START_STICKY
     }
@@ -99,49 +150,6 @@ class AlarmForegroundService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun buildNotification(label: String): Notification {
-        val pattern = longArrayOf(0, 500, 500)
-        val snoozeIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = ACTION_SNOOZE
-        }
-        val snoozePendingIntent = PendingIntent.getBroadcast(
-            this,
-            1,
-            snoozeIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-
-        val stopIntent = Intent(this, AlarmForegroundService::class.java).apply {
-            action = ACTION_STOP
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this,
-            0,
-            stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, CHANNEL_ID)
-        } else {
-            Notification.Builder(this).setPriority(Notification.PRIORITY_HIGH)
-        }
-
-
-
-        return  NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(label)
-            .setContentText("Alarm ringing")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .addAction(android.R.drawable.ic_lock_idle_alarm, "Snooze", snoozePendingIntent)
-            .addAction(android.R.drawable.ic_media_pause, "Stop", stopPendingIntent)
-            .setCategory(Notification.CATEGORY_ALARM)
-            .setOngoing(true)
-            .setVibrate(pattern)
-            .build()
-    }
-
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -150,6 +158,8 @@ class AlarmForegroundService : Service() {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Alarm service channel"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 500, 500)
             }
             val nm = getSystemService(NotificationManager::class.java)
             nm.createNotificationChannel(channel)

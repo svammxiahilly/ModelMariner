@@ -2,7 +2,6 @@ package com.pranshulgg.clockmaster
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,24 +14,29 @@ class AlarmActionReceiver : BroadcastReceiver() {
         val alarmId = intent.getIntExtra("id", 0)
         val action = intent.action ?: return
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         when (action) {
-            "ACTION_SNOOZE" -> {
-                val vibrate = intent.getBooleanExtra("vibrate", false)
+            "com.pranshulgg.clockmaster.ACTION_SNOOZE" -> {
                 val label = intent.getStringExtra("label") ?: "Snoozed Alarm"
+                val vibrate = intent.getBooleanExtra("vibrate", false)
                 val sound = intent.getStringExtra("sound")
 
-                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                val stopIntent = Intent(context, AlarmForegroundService::class.java)
+                stopIntent.setAction(AlarmForegroundService.ACTION_STOP)
+                context.startService(stopIntent)
+
+
                 val trigger = System.currentTimeMillis() + 5 * 60 * 1000L
 
-                val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
+                val alarmIntent = Intent(context, AlarmForegroundService::class.java).apply {
                     putExtra("id", alarmId)
                     putExtra("label", label)
                     putExtra("vibrate", vibrate)
                     putExtra("sound", sound)
                 }
-                val pending = PendingIntent.getBroadcast(
+                val pending = PendingIntent.getService(
                     context,
                     alarmId,
                     alarmIntent,
@@ -44,13 +48,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 } else {
                     am.setExact(AlarmManager.RTC_WAKEUP, trigger, pending)
                 }
-
-                notificationManager.cancel(alarmId)
             }
 
-            "ACTION_STOP" -> {
-                notificationManager.cancel(alarmId)
+            "com.pranshulgg.clockmaster.ACTION_STOP" -> {
+                val stopIntent = Intent(context, AlarmForegroundService::class.java)
+                stopIntent.setAction(AlarmForegroundService.ACTION_STOP)
+                context.startService(stopIntent)
             }
         }
+
     }
-}
+    }

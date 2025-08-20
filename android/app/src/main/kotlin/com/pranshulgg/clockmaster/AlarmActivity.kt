@@ -94,7 +94,7 @@ class AlarmActivity : ComponentActivity() {
         }
         findViewById<Button>(R.id.btn_snooze).setOnClickListener {
             stopAlarm()
-            scheduleSnooze(alarmId, 5)
+            scheduleSnooze(alarmId, 1, label)
             finish()
         }
 
@@ -145,14 +145,13 @@ class AlarmActivity : ComponentActivity() {
         nm.cancel(alarmId)
     }
 
-    @SuppressLint("ScheduleExactAlarm")
-    @RequiresApi(23)
-    private fun scheduleSnooze(id: Int, minutes: Int) {
+    private fun scheduleSnooze(id: Int, minutes: Int, label: String) {
         val am = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
         val trigger = System.currentTimeMillis() + minutes * 60 * 1000L
+
         val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
             putExtra("id", id)
-            putExtra("label", "Snoozed Alarm")
+            putExtra("label", "Snoozed Alarm • $label")
             putExtra("vibrate", vibrateEnabled)
             putExtra("sound", soundUri)
         }
