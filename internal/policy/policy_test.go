@@ -132,3 +132,9 @@ func TestAppliesToScoping(t *testing.T) {
 		t.Error("global policy should apply to all tasks")
 	}
 	if scoped.AppliesTo("other") || !scoped.AppliesTo("only") {
+		t.Error("scoped policy applies incorrectly")
+	}
+}
+
+func TestZeroSampleModelIneligible(t *testing.T) {
+	a := agg("dead", 0.1, 100, 0.9, 0.9, 0)
