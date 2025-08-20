@@ -101,7 +101,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                             children: [
                               SvgPicture.string(
                                 buildClockFaceSvg(
-                                  colorTheme.surfaceContainer,
+                                  colorTheme.surfaceContainerLow,
 
                                   colorTheme.primaryContainer,
                                 ),
@@ -275,14 +275,18 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                     style: TextStyle(
                                       color: colorTheme.onSurface,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 24,
+                                      fontSize: clockStyle == "Analog"
+                                          ? 24
+                                          : 18,
                                     ),
                                   ),
                                   Text(
                                     formatOffset(offset),
                                     style: TextStyle(
                                       color: colorTheme.onSurfaceVariant,
-                                      fontSize: 18,
+                                      fontSize: clockStyle == "Analog"
+                                          ? 24
+                                          : 16,
                                     ),
                                   ),
                                 ],
@@ -297,7 +301,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                         children: [
                                           SvgPicture.string(
                                             buildClockFaceSvg(
-                                              colorTheme.surfaceContainer,
+                                              colorTheme.surfaceContainerLow,
                                               colorTheme.tertiaryContainer,
                                             ),
                                           ),
@@ -330,7 +334,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                       style: TextStyle(
                                         fontSize:
                                             MediaQuery.of(context).size.width /
-                                            11,
+                                            12,
                                         fontWeight: FontWeight.w500,
                                         color: colorTheme.secondary,
                                       ),

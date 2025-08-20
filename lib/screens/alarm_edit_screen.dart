@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import '../models/alarm_data_model.dart';
 import 'package:settings_tiles/settings_tiles.dart';
 import 'package:flutter/services.dart';
+import '../utils/snack_util.dart';
 
 class AlarmEditContent extends StatefulWidget {
   final Alarm? alarm;
   final bool is24HourFormat;
-  const AlarmEditContent({Key? key, this.alarm, this.is24HourFormat = false})
-    : super(key: key);
+  final VoidCallback? onDelete;
+  const AlarmEditContent({
+    Key? key,
+    this.alarm,
+    this.is24HourFormat = false,
+    this.onDelete,
+  }) : super(key: key);
 
   @override
   State<AlarmEditContent> createState() => _AlarmEditContentState();
@@ -73,7 +79,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
       // constraints: BoxConstraints(
       //   minHeight: MediaQuery.of(context).size.height * 0.7,
       // ),
-      height: MediaQuery.of(context).size.height * 0.7,
+      // height: MediaQuery.of(context).size.height * 0.7,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -191,94 +197,127 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
           ),
 
           SizedBox(height: 20),
-          Expanded(
-            child: SingleChildScrollView(
-              child: SettingSection(
-                styleTile: true,
-                tiles: [
-                  SettingTextFieldTile(
-                    title: Text("Label"),
-                    dialogTitle: "Label",
+          SingleChildScrollView(
+            child: SettingSection(
+              styleTile: true,
+              tiles: [
+                SettingTextFieldTile(
+                  title: Text("Label"),
+                  dialogTitle: "Label",
 
-                    onSubmitted: (value) {
-                      setState(() {
-                        labelController.text = value;
-                      });
-                    },
-                    initialText: labelController.text,
-                    value: Text(labelController.text),
-                  ),
-                  SettingSwitchTile(
-                    title: const Text('Vibrate'),
-                    toggled: vibrate,
-                    onChanged: (v) => setState(() => vibrate = v),
-                  ),
+                  onSubmitted: (value) {
+                    setState(() {
+                      labelController.text = value;
+                    });
+                  },
+                  initialText: labelController.text,
+                  value: Text(labelController.text),
+                ),
+                SettingSwitchTile(
+                  title: const Text('Vibrate'),
+                  toggled: vibrate,
+                  onChanged: (v) => setState(() => vibrate = v),
+                ),
 
-                  SettingActionTile(
-                    title: const Text('Sound'),
-                    description: Text(sound ?? 'Default'),
-                    onTap: _pickSound,
-                  ),
-                ],
-              ),
+                SettingActionTile(
+                  title: const Text('Sound'),
+                  description: Text(sound ?? 'Default'),
+                  onTap: _pickSound,
+                ),
+              ],
             ),
           ),
 
           SizedBox(height: 16),
 
-          FilledButton.icon(
-            onPressed: () {
-              final id =
-                  widget.alarm?.id ?? DateTime.now().millisecondsSinceEpoch;
-              final newAlarm = Alarm(
-                id: id,
-                hour: time.hour,
-                minute: time.minute,
-                label: labelController.text.isEmpty
-                    ? 'Alarm'
-                    : labelController.text,
-                enabled: true,
-                repeatDays: repeatDays,
-                vibrate: vibrate,
-                sound: sound,
-              );
-              DateTime alarmTime = getNextAlarmTime(time, repeatDays);
-              Duration diff = alarmTime.difference(DateTime.now());
+          Row(
+            spacing: 10,
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: widget.alarm != null
+                      ? () {
+                          widget.onDelete?.call();
+                          Navigator.pop(context);
+                          SnackUtil.showSnackBar(
+                            context: context,
+                            message: "Alarm deleted",
+                          );
+                        }
+                      : () => Navigator.pop(context),
+                  icon: Icon(
+                    widget.alarm == null ? Icons.close : Icons.delete,
+                    size: 20,
+                  ),
+                  label: Text(
+                    widget.alarm == null ? 'Cancel' : 'Delete',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: Size(58, 58),
+                    backgroundColor: colorTheme.errorContainer,
+                    foregroundColor: colorTheme.onErrorContainer,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    final id =
+                        widget.alarm?.id ??
+                        DateTime.now().millisecondsSinceEpoch;
+                    final newAlarm = Alarm(
+                      id: id,
+                      hour: time.hour,
+                      minute: time.minute,
+                      label: labelController.text.isEmpty
+                          ? 'Alarm'
+                          : labelController.text,
+                      enabled: true,
+                      repeatDays: repeatDays,
+                      vibrate: vibrate,
+                      sound: sound,
+                    );
+                    DateTime alarmTime = getNextAlarmTime(time, repeatDays);
+                    Duration diff = alarmTime.difference(DateTime.now());
 
-              int totalMinutes = diff.inMinutes;
+                    int totalMinutes = diff.inMinutes;
 
-              int hours = totalMinutes ~/ 60;
-              int minutes = totalMinutes % 60;
+                    int hours = totalMinutes ~/ 60;
+                    int minutes = totalMinutes % 60;
 
-              String hoursText = hours > 0
-                  ? '$hours hour${hours > 1 ? 's' : ''} '
-                  : '';
-              String minutesText = minutes > 0
-                  ? '$minutes minute${minutes > 1 ? 's' : ''}'
-                  : '';
+                    String hoursText = hours > 0
+                        ? '$hours hour${hours > 1 ? 's' : ''} '
+                        : '';
+                    String minutesText = minutes > 0
+                        ? '$minutes minute${minutes > 1 ? 's' : ''}'
+                        : '';
 
-              String timeText = (hoursText.isEmpty && minutesText.isEmpty)
-                  ? 'less than a minute'
-                  : '$hoursText$minutesText';
+                    String timeText = (hoursText.isEmpty && minutesText.isEmpty)
+                        ? 'less than a minute'
+                        : '$hoursText$minutesText';
 
-              final snackBar = SnackBar(
-                content: Text('Alarm set for $timeText from now'),
-                duration: Duration(seconds: 4),
-              );
+                    final snackBar = SnackBar(
+                      content: Text('Alarm set for $timeText from now'),
+                      duration: Duration(seconds: 4),
+                    );
 
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              Navigator.pop(context, newAlarm);
-            },
-            icon: Icon(Icons.save, size: 20),
-            label: Text(
-              widget.alarm == null ? 'Add' : 'Save',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            style: FilledButton.styleFrom(
-              minimumSize: Size(double.infinity, 58),
-              backgroundColor: colorTheme.tertiaryContainer,
-              foregroundColor: colorTheme.onTertiaryContainer,
-            ),
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    Navigator.pop(context, newAlarm);
+                  },
+                  icon: Icon(Icons.save, size: 20),
+                  label: Text(
+                    widget.alarm == null ? 'Add' : 'Save',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: Size(58, 58),
+                    backgroundColor: colorTheme.tertiaryContainer,
+                    foregroundColor: colorTheme.onTertiaryContainer,
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],

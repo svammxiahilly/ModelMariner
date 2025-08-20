@@ -21,6 +21,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../screens/screen_saver.dart';
 import '../helpers/preferences_helper.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'dart:developer';
 
 class BatteryOptimizationHelper {
   static Future<bool> isIgnoringBatteryOptimizations() async {
@@ -45,6 +46,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   String _selectedIndexLabel = "Alarm";
   bool _showFab = true;
+  bool loaded = false;
 
   bool get is24HourFormat =>
       context.watch<UnitSettingsNotifier>().timeFormat == "24 hr";
@@ -117,22 +119,50 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final colorTheme = Theme.of(context).colorScheme;
 
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Color(0x01000000),
-        statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
-        systemNavigationBarIconBrightness: isLight
-            ? Brightness.dark
-            : Brightness.light,
-        systemNavigationBarColor:
-            MediaQuery.of(context).systemGestureInsets.left > 0
-            ? Color(0x01000000)
-            : isLight
-            ? Color(0x01000000)
-            : Color.fromRGBO(0, 0, 0, 0.3),
-      ),
-    );
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (!loaded) {
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Color(0x01000000),
+          statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
+          systemNavigationBarIconBrightness: isLight
+              ? Brightness.dark
+              : Brightness.light,
+          systemNavigationBarColor:
+              MediaQuery.of(context).systemGestureInsets.left > 0
+              ? Color(0x01000000)
+              : Color(0x01000000),
+        ),
+      );
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      loaded = true;
+    }
+
+    void revertSettings() {
+      Future.delayed(const Duration(seconds: 1), () {
+        resetBrightness();
+        if (PreferencesHelper.getBool('PreventScreenSleep') == false) {
+          WakelockPlus.toggle(enable: false);
+        }
+        SystemChrome.setSystemUIOverlayStyle(
+          SystemUiOverlayStyle(
+            statusBarColor: Color(0x01000000),
+            statusBarIconBrightness:
+                Theme.of(context).brightness == Brightness.light
+                ? Brightness.dark
+                : Brightness.light,
+            systemNavigationBarIconBrightness:
+                Theme.of(context).brightness == Brightness.light
+                ? Brightness.dark
+                : Brightness.light,
+            systemNavigationBarColor:
+                MediaQuery.of(context).systemGestureInsets.left > 0
+                ? Color(0x01000000)
+                : Color(0x01000000),
+          ),
+        );
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -149,43 +179,27 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         actions: [
           PopupMenuButton<String>(
             icon: const IconWithWeight(Symbols.more_vert, weight: 900),
+            elevation: 0,
+            color: colorTheme.surfaceContainerHigh,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(13),
             ),
             clipBehavior: Clip.hardEdge,
             onSelected: (value) async {
               if (value == "openSettings") {
-                Navigator.of(context).push(
+                final result = await Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 );
+                if (result == true) {
+                  revertSettings();
+                }
               } else if (value == "openScreenSaver") {
                 final result = await Navigator.of(
                   context,
                 ).push(MaterialPageRoute(builder: (_) => const ScreenSaver()));
+
                 if (result == true) {
-                  resetBrightness();
-                  if (PreferencesHelper.getBool('PreventScreenSleep') ==
-                      false) {
-                    WakelockPlus.toggle(enable: false);
-                  }
-                  SystemChrome.setSystemUIOverlayStyle(
-                    SystemUiOverlayStyle(
-                      statusBarColor: Color(0x01000000),
-                      statusBarIconBrightness: isLight
-                          ? Brightness.dark
-                          : Brightness.light,
-                      systemNavigationBarIconBrightness: isLight
-                          ? Brightness.dark
-                          : Brightness.light,
-                      systemNavigationBarColor:
-                          MediaQuery.of(context).systemGestureInsets.left > 0
-                          ? Color(0x01000000)
-                          : isLight
-                          ? Color(0x01000000)
-                          : Color.fromRGBO(0, 0, 0, 0.3),
-                    ),
-                  );
-                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                  revertSettings();
                 }
               }
             },

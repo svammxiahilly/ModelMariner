@@ -278,12 +278,32 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
 
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
+  List<Duration> _lapDurations = [];
+
   void _lap() {
     final formattedLap = _formatTime(_elapsed);
 
     _laps.insert(0, formattedLap);
-
+    _lapDurations.insert(0, Duration(milliseconds: _elapsed));
     _listKey.currentState?.insertItem(0, duration: Duration(milliseconds: 300));
+
+    setState(() {});
+  }
+
+  Color _getLapColor(int index, ColorScheme colorTheme) {
+    if (_lapDurations.isEmpty) return colorTheme.secondary;
+
+    final fastestLap = _lapDurations.reduce((a, b) => a < b ? a : b);
+    final slowestLap = _lapDurations.reduce((a, b) => a > b ? a : b);
+
+    final lapDuration = _lapDurations[index];
+    if (lapDuration.inMilliseconds == fastestLap.inMilliseconds) {
+      return Colors.green;
+    } else if (lapDuration.inMilliseconds == slowestLap.inMilliseconds) {
+      return Colors.red;
+    } else {
+      return colorTheme.secondary;
+    }
   }
 
   @override
@@ -292,11 +312,11 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
     final colorTheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            AnimatedSwitcher(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               switchInCurve: Curves.easeInBack,
               switchOutCurve: Curves.easeOutBack,
@@ -321,121 +341,147 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                 ),
               ),
             ),
-            Divider(),
-            Expanded(
-              child: AnimatedList(
-                key: _listKey,
-                initialItemCount: _laps.length,
-                itemBuilder: (context, index, animation) {
-                  final lapNum = _laps.length - index;
-                  final lapTime = _laps[index];
+          ),
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2.0),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: colorTheme.tertiaryContainer,
-                          foregroundColor: colorTheme.onTertiaryContainer,
-                          child: Text("#$lapNum"),
-                        ),
-                        trailing: Text(
-                          lapTime,
-                          style: TextStyle(
-                            color: colorTheme.secondary,
-                            fontSize: 16,
+          Divider(),
+
+          SizedBox(
+            height: 100,
+            child: AnimatedList(
+              key: _listKey,
+              scrollDirection: Axis.horizontal,
+
+              initialItemCount: _laps.length,
+              itemBuilder: (context, index, animation) {
+                final lapNum = _laps.length - index;
+                final lapTime = _laps[index];
+                final isLast = index == _laps.length - 1;
+                final isFirst = index == 0;
+
+                final lapColor = _getLapColor(index, colorTheme);
+                return FadeTransition(
+                  opacity: animation,
+                  child: Padding(
+                    // padding: const EdgeInsets.all(4),
+                    padding: EdgeInsetsGeometry.only(
+                      left: isFirst ? 16 : 4,
+                      top: 4,
+                      bottom: 4,
+                      right: isLast ? 16 : 4,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: colorTheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "#$lapNum",
+
+                            style: TextStyle(
+                              color: lapColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
+
+                          Text(
+                            lapTime,
+
+                            style: TextStyle(color: lapColor, fontSize: 16),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-            SizedBox(height: 10),
+          ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              spacing: 10,
-              children: [
-                GestureDetector(
-                  onTap: _startPause,
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(
-                      end: _isRunning ? 28.0 : 50.0, // only end changes
-                    ),
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutBack,
-                    builder: (context, borderRadiusValue, child) {
-                      return Container(
-                        width: 96,
-                        height: 96,
-                        decoration: BoxDecoration(
-                          color: _isRunning
-                              ? colorTheme.surfaceContainerHighest
-                              : colorTheme.primary,
-                          borderRadius: BorderRadius.circular(
-                            borderRadiusValue,
-                          ),
-                        ),
-                        child: child,
-                      );
-                    },
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Center(
-                        child: IconWithWeight(
-                          _isRunning ? Symbols.pause : Symbols.play_arrow,
-                          color: _isRunning
-                              ? colorTheme.primary
-                              : colorTheme.onPrimary,
-                          size: 40,
-                        ),
+          SizedBox(height: 10),
+
+          Expanded(child: SizedBox.shrink()),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 10,
+            children: [
+              GestureDetector(
+                onTap: _startPause,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(end: _isRunning ? 28.0 : 50.0),
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  builder: (context, borderRadiusValue, child) {
+                    return Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        color: _isRunning
+                            ? colorTheme.surfaceContainerHighest
+                            : colorTheme.primary,
+                        borderRadius: BorderRadius.circular(borderRadiusValue),
+                      ),
+                      child: child,
+                    );
+                  },
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Center(
+                      child: IconWithWeight(
+                        _isRunning ? Symbols.pause : Symbols.play_arrow,
+                        color: _isRunning
+                            ? colorTheme.primary
+                            : colorTheme.onPrimary,
+                        size: 40,
                       ),
                     ),
                   ),
                 ),
-
-                FloatingActionButton.large(
-                  shape: const CircleBorder(),
-                  onPressed: _reset,
-                  backgroundColor: colorTheme.secondaryContainer,
-                  heroTag: "idk_cool_random_tag",
-
-                  elevation: 0,
-                  highlightElevation: 0,
-                  child: IconWithWeight(
-                    Symbols.restart_alt,
-                    size: 40,
-                    color: colorTheme.onSecondaryContainer,
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 10),
-            Container(
-              width: 96 + 96,
-              height: 70,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
               ),
-              child: FloatingActionButton.extended(
-                onPressed: _isRunning ? _lap : null,
+
+              FloatingActionButton.large(
+                shape: const CircleBorder(),
+                onPressed: _reset,
                 backgroundColor: colorTheme.secondaryContainer,
-                heroTag: "idk_random_tag_stop_wow",
+                heroTag: "idk_cool_random_tag",
 
-                label: Text(
-                  "Lap",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                elevation: 0,
+                highlightElevation: 0,
+                child: IconWithWeight(
+                  Symbols.restart_alt,
+                  size: 40,
+                  color: colorTheme.onSecondaryContainer,
                 ),
               ),
+            ],
+          ),
+
+          SizedBox(height: 10),
+          Container(
+            width: 96 + 96,
+            height: 70,
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
+            child: FloatingActionButton.extended(
+              onPressed: _isRunning ? _lap : null,
+              backgroundColor: colorTheme.secondaryContainer,
+              heroTag: "idk_random_tag_stop_wow",
+
+              label: Text(
+                "Lap",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+              ),
             ),
-          ],
-        ),
+          ),
+
+          SizedBox(height: 16),
+        ],
       ),
     );
   }

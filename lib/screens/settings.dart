@@ -79,6 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         PreferencesHelper.getBool('FullBlackScreenSaver') ?? false;
 
     const MethodChannel _channel = MethodChannel('com.pranshulgg.alarm/alarm');
+    final isLight = Theme.of(context).brightness == Brightness.light;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -129,6 +130,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ? ThemeMode.system
                                 : ThemeMode.light,
                           );
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            Navigator.of(context).pop(true);
+                          });
                         });
                       },
                     ),

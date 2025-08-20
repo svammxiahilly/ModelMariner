@@ -62,9 +62,7 @@ class _ScreenSaverState extends State<ScreenSaver> {
       await _channelBrightness.invokeMethod('setBrightness', {
         "brightness": 0.0,
       });
-    } on PlatformException catch (e) {
-      print("Failed to set brightness: ${e.message}");
-    }
+    } on PlatformException catch (e) {}
   }
 
   Timer? _timer;
@@ -124,7 +122,7 @@ class _ScreenSaverState extends State<ScreenSaver> {
     double brightness =
         PreferencesHelper.getDouble("screensaverBrightness") ?? 0.3;
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: GestureDetector(

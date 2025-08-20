@@ -112,6 +112,7 @@ class AlarmScreenState extends State<AlarmScreen> {
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).colorScheme;
+    final themeBrightness = Theme.of(context).brightness;
     // - ${a.label}
     return Scaffold(
       body: alarms.isEmpty
@@ -180,7 +181,9 @@ class AlarmScreenState extends State<AlarmScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: a.enabled
-                              ? colorTheme.onPrimary
+                              ? themeBrightness == Brightness.dark
+                                    ? colorTheme.onPrimary
+                                    : colorTheme.primaryContainer
                               : colorTheme.surfaceContainerLow,
                         ),
                         child: Row(
@@ -285,6 +288,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                             child: AlarmEditContent(
                               alarm: a,
                               is24HourFormat: is24HourFormat,
+                              onDelete: a != null ? () => _delete(a) : null,
                             ),
                           ),
                         ).then((result) async {
