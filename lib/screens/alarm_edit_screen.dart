@@ -25,6 +25,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
   List<int> repeatDays = [];
   bool vibrate = true;
   String? sound;
+  int snoozeTime = 5;
 
   @override
   void initState() {
@@ -80,126 +81,130 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
       //   minHeight: MediaQuery.of(context).size.height * 0.7,
       // ),
       // height: MediaQuery.of(context).size.height * 0.7,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 32,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colorTheme.onSurfaceVariant,
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-
-          SizedBox(height: 10),
-          Text(
-            widget.alarm == null ? 'Add Alarm' : 'Edit Alarm',
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 12),
-
-          GestureDetector(
-            onTap: () async {
-              final picked = await showTimePicker(
-                context: context,
-                initialTime: time,
-                builder: (context, child) {
-                  return MediaQuery(
-                    data: MediaQuery.of(
-                      context,
-                    ).copyWith(alwaysUse24HourFormat: is24HourFormat),
-                    child: child!,
-                  );
-                },
-              );
-              if (picked != null) setState(() => time = picked);
-            },
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: _formatTimeWithoutAmPm(time, is24HourFormat, context),
-                    style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width / 5,
-                      fontFamily: "OpenSans",
-                      fontWeight: FontWeight.bold,
-                      color: colorTheme.onSurface,
-                    ),
-                  ),
-                  TextSpan(text: " "),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: Text(
-                      _getAmPm(time, is24HourFormat, context),
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width / 11,
-                        fontWeight: FontWeight.w500,
-                        color: colorTheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 32,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorTheme.onSurfaceVariant,
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-          ),
 
-          SizedBox(height: 16),
+            SizedBox(height: 10),
+            Text(
+              widget.alarm == null ? 'Add Alarm' : 'Edit Alarm',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12),
 
-          Wrap(
-            spacing: 2,
-            children: List.generate(7, (index) {
-              const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-              final dayNum = index + 1;
-              final isFirst = index == 0;
-              final isLast = index == 6;
-
-              final firstRadius = isFirst ? 18.0 : 5.0;
-              final lastRadius = isLast ? 18.0 : 5.0;
-
-              final selected = repeatDays.contains(dayNum);
-
-              return SizedBox(
-                width: 40,
-                height: 40,
-                child: ChoiceChip(
-                  label: Center(
-                    child: Text(
-                      days[index],
-                      style: TextStyle(
-                        color: selected
-                            ? colorTheme.onTertiary
-                            : colorTheme.onSurface,
-                        fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: () async {
+                final picked = await showTimePicker(
+                  context: context,
+                  initialTime: time,
+                  builder: (context, child) {
+                    return MediaQuery(
+                      data: MediaQuery.of(
+                        context,
+                      ).copyWith(alwaysUse24HourFormat: is24HourFormat),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) setState(() => time = picked);
+              },
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: _formatTimeWithoutAmPm(
+                        time,
+                        is24HourFormat,
+                        context,
                       ),
-                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width / 5,
+                        fontFamily: "OpenSans",
+                        fontWeight: FontWeight.bold,
+                        color: colorTheme.onSurface,
+                      ),
                     ),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: selected
-                        ? BorderRadius.circular(50)
-                        : BorderRadius.only(
-                            topLeft: Radius.circular(firstRadius),
-                            bottomLeft: Radius.circular(firstRadius),
-                            bottomRight: Radius.circular(lastRadius),
-                            topRight: Radius.circular(lastRadius),
-                          ),
-                  ),
-                  showCheckmark: false,
-                  selectedColor: colorTheme.tertiary,
-                  padding: EdgeInsets.all(0),
-                  selected: selected,
-                  onSelected: (_) => toggleDay(dayNum),
+                    TextSpan(text: " "),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: Text(
+                        _getAmPm(time, is24HourFormat, context),
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width / 11,
+                          fontWeight: FontWeight.w500,
+                          color: colorTheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            }),
-          ),
+              ),
+            ),
 
-          SizedBox(height: 20),
-          SingleChildScrollView(
-            child: SettingSection(
+            SizedBox(height: 16),
+
+            Wrap(
+              spacing: 2,
+              children: List.generate(7, (index) {
+                const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+                final dayNum = index + 1;
+                final isFirst = index == 0;
+                final isLast = index == 6;
+
+                final firstRadius = isFirst ? 18.0 : 5.0;
+                final lastRadius = isLast ? 18.0 : 5.0;
+
+                final selected = repeatDays.contains(dayNum);
+
+                return SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: ChoiceChip(
+                    label: Center(
+                      child: Text(
+                        days[index],
+                        style: TextStyle(
+                          color: selected
+                              ? colorTheme.onTertiary
+                              : colorTheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: selected
+                          ? BorderRadius.circular(50)
+                          : BorderRadius.only(
+                              topLeft: Radius.circular(firstRadius),
+                              bottomLeft: Radius.circular(firstRadius),
+                              bottomRight: Radius.circular(lastRadius),
+                              topRight: Radius.circular(lastRadius),
+                            ),
+                    ),
+                    showCheckmark: false,
+                    selectedColor: colorTheme.tertiary,
+                    padding: EdgeInsets.all(0),
+                    selected: selected,
+                    onSelected: (_) => toggleDay(dayNum),
+                  ),
+                );
+              }),
+            ),
+
+            SizedBox(height: 20),
+            SettingSection(
               styleTile: true,
               tiles: [
                 SettingTextFieldTile(
@@ -225,106 +230,129 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                   description: Text(sound ?? 'Default'),
                   onTap: _pickSound,
                 ),
+                SettingSliderTile(
+                  title: Text("Snooze time"),
+                  dialogTitle: "Snooze",
+                  initialValue: snoozeTime!.round().toDouble(),
+                  min: 1,
+                  max: 30,
+                  divisions: 15,
+                  value: SettingTileValue("${snoozeTime.toString()} minutes"),
+                  label: (value) => "${value.round().toInt()}m",
+                  onSubmitted: (v) {
+                    setState(() {
+                      snoozeTime = v.round().toInt();
+                    });
+                  },
+                ),
               ],
             ),
-          ),
 
-          SizedBox(height: 16),
+            SizedBox(height: 16),
 
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: widget.alarm != null
-                      ? () {
-                          widget.onDelete?.call();
-                          Navigator.pop(context);
-                          SnackUtil.showSnackBar(
-                            context: context,
-                            message: "Alarm deleted",
-                          );
-                        }
-                      : () => Navigator.pop(context),
-                  icon: Icon(
-                    widget.alarm == null ? Icons.close : Icons.delete,
-                    size: 20,
-                  ),
-                  label: Text(
-                    widget.alarm == null ? 'Cancel' : 'Delete',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  style: FilledButton.styleFrom(
-                    minimumSize: Size(58, 58),
-                    backgroundColor: colorTheme.errorContainer,
-                    foregroundColor: colorTheme.onErrorContainer,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () {
-                    final sortedDays = List<int>.from(repeatDays)..sort();
-
-                    final id =
-                        widget.alarm?.id ??
-                        DateTime.now().millisecondsSinceEpoch;
-                    final newAlarm = Alarm(
-                      id: id,
-                      hour: time.hour,
-                      minute: time.minute,
-                      label: labelController.text.isEmpty
-                          ? 'Alarm'
-                          : labelController.text,
-                      enabled: true,
-                      repeatDays: sortedDays,
-                      vibrate: vibrate,
-                      sound: sound,
-                    );
-
-                    DateTime alarmTime = getNextAlarmTime(time, sortedDays);
-                    Duration diff = alarmTime.difference(DateTime.now());
-
-                    int totalMinutes = diff.inMinutes;
-
-                    int hours = totalMinutes ~/ 60;
-                    int minutes = totalMinutes % 60;
-
-                    String hoursText = hours > 0
-                        ? '$hours hour${hours > 1 ? 's' : ''} '
-                        : '';
-                    String minutesText = minutes > 0
-                        ? '$minutes minute${minutes > 1 ? 's' : ''}'
-                        : '';
-
-                    String timeText = (hoursText.isEmpty && minutesText.isEmpty)
-                        ? 'less than a minute'
-                        : '$hoursText$minutesText';
-
-                    final snackBar = SnackBar(
-                      content: Text('Alarm set for $timeText from now'),
-                      duration: Duration(seconds: 4),
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    Navigator.pop(context, newAlarm);
-                  },
-                  icon: Icon(Icons.save, size: 20),
-                  label: Text(
-                    widget.alarm == null ? 'Add' : 'Save',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  style: FilledButton.styleFrom(
-                    minimumSize: Size(58, 58),
-                    backgroundColor: colorTheme.tertiaryContainer,
-                    foregroundColor: colorTheme.onTertiaryContainer,
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: widget.alarm != null
+                        ? () {
+                            widget.onDelete?.call();
+                            Navigator.pop(context);
+                            SnackUtil.showSnackBar(
+                              context: context,
+                              message: "Alarm deleted",
+                            );
+                          }
+                        : () => Navigator.pop(context),
+                    icon: Icon(
+                      widget.alarm == null ? Icons.close : Icons.delete,
+                      size: 20,
+                    ),
+                    label: Text(
+                      widget.alarm == null ? 'Cancel' : 'Delete',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: Size(58, 58),
+                      backgroundColor: colorTheme.errorContainer,
+                      foregroundColor: colorTheme.onErrorContainer,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
-        ],
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      final sortedDays = List<int>.from(repeatDays)..sort();
+
+                      final id =
+                          widget.alarm?.id ??
+                          DateTime.now().millisecondsSinceEpoch;
+                      final newAlarm = Alarm(
+                        id: id,
+                        hour: time.hour,
+                        minute: time.minute,
+                        label: labelController.text.isEmpty
+                            ? 'Alarm'
+                            : labelController.text,
+                        enabled: true,
+                        repeatDays: sortedDays,
+                        vibrate: vibrate,
+                        sound: sound,
+                        snoozeMinutes: snoozeTime,
+                      );
+
+                      DateTime alarmTime = getNextAlarmTime(time, sortedDays);
+                      Duration diff = alarmTime.difference(DateTime.now());
+
+                      int totalMinutes = diff.inMinutes;
+
+                      int hours = totalMinutes ~/ 60;
+                      int minutes = totalMinutes % 60;
+
+                      String hoursText = hours > 0
+                          ? '$hours hour${hours > 1 ? 's' : ''} '
+                          : '';
+                      String minutesText = minutes > 0
+                          ? '$minutes minute${minutes > 1 ? 's' : ''}'
+                          : '';
+
+                      String timeText =
+                          (hoursText.isEmpty && minutesText.isEmpty)
+                          ? 'less than a minute'
+                          : '$hoursText$minutesText';
+
+                      final snackBar = SnackBar(
+                        content: Text('Alarm set for $timeText from now'),
+                        duration: Duration(seconds: 4),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      Navigator.pop(context, newAlarm);
+                    },
+                    icon: Icon(Icons.save, size: 20),
+                    label: Text(
+                      widget.alarm == null ? 'Add' : 'Save',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: Size(58, 58),
+                      backgroundColor: colorTheme.tertiaryContainer,
+                      foregroundColor: colorTheme.onTertiaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
       ),
     );
   }

@@ -29,6 +29,8 @@ class AlarmReceiver : BroadcastReceiver() {
         val sound = intent.getStringExtra("sound")
         val hour = intent.getIntExtra("hour", 7)
         val minute = intent.getIntExtra("minute", 0)
+        val snooze = intent.getIntExtra("snoozeTime", 5)
+
 
         val daysOfWeekFlutter = intent.getIntegerArrayListExtra("daysOfWeek")
             ?: intent.getIntegerArrayListExtra("repeatDays")
@@ -50,7 +52,6 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         // Log received data for debugging
-        Log.d(TAG, "onReceive: idLong=$idLong requestCode=$requestCode label=$label hour=$hour minute=$minute recurring=$recurring days=$daysOfWeek")
 
         val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
         val isLocked = keyguardManager.isKeyguardLocked
@@ -62,6 +63,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 putExtra("label", label)
                 putExtra("vibrate", vibrate)
                 putExtra("sound", sound)
+                putExtra("snoozeTime", snooze)
             }
 
             val fullScreenPendingIntent = PendingIntent.getActivity(
@@ -109,6 +111,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 putExtra("label", label)
                 putExtra("vibrate", vibrate)
                 putExtra("sound", sound)
+                putExtra("snoozeTime", snooze)
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -151,7 +154,6 @@ class AlarmReceiver : BroadcastReceiver() {
                 nextTriggerMillis = candidate.timeInMillis
             }
 
-            Log.d(TAG, "scheduling next alarm: nextTriggerMillis=$nextTriggerMillis (release)")
 
             val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
@@ -161,6 +163,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 putExtra("sound", sound)
                 putExtra("hour", hour)
                 putExtra("minute", minute)
+                putExtra("snoozeTime", snooze)
                 putIntegerArrayListExtra("daysOfWeek", ArrayList(daysOfWeekFlutter))
                 putExtra("recurring", recurring)
             }

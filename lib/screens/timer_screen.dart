@@ -1001,11 +1001,15 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                       transitionDuration: Duration(
                                         milliseconds: 500,
                                       ),
+                                      openElevation: 0,
+                                      openShape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
                                       transitionType:
                                           ContainerTransitionType.fadeThrough,
                                       openColor: colorTheme.surface,
                                       closedShape: RoundedRectangleBorder(
-                                        // borderRadius: BorderRadius.circular(18),
+                                        borderRadius: BorderRadius.circular(18),
                                       ),
                                       closedBuilder: (context, openContainer) {
                                         return Container(

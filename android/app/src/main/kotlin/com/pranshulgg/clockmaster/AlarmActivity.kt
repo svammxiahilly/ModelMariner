@@ -65,6 +65,8 @@ class AlarmActivity : ComponentActivity() {
         val label = intent.getStringExtra("label") ?: "Alarm"
         vibrateEnabled = intent.getBooleanExtra("vibrate", false)
         soundUri = intent.getStringExtra("sound")
+        val snooze = intent.getIntExtra("snoozeTime", 5)
+
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(
@@ -96,9 +98,10 @@ class AlarmActivity : ComponentActivity() {
         }
         findViewById<Button>(R.id.btn_snooze).setOnClickListener {
             stopAlarm()
-            scheduleSnooze(alarmId, 5, label)
+            scheduleSnooze(alarmId, snooze, label)
             finish()
             refreshAlwaysOnService()
+
         }
 
         // Play custom sound
@@ -152,11 +155,18 @@ class AlarmActivity : ComponentActivity() {
         val am = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
         val trigger = System.currentTimeMillis() + minutes * 60 * 1000L
 
+        android.widget.Toast.makeText(
+            this@AlarmActivity,
+            "Snoozed for $minutes ${if (minutes == 1) "minute" else "minutes"}",
+            android.widget.Toast.LENGTH_LONG
+        ).show()
+
         val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
             putExtra("id", id)
             putExtra("label", "Snoozed Alarm • $label")
             putExtra("vibrate", vibrateEnabled)
             putExtra("sound", soundUri)
+            putExtra("snoozeTime", minutes)
         }
         val pending = android.app.PendingIntent.getBroadcast(
             this, id, alarmIntent,

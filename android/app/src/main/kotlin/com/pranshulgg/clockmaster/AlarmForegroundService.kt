@@ -41,6 +41,8 @@ class AlarmForegroundService : Service() {
         val vibrate = intent?.getBooleanExtra("vibrate", false) ?: false
         val soundUriString = intent?.getStringExtra("sound")
         val soundUri = soundUriString?.let { Uri.parse(it) } ?: Settings.System.DEFAULT_ALARM_ALERT_URI
+        val snooze = intent?.getIntExtra("snoozeTime", 5)
+
 
         if (intent?.action == ACTION_STOP) {
             stopSelf()
@@ -54,6 +56,7 @@ class AlarmForegroundService : Service() {
             putExtra("label", label)
             putExtra("vibrate", vibrate)
             putExtra("sound", soundUri.toString())
+            putExtra("snoozeTime", snooze)
         }
         val snoozePendingIntent = PendingIntent.getBroadcast(
             this,
@@ -78,6 +81,8 @@ class AlarmForegroundService : Service() {
             putExtra("label", label)
             putExtra("vibrate", vibrate)
             putExtra("sound", soundUri.toString())
+            putExtra("snoozeTime", snooze)
+
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(

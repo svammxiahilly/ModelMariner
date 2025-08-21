@@ -59,7 +59,7 @@ class Alarm {
     'repeatDays': repeatDays,
     'vibrate': vibrate,
     'sound': sound,
-    'snoozeMinutes': snoozeMinutes,
+    'worl': snoozeMinutes,
   };
 
   factory Alarm.fromMap(Map<String, dynamic> m) => Alarm(

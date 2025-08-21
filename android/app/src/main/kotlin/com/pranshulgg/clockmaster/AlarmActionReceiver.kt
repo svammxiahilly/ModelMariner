@@ -30,6 +30,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 val label = intent.getStringExtra("label") ?: "Snoozed Alarm"
                 val vibrate = intent.getBooleanExtra("vibrate", false)
                 val sound = intent.getStringExtra("sound")
+                val snooze = intent.getIntExtra("snoozeTime", 5)
 
 
                 val stopIntent = Intent(context, AlarmForegroundService::class.java)
@@ -37,13 +38,21 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 context.startService(stopIntent)
 
 
-                val trigger = System.currentTimeMillis() + 5 * 60 * 1000L
+                val trigger = System.currentTimeMillis() + snooze * 60 * 1000L
+
+                android.widget.Toast.makeText(
+                    context,
+                    "Snoozed for $snooze ${if (snooze == 1) "minute" else "minutes"}",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+
 
                 val alarmIntent = Intent(context, AlarmForegroundService::class.java).apply {
                     putExtra("id", alarmId)
                     putExtra("label", label)
                     putExtra("vibrate", vibrate)
                     putExtra("sound", sound)
+                    putExtra("snoozeTime", snooze)
                 }
                 val pending = PendingIntent.getService(
                     context,

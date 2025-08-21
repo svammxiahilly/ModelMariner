@@ -28,7 +28,7 @@ class TimerModel {
   factory TimerModel.fromMap(Map<String, dynamic> m) => TimerModel(
     id: m['id'],
     label: m['label'],
-    uiLabel: m['uilabel'],
+    uiLabel: m['uiLabel'],
     remainingSeconds: m['remainingSeconds'],
     initialSeconds: m['initialSeconds'],
     isRunning: m['isRunning'],

@@ -58,6 +58,7 @@ class AlarmService {
         'hour': alarm.hour,
         'minute': alarm.minute,
         'repeatDays': sortedDays,
+        'snoozeMinutes': alarm.snoozeMinutes,
       });
     } on PlatformException {}
   }

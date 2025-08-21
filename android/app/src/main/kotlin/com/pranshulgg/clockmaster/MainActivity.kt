@@ -53,7 +53,9 @@ class MainActivity: FlutterActivity() {
           val minute = call.argument<Int>("minute") ?: 0
           val repeatDays = call.argument<List<Int>>("repeatDays") ?: listOf<Int>()
           val vibrate = call.argument<Boolean>("vibrate") ?: false
-          scheduleAlarm(id, triggerAtMillisUtc, label, recurring, sound, hour, minute, repeatDays, vibrate)
+          val snoozeTimer = call.argument<Int>("snoozeMinutes") ?: 5
+
+          scheduleAlarm(id, triggerAtMillisUtc, label, recurring, sound, hour, minute, repeatDays, vibrate, snoozeTimer)
           result.success(null)
         }
         "cancelAlarm" -> {
@@ -133,7 +135,8 @@ class MainActivity: FlutterActivity() {
     hour: Int,
     minute: Int,
     repeatDays: List<Int>,
-    vibrate: Boolean
+    vibrate: Boolean,
+    snoozeTimer: Int,
   ) {
     val am = getSystemService(ALARM_SERVICE) as AlarmManager
 
@@ -144,9 +147,10 @@ class MainActivity: FlutterActivity() {
       putExtra("sound", sound)
       putExtra("hour", hour)
       putExtra("minute", minute)
-      putIntegerArrayListExtra("daysOfWeek", ArrayList(repeatDays)) // Flutter -> Kotlin list
+      putIntegerArrayListExtra("daysOfWeek", ArrayList(repeatDays))
       putExtra("recurring", recurring)
       putExtra("vibrate", vibrate)
+      putExtra("snoozeTime", snoozeTimer)
 
     }
 

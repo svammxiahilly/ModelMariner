@@ -271,8 +271,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 closedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
+                openShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                openElevation: 0,
+                transitionDuration: Duration(milliseconds: 500),
                 closedColor: colorTheme.tertiaryContainer,
                 openColor: colorTheme.surfaceContainerHigh,
+
                 closedBuilder: (context, openContainer) {
                   return SizedBox(
                     height: 80,
@@ -285,6 +291,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       heroTag: "idk_random_tag",
                       elevation: 0,
                       highlightElevation: 0,
+
                       backgroundColor: colorTheme.tertiaryContainer,
                       foregroundColor: colorTheme.onTertiaryContainer,
                       child: IconWithWeight(Symbols.add),
