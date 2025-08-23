@@ -245,7 +245,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
               const PopupMenuItem<String>(
                 value: 'openScreenSaver',
-                padding: EdgeInsets.only(left: 14),
+                padding: EdgeInsets.only(left: 14, right: 6),
                 child: Text(
                   'Screen saver',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),

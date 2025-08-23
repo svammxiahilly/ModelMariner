@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import '../utils/font_variation.dart';
 
 @pragma('vm:entry-point')
 void startCallback() {
@@ -298,9 +298,9 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
 
     final lapDuration = _lapDurations[index];
     if (lapDuration.inMilliseconds == fastestLap.inMilliseconds) {
-      return Colors.green;
+      return Color(0xffb1d18a);
     } else if (lapDuration.inMilliseconds == slowestLap.inMilliseconds) {
-      return Colors.red;
+      return Color(0xffffb4ab);
     } else {
       return colorTheme.secondary;
     }
@@ -337,7 +337,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                 key: ValueKey<String>(elapsedStr),
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.width / 3.5,
-                  fontFamily: "FunFont2",
+                  fontVariations: fontVariationsBold,
                 ),
               ),
             ),
@@ -384,14 +384,18 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                             style: TextStyle(
                               color: lapColor,
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontVariations: fontVariationsSemiBold,
                             ),
                           ),
 
                           Text(
                             lapTime,
 
-                            style: TextStyle(color: lapColor, fontSize: 16),
+                            style: TextStyle(
+                              color: lapColor,
+                              fontSize: 16,
+                              fontVariations: fontVariationsSemiBold,
+                            ),
                           ),
                         ],
                       ),

@@ -138,7 +138,11 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                 style: TextStyle(
                                   fontSize:
                                       MediaQuery.of(context).size.width / 5,
-                                  fontWeight: FontWeight.w200,
+                                  fontFamily: "FlexFont",
+                                  fontVariations: const [
+                                    FontVariation('wght', 200),
+                                    FontVariation('ROND', 100),
+                                  ],
                                   color: colorTheme.onSurface,
                                 ),
                               ),
@@ -152,7 +156,11 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                     fontSize:
                                         MediaQuery.of(context).size.width /
                                         12, // smaller size
-                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "FlexFont",
+                                    fontVariations: const [
+                                      FontVariation('wght', 450),
+                                      FontVariation('ROND', 100),
+                                    ],
                                     color: colorTheme.onSurfaceVariant,
                                   ),
                                 ),
@@ -178,7 +186,10 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                           "Saved timezones",
                           style: TextStyle(
                             color: colorTheme.primary,
-                            fontWeight: FontWeight.w600,
+                            fontVariations: const [
+                              FontVariation('wght', 600),
+                              FontVariation('ROND', 100),
+                            ],
                           ),
                         ),
                       )

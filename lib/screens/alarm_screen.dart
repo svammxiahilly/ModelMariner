@@ -8,6 +8,8 @@ import '../utils/snack_util.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import '../notifiers/settings_notifier.dart';
 import 'package:provider/provider.dart';
+import '../utils/font_variation.dart';
+import 'dart:async';
 
 class AlarmScreen extends StatefulWidget {
   const AlarmScreen({super.key});
@@ -138,165 +140,191 @@ class AlarmScreenState extends State<AlarmScreen> {
                 ),
               ),
             )
-          : ListView.separated(
+          : ReorderableListView.builder(
               padding: const EdgeInsets.fromLTRB(13, 0, 13, 130),
+              onReorder: (oldIndex, newIndex) async {
+                if (newIndex > oldIndex) newIndex--;
+                final movedAlarm = alarms.removeAt(oldIndex);
+                alarms.insert(newIndex, movedAlarm);
 
+                setState(() {});
+
+                await AlarmService.instance.saveAlarms(alarms);
+              },
+
+              proxyDecorator: (child, index, animation) {
+                return Material(type: MaterialType.transparency, child: child);
+              },
               itemCount: alarms.length,
-              separatorBuilder: (context, i) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 final a = alarms[i];
                 final resultAlarms = getTimeAndAmPm(a);
                 final isLast = i == alarms.length - 1;
 
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Dismissible(
-                    key: ValueKey(a.id),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: colorTheme.errorContainer,
-                      ),
-                      child: Icon(
-                        Icons.delete,
-                        color: colorTheme.onErrorContainer,
-                      ),
-                    ),
-                    onDismissed: (direction) {
-                      _delete(a);
-                      SnackUtil.showSnackBar(
-                        context: context,
-                        message: "Alarm deleted",
-                      );
-                    },
-                    child: GestureDetector(
-                      child: Container(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          bottom: 10,
-                          top: 10,
-                        ),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  key: ValueKey(a.id),
+
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+
+                    child: Dismissible(
+                      key: ValueKey(a.id),
+
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
-                          color: a.enabled
-                              ? themeBrightness == Brightness.dark
-                                    ? colorTheme.onPrimary
-                                    : colorTheme.primaryContainer
-                              : colorTheme.surfaceContainerLow,
+                          color: colorTheme.errorContainer,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _repeatDaysText(a.repeatDays),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: colorTheme.onSurfaceVariant,
+                        child: Icon(
+                          Icons.delete,
+                          color: colorTheme.onErrorContainer,
+                        ),
+                      ),
+                      onDismissed: (direction) {
+                        _delete(a);
+                        SnackUtil.showSnackBar(
+                          context: context,
+                          message: "Alarm deleted",
+                        );
+                      },
+                      child: GestureDetector(
+                        child: Container(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: 10,
+                            top: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: a.enabled
+                                ? themeBrightness == Brightness.dark
+                                      ? colorTheme.onPrimary
+                                      : colorTheme.primaryContainer
+                                : colorTheme.surfaceContainerLow,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _repeatDaysText(a.repeatDays),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontVariations: fontVariationsMedium,
+                                      color: colorTheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 2),
-                                RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: resultAlarms['time'],
-                                        style: TextStyle(
-                                          fontSize: 53,
-                                          fontFamily: "FunFont2",
-                                          color: a.enabled
-                                              ? colorTheme.onSurface
-                                              : colorTheme.onSurfaceVariant,
-                                          height: 1.25,
-                                        ),
-                                      ),
-                                      TextSpan(text: " "),
-                                      WidgetSpan(
-                                        alignment:
-                                            PlaceholderAlignment.baseline,
-                                        baseline: TextBaseline.alphabetic,
-                                        child: Text(
-                                          resultAlarms['ampm'].toString(),
+                                  SizedBox(height: 2),
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: resultAlarms['time'],
                                           style: TextStyle(
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.w500,
-                                            color: colorTheme.onSurfaceVariant,
+                                            fontSize: 53,
+                                            fontFamily: 'FlexFont',
+                                            fontVariations:
+                                                fontVariationsMedium,
+                                            color: a.enabled
+                                                ? colorTheme.onSurface
+                                                : colorTheme.onSurfaceVariant,
+                                            height: 1.25,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        TextSpan(text: " "),
+                                        WidgetSpan(
+                                          alignment:
+                                              PlaceholderAlignment.baseline,
+                                          baseline: TextBaseline.alphabetic,
+                                          child: Text(
+                                            resultAlarms['ampm'].toString(),
+                                            style: TextStyle(
+                                              fontSize: 26,
+                                              fontFamily: 'FlexFont',
+                                              fontVariations:
+                                                  fontVariationsMedium,
+                                              color:
+                                                  colorTheme.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  a.label,
-                                  style: TextStyle(
-                                    height: 1,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorTheme.secondary,
+                                  Text(
+                                    a.label,
+                                    style: TextStyle(
+                                      height: 1,
+                                      fontSize: 16,
+                                      fontVariations: fontVariationsSemiBold,
+                                      color: colorTheme.secondary,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            // Column(
-                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                            //   children: [
-                            Switch(
-                              value: a.enabled,
-                              thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-                                (states) =>
-                                    states.contains(WidgetState.selected)
-                                    ? Icon(
-                                        Icons.notifications_active,
-                                        color: colorTheme.primary,
-                                      )
-                                    : null,
+                                ],
                               ),
-                              onChanged: (v) async {
-                                a.enabled = v;
-                                await _saveAndSchedule(a);
-                                setState(() {});
-                              },
-                              // ),
-                              // ],
-                            ),
-                          ],
-                        ),
-                      ),
+                              // Column(
+                              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                      onTap: () {
-                        showModalBottomSheet<Alarm>(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: colorTheme.surface,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(28),
-                            ),
+                              //   children: [
+                              Switch(
+                                value: a.enabled,
+                                thumbIcon:
+                                    WidgetStateProperty.resolveWith<Icon?>(
+                                      (states) =>
+                                          states.contains(WidgetState.selected)
+                                          ? Icon(
+                                              Icons.notifications_active,
+                                              color: colorTheme.primary,
+                                            )
+                                          : null,
+                                    ),
+                                onChanged: (v) async {
+                                  a.enabled = v;
+                                  await _saveAndSchedule(a);
+                                  setState(() {});
+                                },
+                                // ),
+                                // ],
+                              ),
+                            ],
                           ),
-                          builder: (context) => Padding(
-                            padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+
+                        onTap: () {
+                          showModalBottomSheet<Alarm>(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: colorTheme.surface,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(28),
+                              ),
                             ),
-                            child: AlarmEditContent(
-                              alarm: a,
-                              is24HourFormat: is24HourFormat,
-                              onDelete: a != null ? () => _delete(a) : null,
+                            builder: (context) => Padding(
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(
+                                  context,
+                                ).viewInsets.bottom,
+                              ),
+                              child: AlarmEditContent(
+                                alarm: a,
+                                is24HourFormat: is24HourFormat,
+                                onDelete: a != null ? () => _delete(a) : null,
+                              ),
                             ),
-                          ),
-                        ).then((result) async {
-                          if (result is Alarm) {
-                            await _saveAndSchedule(result);
-                          }
-                        });
-                      },
+                          ).then((result) async {
+                            if (result is Alarm) {
+                              await _saveAndSchedule(result);
+                            }
+                          });
+                        },
+                      ),
                     ),
                   ),
                 );

@@ -3,6 +3,7 @@ import '../models/alarm_data_model.dart';
 import 'package:settings_tiles/settings_tiles.dart';
 import 'package:flutter/services.dart';
 import '../utils/snack_util.dart';
+import '../utils/font_variation.dart';
 
 class AlarmEditContent extends StatefulWidget {
   final Alarm? alarm;
@@ -129,8 +130,8 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                       ),
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width / 5,
-                        fontFamily: "OpenSans",
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'FlexFont',
+                        fontVariations: fontVariationsBold,
                         color: colorTheme.onSurface,
                       ),
                     ),
@@ -142,7 +143,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                         _getAmPm(time, is24HourFormat, context),
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.width / 11,
-                          fontWeight: FontWeight.w500,
+                          fontVariations: fontVariationsMedium,
                           color: colorTheme.onSurfaceVariant,
                         ),
                       ),
@@ -178,7 +179,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                           color: selected
                               ? colorTheme.onTertiary
                               : colorTheme.onSurface,
-                          fontWeight: FontWeight.bold,
+                          fontVariations: fontVariationsBold,
                         ),
                         textAlign: TextAlign.center,
                       ),
