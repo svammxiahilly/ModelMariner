@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
           ).copyWith(
             textTheme: ThemeData.light().textTheme.apply(
-              fontFamily: 'OpenSans',
+              fontFamily: 'FlexFont',
             ),
             highlightColor: Colors.transparent,
 
@@ -107,7 +107,7 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ).copyWith(
-            textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'OpenSans'),
+            textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'FlexFont'),
             highlightColor: Colors.transparent,
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {

@@ -85,20 +85,11 @@ flutter:
   uses-material-design: true
 
   fonts:
-    - family: OpenSans
+    - family: FlexFont
       fonts:
-        - asset: assets/fonts/Regular.ttf
+        - asset: assets/fonts/flex_font.ttf
           weight: 400
-        - asset: assets/fonts/Medium.ttf
-          weight: 500
-    - family: FunFont1
-      fonts:
-        - asset: assets/fonts/fun_font_1.ttf
-          weight: 400
-    - family: FunFont2
-      fonts:
-        - asset: assets/fonts/fun_font_2.ttf
-          weight: 400
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
