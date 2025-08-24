@@ -167,9 +167,9 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
             i,
             (context, animation) => FadeTransition(
               opacity: animation,
-              child: ListTile(
-                leading: Text('Lap ${i + 1}'),
-                trailing: Text(removedItem),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Text("Lap ${i + 1}"), Text(removedItem)],
               ),
             ),
             duration: Duration(milliseconds: 200),
@@ -265,9 +265,9 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
         i,
         (context, animation) => FadeTransition(
           opacity: animation,
-          child: ListTile(
-            leading: Text('Lap ${i + 1}'),
-            trailing: Text(removedItem),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Text("Lap ${i + 1}"), Text(removedItem)],
           ),
         ),
         duration: Duration(milliseconds: 200),
