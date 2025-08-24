@@ -138,10 +138,10 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                 style: TextStyle(
                                   fontSize:
                                       MediaQuery.of(context).size.width / 5,
-                                  fontFamily: "FlexFont",
-                                  fontVariations: const [
-                                    FontVariation('wght', 200),
-                                    FontVariation('ROND', 100),
+                                  fontFamily: "FunFont",
+                                  fontVariations: [
+                                    FontVariation.weight(200),
+                                    FontVariation("ROND", 100),
                                   ],
                                   color: colorTheme.onSurface,
                                 ),
@@ -157,10 +157,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                         MediaQuery.of(context).size.width /
                                         12, // smaller size
                                     fontFamily: "FlexFont",
-                                    fontVariations: const [
-                                      FontVariation('wght', 450),
-                                      FontVariation('ROND', 100),
-                                    ],
+
                                     color: colorTheme.onSurfaceVariant,
                                   ),
                                 ),
@@ -185,11 +182,9 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                         child: Text(
                           "Saved timezones",
                           style: TextStyle(
+                            fontSize: 16,
                             color: colorTheme.primary,
-                            fontVariations: const [
-                              FontVariation('wght', 600),
-                              FontVariation('ROND', 100),
-                            ],
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       )

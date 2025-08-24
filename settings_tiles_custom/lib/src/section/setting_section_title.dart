@@ -17,11 +17,8 @@ class SettingSectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          fontVariations: const [
-            FontVariation('wght', 700),
-            FontVariation('ROND', 100),
-          ],
           fontSize: 16,
+          fontWeight: FontWeight.w700,
           color: Theme.of(context).colorScheme.primary,
         ),
       ),

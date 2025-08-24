@@ -7,11 +7,11 @@ import 'package:flutter/services.dart';
 import 'helpers/preferences_helper.dart';
 import 'controllers/theme_controller.dart';
 import 'package:provider/provider.dart';
-import 'screens/alarm_screen.dart';
 import 'services/alarm_service.dart';
 import 'notifiers/settings_notifier.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +36,8 @@ void main() async {
   await themeController.checkDynamicColorSupport();
 
   WakelockPlus.enable();
+
+  await FlutterDisplayMode.setHighRefreshRate();
 
   // FlutterForegroundTask.init(
   //   androidNotificationOptions: AndroidNotificationOptions(
@@ -83,8 +85,9 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
           ).copyWith(
             textTheme: ThemeData.light().textTheme.apply(
-              fontFamily: 'FlexFont',
+              fontFamily: 'DefaultFont',
             ),
+
             highlightColor: Colors.transparent,
 
             pageTransitionsTheme: const PageTransitionsTheme(
@@ -107,7 +110,9 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ).copyWith(
-            textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'FlexFont'),
+            textTheme: ThemeData.dark().textTheme.apply(
+              fontFamily: 'DefaultFont',
+            ),
             highlightColor: Colors.transparent,
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {

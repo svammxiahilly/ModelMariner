@@ -3,7 +3,6 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import '../utils/font_variation.dart';
 
 @pragma('vm:entry-point')
 void startCallback() {
@@ -337,7 +336,11 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                 key: ValueKey<String>(elapsedStr),
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.width / 3.5,
-                  fontVariations: fontVariationsBold,
+                  fontFamily: "FunFont",
+                  fontVariations: [
+                    FontVariation.weight(600),
+                    FontVariation("ROND", 100),
+                  ],
                 ),
               ),
             ),
@@ -381,21 +384,13 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                           Text(
                             "#$lapNum",
 
-                            style: TextStyle(
-                              color: lapColor,
-                              fontSize: 16,
-                              fontVariations: fontVariationsSemiBold,
-                            ),
+                            style: TextStyle(color: lapColor, fontSize: 16),
                           ),
 
                           Text(
                             lapTime,
 
-                            style: TextStyle(
-                              color: lapColor,
-                              fontSize: 16,
-                              fontVariations: fontVariationsSemiBold,
-                            ),
+                            style: TextStyle(color: lapColor, fontSize: 16),
                           ),
                         ],
                       ),

@@ -11,6 +11,8 @@ import android.os.Build
 import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
@@ -67,14 +69,15 @@ class AlarmActionReceiver : BroadcastReceiver() {
                     am.setExact(AlarmManager.RTC_WAKEUP, trigger, pending)
                 }
 
-                refreshAlwaysOnService(context);
+
             }
 
             "com.pranshulgg.clockmaster.ACTION_STOP" -> {
                 val stopIntent = Intent(context, AlarmForegroundService::class.java)
                 stopIntent.setAction(AlarmForegroundService.ACTION_STOP)
                 context.startService(stopIntent)
-                refreshAlwaysOnService(context);
+
+
             }
         }
 
@@ -82,18 +85,6 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
     }
 
-    private fun refreshAlwaysOnService(context: Context) {
-        val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val alwaysRunService = prefs.getBoolean("flutter.alwaysRunService", false)
 
-        if (alwaysRunService) {
-            val intent = Intent(context, AlwaysOnAlarmService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
-        }
-    }
 
 }

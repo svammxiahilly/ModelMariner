@@ -67,8 +67,11 @@ class MainActivity: FlutterActivity() {
           pendingResult = result
           val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
             putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true)
             putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Alarm Sound")
+            val defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, defaultUri)
           }
           startActivityForResult(intent, 1234)
         }
@@ -83,6 +86,28 @@ class MainActivity: FlutterActivity() {
       }
     }
   }
+
+override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == 1234 && resultCode == RESULT_OK) {
+        val pickedUri = data?.getParcelableExtra<android.net.Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+
+        val soundUriString = pickedUri?.toString() ?: "default"
+        val ringtoneTitle = pickedUri?.let { uri ->
+            RingtoneManager.getRingtone(this, uri)?.getTitle(this)
+        } ?: "Default"
+
+        val resultMap = mapOf(
+            "uri" to soundUriString,
+            "title" to ringtoneTitle
+        )
+        pendingResult?.success(resultMap)
+        pendingResult = null
+    } else if (requestCode == 1234) {
+        pendingResult?.success(null)
+        pendingResult = null
+    }
+}
 
   private fun isNotificationPermissionGranted(): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

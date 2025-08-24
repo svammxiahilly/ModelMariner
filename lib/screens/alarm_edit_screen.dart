@@ -3,7 +3,7 @@ import '../models/alarm_data_model.dart';
 import 'package:settings_tiles/settings_tiles.dart';
 import 'package:flutter/services.dart';
 import '../utils/snack_util.dart';
-import '../utils/font_variation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AlarmEditContent extends StatefulWidget {
   final Alarm? alarm;
@@ -25,7 +25,10 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
   late TextEditingController labelController;
   List<int> repeatDays = [];
   bool vibrate = true;
+  String displaySound = 'Default';
+
   String? sound;
+
   int snoozeTime = 5;
 
   @override
@@ -56,15 +59,39 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
   Future<void> _pickSound() async {
     const channel = MethodChannel('com.pranshulgg.alarm/alarm');
     try {
-      final pickedSound = await channel.invokeMethod<String>('pickSound');
+      final Map? pickedSound = await channel.invokeMethod('pickSound');
       if (pickedSound != null) {
         setState(() {
-          sound = pickedSound;
+          sound = pickedSound['uri'] as String?;
+          displaySound = pickedSound['title'] as String? ?? 'Default';
         });
+        if (sound != null) {
+          await _saveSound(sound!, displaySound);
+        }
       }
     } catch (e) {
       debugPrint("Sound picking failed: $e");
     }
+  }
+
+  Future<void> _loadSavedSound() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedSound = prefs.getString('alarm_sound');
+    final savedSoundTitle = prefs.getString('alarm_sound_title');
+
+    if (savedSound != null) {
+      setState(() {
+        sound = savedSound;
+        displaySound = savedSoundTitle
+            .toString(); // optional, or store the title too
+      });
+    }
+  }
+
+  Future<void> _saveSound(String uri, String title) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('alarm_sound', uri);
+    await prefs.setString('alarm_sound_title', title);
   }
 
   @override
@@ -75,6 +102,8 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
     if (labelController.text.isEmpty) {
       labelController.text = "Your label";
     }
+
+    _loadSavedSound();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -130,8 +159,11 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                       ),
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width / 5,
-                        fontFamily: 'FlexFont',
-                        fontVariations: fontVariationsBold,
+                        fontFamily: 'FunFont',
+                        fontVariations: [
+                          FontVariation.weight(600),
+                          FontVariation("ROND", 100),
+                        ],
                         color: colorTheme.onSurface,
                       ),
                     ),
@@ -143,7 +175,6 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                         _getAmPm(time, is24HourFormat, context),
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.width / 11,
-                          fontVariations: fontVariationsMedium,
                           color: colorTheme.onSurfaceVariant,
                         ),
                       ),
@@ -179,7 +210,6 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                           color: selected
                               ? colorTheme.onTertiary
                               : colorTheme.onSurface,
-                          fontVariations: fontVariationsBold,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -228,7 +258,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
 
                 SettingActionTile(
                   title: const Text('Sound'),
-                  description: Text(sound ?? 'Default'),
+                  description: Text(displaySound),
                   onTap: _pickSound,
                 ),
                 SettingSliderTile(
@@ -272,10 +302,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                     ),
                     label: Text(
                       widget.alarm == null ? 'Cancel' : 'Delete',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 18),
                     ),
                     style: FilledButton.styleFrom(
                       minimumSize: Size(58, 58),
@@ -337,10 +364,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                     icon: Icon(Icons.save, size: 20),
                     label: Text(
                       widget.alarm == null ? 'Add' : 'Save',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 18),
                     ),
                     style: FilledButton.styleFrom(
                       minimumSize: Size(58, 58),

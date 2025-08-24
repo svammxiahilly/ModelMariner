@@ -85,10 +85,6 @@ abstract class SettingTile extends StatelessWidget {
         style: textWidget.style ??
             const TextStyle(
               fontSize: 16.5,
-              fontVariations: const [
-                FontVariation('wght', 460),
-                FontVariation('ROND', 100),
-              ],
             ),
         maxLines: textWidget.maxLines,
         overflow: textWidget.overflow,
@@ -104,13 +100,7 @@ abstract class SettingTile extends StatelessWidget {
       final textWidget = description as Text;
       return Text(
         textWidget.data ?? '',
-        style: textWidget.style ??
-            const TextStyle(
-              fontVariations: const [
-                FontVariation('wght', 450),
-                FontVariation('ROND', 0),
-              ],
-            ),
+        style: textWidget.style ?? const TextStyle(),
         maxLines: textWidget.maxLines,
         overflow: textWidget.overflow,
         textAlign: textWidget.textAlign,

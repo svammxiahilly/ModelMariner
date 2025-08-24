@@ -299,7 +299,11 @@ class _DigitalClockState extends State<DigitalClock> {
 
               style: TextStyle(
                 fontSize: 76,
-
+                fontFamily: "FunFont",
+                fontVariations: [
+                  FontVariation("ROND", 100),
+                  FontVariation("wght", 600),
+                ],
                 color: isNightMode
                     ? Colors.grey[700]
                     : colorTheme.onPrimaryContainer,

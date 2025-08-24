@@ -238,18 +238,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               const PopupMenuItem<String>(
                 value: 'openSettings',
                 padding: EdgeInsets.only(left: 14),
-                child: Text(
-                  'Settings',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
+                child: Text('Settings', style: TextStyle(fontSize: 16)),
               ),
               const PopupMenuItem<String>(
                 value: 'openScreenSaver',
                 padding: EdgeInsets.only(left: 14, right: 6),
-                child: Text(
-                  'Screen saver',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
+                child: Text('Screen saver', style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
@@ -375,7 +369,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
         onDestinationSelected: _onItemTapped,
         labelTextStyle: WidgetStateProperty.all(
-          TextStyle(fontWeight: FontWeight.w500),
+          TextStyle(fontWeight: FontWeight.w500, color: colorTheme.onSurface),
         ),
 
         destinations: const [

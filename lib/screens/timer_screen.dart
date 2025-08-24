@@ -11,7 +11,6 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:animations/animations.dart';
 import '../models/timer_model.dart';
 import 'full_screen_timer.dart';
-import '../utils/font_variation.dart';
 import '../services/timer_service.dart';
 
 class TimerScreen extends StatefulWidget {
@@ -406,7 +405,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Cancel',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
             ),
           ),
           TextButton(
@@ -418,7 +417,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             },
             child: Text(
               'Save',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
             ),
           ),
         ],
@@ -654,57 +653,65 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           ),
                         ),
                       )
-                    : ListView.builder(
+                    : ReorderableListView.builder(
                         itemCount: timers.length,
+                        onReorder: (oldIndex, newIndex) async {
+                          if (newIndex > oldIndex) newIndex--;
+                          final movedAlarm = timers.removeAt(oldIndex);
+                          timers.insert(newIndex, movedAlarm);
+
+                          setState(() {});
+
+                          await _persistTimers();
+                        },
                         itemBuilder: (ctx, i) {
                           final t = timers[i];
 
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
+                          return Padding(
+                            key: ValueKey(t.id),
 
-                            child: Dismissible(
-                              key: ValueKey(t.id),
-                              direction: DismissDirection.endToStart,
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                decoration: BoxDecoration(
-                                  color: colorTheme.errorContainer,
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(18),
+
+                              child: Dismissible(
+                                key: ValueKey(t.id),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  decoration: BoxDecoration(
+                                    color: colorTheme.errorContainer,
+                                  ),
+                                  child: Icon(
+                                    Icons.delete,
+                                    color: colorTheme.onErrorContainer,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.delete,
-                                  color: colorTheme.onErrorContainer,
-                                ),
-                              ),
-                              onDismissed: (_) {
-                                _deleteTimer(t);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Timer deleted')),
-                                );
-                              },
-                              child: ValueListenableBuilder<int>(
-                                valueListenable: t.remainingNotifier,
-                                builder: (context, remaining, _) {
-                                  final progress = t.currentDuration > 0
-                                      ? 1 -
-                                            (t.remainingSeconds /
-                                                t.currentDuration)
-                                      : 0.0;
+                                onDismissed: (_) {
+                                  _deleteTimer(t);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Timer deleted')),
+                                  );
+                                },
+                                child: ValueListenableBuilder<int>(
+                                  valueListenable: t.remainingNotifier,
+                                  builder: (context, remaining, _) {
+                                    final progress = t.currentDuration > 0
+                                        ? 1 -
+                                              (t.remainingSeconds /
+                                                  t.currentDuration)
+                                        : 0.0;
 
-                                  final tileColor = remaining == 0
-                                      ? colorTheme.primaryContainer
-                                      : colorTheme.surfaceContainerLow;
+                                    final tileColor = remaining == 0
+                                        ? colorTheme.primaryContainer
+                                        : colorTheme.surfaceContainerLow;
 
-                                  final finished = remaining == 0;
+                                    final finished = remaining == 0;
 
-                                  final isLast = i == timers.length - 1;
+                                    final isLast = i == timers.length - 1;
 
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      // bottom: isLast ? 130 : 8,
-                                      // bottom: 8,
-                                    ),
-                                    child: OpenContainer(
+                                    return OpenContainer(
                                       closedElevation: 0,
                                       closedColor: tileColor,
                                       transitionDuration: Duration(
@@ -744,8 +751,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                   style: TextStyle(
                                                     height: 1,
                                                     fontSize: 16,
-                                                    fontVariations:
-                                                        fontVariationsMedium,
                                                     color: colorTheme.secondary,
                                                   ),
                                                 ),
@@ -760,8 +765,16 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                     _format(remaining),
                                                     style: TextStyle(
                                                       fontSize: 45,
-                                                      fontVariations:
-                                                          fontVariationsMedium,
+                                                      fontFamily: "FunFont",
+                                                      fontVariations: [
+                                                        FontVariation.weight(
+                                                          600,
+                                                        ),
+                                                        FontVariation(
+                                                          "ROND",
+                                                          100,
+                                                        ),
+                                                      ],
                                                       color: t.isRunning
                                                           ? colorTheme.onSurface
                                                           : colorTheme
@@ -880,9 +893,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                           onDelete: () => _deleteTimer(t),
                                         );
                                       },
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           );

@@ -8,7 +8,6 @@ import '../utils/snack_util.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import '../notifiers/settings_notifier.dart';
 import 'package:provider/provider.dart';
-import '../utils/font_variation.dart';
 import 'dart:async';
 
 class AlarmScreen extends StatefulWidget {
@@ -32,6 +31,7 @@ class AlarmScreenState extends State<AlarmScreen> {
 
   Future<void> load() async {
     final loaded = await AlarmService.instance.loadAlarms();
+
     setState(() => alarms = loaded);
   }
 
@@ -216,7 +216,6 @@ class AlarmScreenState extends State<AlarmScreen> {
                                     _repeatDaysText(a.repeatDays),
                                     style: TextStyle(
                                       fontSize: 16,
-                                      fontVariations: fontVariationsMedium,
                                       color: colorTheme.onSurfaceVariant,
                                     ),
                                   ),
@@ -228,9 +227,11 @@ class AlarmScreenState extends State<AlarmScreen> {
                                           text: resultAlarms['time'],
                                           style: TextStyle(
                                             fontSize: 53,
-                                            fontFamily: 'FlexFont',
-                                            fontVariations:
-                                                fontVariationsMedium,
+                                            fontFamily: "FunFont",
+                                            fontVariations: [
+                                              FontVariation.weight(600),
+                                              FontVariation("ROND", 100),
+                                            ],
                                             color: a.enabled
                                                 ? colorTheme.onSurface
                                                 : colorTheme.onSurfaceVariant,
@@ -247,8 +248,6 @@ class AlarmScreenState extends State<AlarmScreen> {
                                             style: TextStyle(
                                               fontSize: 26,
                                               fontFamily: 'FlexFont',
-                                              fontVariations:
-                                                  fontVariationsMedium,
                                               color:
                                                   colorTheme.onSurfaceVariant,
                                             ),
@@ -262,7 +261,6 @@ class AlarmScreenState extends State<AlarmScreen> {
                                     style: TextStyle(
                                       height: 1,
                                       fontSize: 16,
-                                      fontVariations: fontVariationsSemiBold,
                                       color: colorTheme.secondary,
                                     ),
                                   ),

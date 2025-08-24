@@ -94,13 +94,13 @@ class AlarmActivity : ComponentActivity() {
         findViewById<Button>(R.id.btn_dismiss).setOnClickListener {
             stopAlarm()
             finish()
-            refreshAlwaysOnService()
+
         }
         findViewById<Button>(R.id.btn_snooze).setOnClickListener {
             stopAlarm()
             scheduleSnooze(alarmId, snooze, label)
             finish()
-            refreshAlwaysOnService()
+
 
         }
 
@@ -180,18 +180,5 @@ class AlarmActivity : ComponentActivity() {
         stopAlarm()
     }
 
-    private fun refreshAlwaysOnService() {
-        val prefs = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
-        val alwaysRunService = prefs.getBoolean("flutter.alwaysRunService", false)
-
-        if (alwaysRunService) {
-            val intent = Intent(this, AlwaysOnAlarmService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
-        }
-    }
 
 }

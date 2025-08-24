@@ -18,13 +18,8 @@ class SettingTileValue extends StatelessWidget {
 
     return Text(
       value,
-      style: theme.textTheme.bodyMedium?.copyWith(
-        color: enabled ? theme.colorScheme.tertiary : theme.disabledColor,
-        fontVariations: const [
-          FontVariation('wght', 450),
-          FontVariation('ROND', 0),
-        ],
-      ),
+      style: theme.textTheme.bodyMedium
+          ?.copyWith(color: enabled ? theme.colorScheme.tertiary : theme.disabledColor, fontWeight: FontWeight.w600),
     );
   }
 }

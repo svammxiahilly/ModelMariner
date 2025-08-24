@@ -4,7 +4,6 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import '../widgets/wave_circularprogress.dart';
 import '../models/timer_model.dart';
 import '../helpers/preferences_helper.dart';
-import '../utils/font_variation.dart';
 
 class TimerDetailPage extends StatefulWidget {
   final TimerModel timer;
@@ -70,13 +69,7 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
           appBar: AppBar(
             title: Padding(
               padding: const EdgeInsets.only(left: 6),
-              child: Text(
-                widget.timer.uiLabel,
-                style: TextStyle(
-                  fontVariations: fontVariationsBold,
-                  fontSize: 16,
-                ),
-              ),
+              child: Text(widget.timer.uiLabel, style: TextStyle(fontSize: 20)),
             ),
 
             automaticallyImplyLeading: false,
@@ -123,8 +116,12 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                           return Text(
                             text,
                             style: TextStyle(
-                              fontVariations: fontVariationsSemiBold,
+                              fontFamily: "FunFont",
                               fontSize: fontSize,
+                              fontVariations: [
+                                FontVariation.weight(700),
+                                FontVariation("ROND", 100),
+                              ],
                               color: colorTheme.onSurface,
                             ),
                             textAlign: TextAlign.center,
@@ -189,7 +186,6 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                       "Add +1:00",
                       style: TextStyle(
                         fontSize: 24,
-                        fontVariations: fontVariationsMedium,
                         color: colorTheme.onTertiaryContainer,
                       ),
                     ),

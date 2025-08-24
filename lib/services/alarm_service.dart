@@ -92,4 +92,17 @@ class AlarmService {
     final alarms = await loadAlarms();
     return alarms.where((alarm) => alarm.enabled).length;
   }
+
+  Future<void> disableAlarmById(int id) async {
+    final alarms = await loadAlarms();
+    final index = alarms.indexWhere((a) => a.id == id);
+    if (index != -1) {
+      final alarm = alarms[index];
+      if (alarm.repeatDays.isEmpty) {
+        alarm.enabled = false;
+        await cancelAlarm(alarm.id);
+        await saveAlarms(alarms);
+      }
+    }
+  }
 }

@@ -10,6 +10,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.plugin.common.MethodChannel
+import org.json.JSONObject
 import java.util.Calendar
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -105,6 +108,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 .build()
 
             notificationManager.notify(requestCode, notification)
+
         } else {
             val serviceIntent = Intent(context, AlarmForegroundService::class.java).apply {
                 putExtra("id", idLong)
@@ -119,6 +123,9 @@ class AlarmReceiver : BroadcastReceiver() {
             } else {
                 context.startService(serviceIntent)
             }
+
+            AlwaysOnAlarmService.instance?.updateNotification()
+
         }
 
         if (recurring || daysOfWeek.isNotEmpty()) {
@@ -180,4 +187,6 @@ class AlarmReceiver : BroadcastReceiver() {
             am.setAlarmClock(info, pendingAlarm)
         }
     }
+
+
 }
