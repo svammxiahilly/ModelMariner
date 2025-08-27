@@ -61,6 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         PreferencesHelper.getString("ScreenSaverClockStyle") ?? "Analog";
     final currentClockStyle =
         PreferencesHelper.getString("ClockStyle") ?? "Digital";
+
     final optionsTheme = {"Auto": "Auto", "Dark": "Dark", "Light": "Light"};
     final optionsTimeFormat = {"12 hr": "12 hr", "24 hr": "24 hr"};
     final optionsScreenSaverClockStyle = {

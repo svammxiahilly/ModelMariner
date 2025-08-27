@@ -10,20 +10,20 @@ void startCallback() {
   FlutterForegroundTask.setTaskHandler(MyTaskHandler());
 }
 
+final LoopingRingtone loopingRingtone = LoopingRingtone();
+
 class LoopingRingtone {
   Timer? _loopTimer;
 
   void play({int intervalSeconds = 3}) {
-    // First play immediately
     FlutterRingtonePlayer().play(
       android: AndroidSounds.notification,
       ios: IosSounds.alarm,
-      looping:
-          false, // We'll loop manually, cause the plugin is broken and won't stop
+      looping: false,
       volume: 1.0,
     );
 
-    // Schedule repeats
+    _loopTimer?.cancel();
     _loopTimer = Timer.periodic(Duration(seconds: intervalSeconds), (_) {
       FlutterRingtonePlayer().play(
         android: AndroidSounds.notification,
@@ -85,7 +85,9 @@ class MyTaskHandler extends TaskHandler {
               LoopingRingtone().play(intervalSeconds: 3);
               FlutterForegroundTask.updateService(
                 notificationTitle: 'Timer Finished',
+
                 notificationText: 'Timer',
+
                 notificationButtons: [
                   NotificationButton(
                     id: m['isRunning'] ? 'pause' : 'start',
@@ -143,12 +145,22 @@ class MyTaskHandler extends TaskHandler {
     String title = 'Timer Finished';
     String text = 'Timer';
 
+    Map<String, dynamic>? tlabel;
+
+    if (runningTimers.isNotEmpty) {
+      tlabel = runningTimers.first;
+    } else if (pausedTimers.isNotEmpty) {
+      tlabel = pausedTimers.first;
+    }
+
     if (t != null) {
       title = formatForNotification(t['remainingSeconds']);
       if (runningTimers.length > 1) {
         text = 'Running ${runningTimers.length} timers';
       } else {
-        text = t['isRunning'] ? 'Running' : 'Paused';
+        text = t['isRunning']
+            ? 'Running • ${tlabel!['uiLabel']}'
+            : 'Paused • ${tlabel!['uiLabel']}';
       }
     }
 
@@ -192,51 +204,75 @@ class MyTaskHandler extends TaskHandler {
     if (jsonString == null) return;
     final List data = jsonDecode(jsonString);
 
+    int findTargetIndex() {
+      if (data.isEmpty) return -1;
+      final activeId = prefs.getString('activeTimerId');
+      if (activeId != null) {
+        final idx = data.indexWhere((t) => t['id'] == activeId);
+        if (idx != -1) return idx;
+      }
+      final runningIdx = data.indexWhere((t) => t['isRunning'] == true);
+      if (runningIdx != -1) return runningIdx;
+      final pausedIdx = data.indexWhere(
+        (t) => (t['remainingSeconds'] ?? 0) > 0,
+      );
+      if (pausedIdx != -1) return pausedIdx;
+      return 0;
+    }
+
     if (id == BTN_START_STOP) {
       if (data.isNotEmpty) {
-        Map<String, dynamic> m = data.firstWhere(
-          (t) => t['isRunning'] == true,
-          orElse: () => data.firstWhere((t) => t['remainingSeconds'] > 0),
-        );
+        final idx = findTargetIndex();
+        if (idx != -1) {
+          Map<String, dynamic> m = Map<String, dynamic>.from(data[idx]);
 
-        final idx = data.indexWhere((t) => t['id'] == m['id']);
+          if (m['isRunning'] == true) {
+            int lastStart =
+                m['lastStartEpochMs'] ?? DateTime.now().millisecondsSinceEpoch;
+            int elapsedSec =
+                ((DateTime.now().millisecondsSinceEpoch - lastStart) / 1000)
+                    .floor();
+            m['remainingSeconds'] = (m['remainingSeconds'] - elapsedSec).clamp(
+              0,
+              99999999,
+            );
+            m['isRunning'] = false;
+            m['lastStartEpochMs'] = null;
+            loopingRingtone.stop();
+          } else {
+            m['lastStartEpochMs'] = DateTime.now().millisecondsSinceEpoch;
+            m['isRunning'] = true;
+          }
 
-        if (m['isRunning'] == true) {
-          int lastStart =
-              m['lastStartEpochMs'] ?? DateTime.now().millisecondsSinceEpoch;
-          int elapsedSec =
-              ((DateTime.now().millisecondsSinceEpoch - lastStart) / 1000)
-                  .floor();
-          m['remainingSeconds'] = (m['remainingSeconds'] - elapsedSec).clamp(
-            0,
-            99999999,
-          );
+          data[idx] = m;
+          await prefs.setString('activeTimerId', m['id']);
+          await prefs.setString(prefKey, jsonEncode(data));
+        }
+      }
+    } else if (id == BTN_RESET || id == 'reset') {
+      if (data.isNotEmpty) {
+        final idx = findTargetIndex();
+        if (idx != -1) {
+          final m = Map<String, dynamic>.from(data[idx]);
+          m['remainingSeconds'] = m['initialSeconds'];
           m['isRunning'] = false;
           m['lastStartEpochMs'] = null;
-        } else {
-          m['lastStartEpochMs'] = DateTime.now().millisecondsSinceEpoch;
-          m['isRunning'] = true;
+          data[idx] = m;
+          loopingRingtone.stop();
+          final activeId = prefs.getString('activeTimerId');
+          if (activeId != null && activeId == m['id']) {
+            await prefs.remove('activeTimerId');
+          }
         }
-
-        if (idx != -1) data[idx] = m;
-        await prefs.setString('activeTimerId', m['id']);
-        await prefs.setString(prefKey, jsonEncode(data));
-      }
-    } else if (id == BTN_RESET) {
-      if (data.isNotEmpty) {
-        final m = Map<String, dynamic>.from(data[0]);
-        m['remainingSeconds'] = m['initialSeconds'];
-        m['isRunning'] = false;
-        m['lastStartEpochMs'] = null;
-        data[0] = m;
-        await prefs.setString(prefKey, jsonEncode(data));
       }
     } else if (id == BTN_ADD_MIN) {
       if (data.isNotEmpty) {
-        final m = Map<String, dynamic>.from(data[0]);
-        m['remainingSeconds'] = m['remainingSeconds'] + 60;
-        data[0] = m;
-        await prefs.setString(prefKey, jsonEncode(data));
+        final idx = findTargetIndex();
+        if (idx != -1) {
+          final m = Map<String, dynamic>.from(data[idx]);
+          m['remainingSeconds'] = (m['remainingSeconds'] ?? 0) + 60;
+          data[idx] = m;
+        }
       }
     } else if (id == BTN_RESET_ALL) {
       for (var i = 0; i < data.length; i++) {
@@ -246,8 +282,8 @@ class MyTaskHandler extends TaskHandler {
         m['lastStartEpochMs'] = null;
         data[i] = m;
       }
-      await prefs.setString(prefKey, jsonEncode(data));
-      await FlutterForegroundTask.stopService();
+      loopingRingtone.stop();
+      await prefs.remove('activeTimerId');
     }
 
     await prefs.setString(prefKey, jsonEncode(data));
@@ -260,7 +296,8 @@ class MyTaskHandler extends TaskHandler {
 
     FlutterForegroundTask.sendDataToMain({'type': 'timers_updated'});
 
-    if (id == 'btn_reset') {
+    final anyRunning = data.any((t) => t['isRunning'] == true);
+    if (!anyRunning) {
       await FlutterForegroundTask.stopService();
     }
   }

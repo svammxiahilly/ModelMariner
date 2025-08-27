@@ -24,8 +24,6 @@ class MainActivity: FlutterActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-
     MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
       when (call.method) {
         "checkNotificationPermission" -> {
@@ -43,7 +41,7 @@ class MainActivity: FlutterActivity() {
           resetBrightness()
           result.success(null)
         }
-        "scheduleAlarm" -> {
+          "scheduleAlarm" -> {
           val id = call.argument<Int>("id")!!
           val triggerAtMillisUtc = call.argument<Long>("triggerAtMillisUtc")!!
           val label = call.argument<String>("label") ?: "Alarm"

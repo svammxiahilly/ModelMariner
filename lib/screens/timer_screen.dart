@@ -236,6 +236,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       serviceId: 150,
       notificationTitle: 'Timers',
       notificationText: 'Foreground service running',
+
       notificationIcon: const NotificationIcon(
         metaDataName: "com.pranshulgg.service.timer_icon",
       ),
@@ -724,9 +725,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                       transitionType:
                                           ContainerTransitionType.fadeThrough,
                                       openColor: colorTheme.surface,
-                                      closedShape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
                                       closedBuilder: (context, openContainer) {
                                         return Container(
                                           padding: const EdgeInsets.only(

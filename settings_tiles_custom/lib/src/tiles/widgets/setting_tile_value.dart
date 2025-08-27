@@ -19,7 +19,7 @@ class SettingTileValue extends StatelessWidget {
     return Text(
       value,
       style: theme.textTheme.bodyMedium
-          ?.copyWith(color: enabled ? theme.colorScheme.tertiary : theme.disabledColor, fontWeight: FontWeight.w600),
+          ?.copyWith(color: enabled ? theme.colorScheme.tertiary : theme.disabledColor, fontWeight: FontWeight.w500),
     );
   }
 }

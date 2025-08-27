@@ -8,12 +8,15 @@ class SettingTextFieldDialog extends StatefulWidget {
   const SettingTextFieldDialog({
     required this.title,
     required this.initialText,
+    this.maxLength,
     super.key,
   });
 
   final String title;
 
   final String? initialText;
+
+  final int? maxLength;
 
   @override
   State<SettingTextFieldDialog> createState() => _SettingTextFieldDialogState();
@@ -39,6 +42,7 @@ class _SettingTextFieldDialogState extends State<SettingTextFieldDialog> {
           child: TextField(
             controller: _textEditingController,
             autofocus: true,
+            maxLength: widget.maxLength,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
             ),

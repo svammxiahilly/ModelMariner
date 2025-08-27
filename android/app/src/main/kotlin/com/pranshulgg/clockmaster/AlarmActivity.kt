@@ -2,9 +2,11 @@ package com.pranshulgg.clockmaster
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
@@ -15,14 +17,19 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.TypedValue
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.Date
+import android.view.WindowInsets
+import android.view.WindowInsetsController
+import android.view.View
 
 class AlarmActivity : ComponentActivity() {
     private var mp: MediaPlayer? = null
@@ -30,6 +37,7 @@ class AlarmActivity : ComponentActivity() {
     private var soundUri: String? = null
     private var alarmId = 0
     private var wakeLock: PowerManager.WakeLock? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +57,29 @@ class AlarmActivity : ComponentActivity() {
             setTurnScreenOn(true)
         }
 
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
 
+            window.insetsController?.let { controller ->
+                controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility =
+                (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+            @Suppress("DEPRECATION")
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            @Suppress("DEPRECATION")
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        }
         setContentView(R.layout.activity_alarm)
+
 
         WindowCompat.setDecorFitsSystemWindows(window, true)
 

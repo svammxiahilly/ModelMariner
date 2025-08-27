@@ -18,6 +18,7 @@ class SettingTextFieldTile extends SettingTile {
     super.trailing,
     this.initialText,
     this.onCanceled,
+    this.maxLength,
   });
 
   /// The title of the dialog.
@@ -25,6 +26,8 @@ class SettingTextFieldTile extends SettingTile {
 
   /// The initial text displayed in the text field.
   final String? initialText;
+
+  final int? maxLength;
 
   /// Called when the text is submitted.
   final void Function(String) onSubmitted;
@@ -40,6 +43,7 @@ class SettingTextFieldTile extends SettingTile {
         return SettingTextFieldDialog(
           title: dialogTitle,
           initialText: initialText,
+          maxLength: maxLength,
         );
       },
     );

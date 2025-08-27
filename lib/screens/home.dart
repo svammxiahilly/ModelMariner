@@ -22,6 +22,7 @@ import '../screens/screen_saver.dart';
 import '../helpers/preferences_helper.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'about_screen.dart';
 
 class BatteryOptimizationHelper {
   static Future<bool> isIgnoringBatteryOptimizations() async {
@@ -81,6 +82,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         WakelockPlus.toggle(enable: true);
       }
     });
+    _startAlwaysOnService();
   }
 
   final List<String> _pagesLabel = [
@@ -118,6 +120,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     final isAndroid9OrAbove = androidInfo.version.sdkInt >= 28;
     return isAndroid9OrAbove;
+  }
+
+  Future<void> _startAlwaysOnService() async {
+    final count = await AlarmService.instance.activeAlarmCount();
+    final value = PreferencesHelper.getBool("alwaysRunService") ?? false;
+
+    if (value == true && count > 0) {
+      _channelBrightness.invokeMethod('refreshAlwaysRunning');
+    } else if (value == false) {
+      _channelBrightness.invokeMethod('StopAlwaysRunning');
+    }
   }
 
   Future<void> _setupSystemUI() async {
@@ -232,18 +245,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     });
                   });
                 }
+              } else if (value == "openAboutScreen") {
+                await Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const AboutScreen()));
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'openSettings',
+
                 padding: EdgeInsets.only(left: 14),
-                child: Text('Settings', style: TextStyle(fontSize: 16)),
+                // child: Text('Settings', style: TextStyle(fontSize: 16)),
+                child: menuItemRow(Symbols.settings, "Settings"),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'openScreenSaver',
                 padding: EdgeInsets.only(left: 14, right: 6),
-                child: Text('Screen saver', style: TextStyle(fontSize: 16)),
+                // child: Text('Screen saver', style: TextStyle(fontSize: 16)),
+                child: menuItemRow(Symbols.mobile_text_2, "Screen saver"),
+              ),
+              PopupMenuItem<String>(
+                value: 'openAboutScreen',
+                padding: EdgeInsets.only(left: 14, right: 6),
+                // child: Text('About', style: TextStyle(fontSize: 16)),
+                child: menuItemRow(Symbols.info, "About"),
               ),
             ],
           ),
@@ -502,4 +528,14 @@ void checkAllPermission(BuildContext context) async {
   if (isIgnoringBatteryOptimizations && grantedNotification) {
     Navigator.pop(context);
   }
+}
+
+Widget menuItemRow(IconData leadingIcon, String label) {
+  return Row(
+    spacing: 6,
+    children: [
+      IconWithWeight(leadingIcon, fill: 1, size: 20),
+      Text(label, style: TextStyle(fontSize: 16)),
+    ],
+  );
 }

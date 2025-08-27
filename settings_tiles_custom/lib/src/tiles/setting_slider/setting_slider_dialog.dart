@@ -52,14 +52,14 @@ class _SettingSliderDialogState extends State<SettingSliderDialog> {
   Widget build(BuildContext context) {
     return AlertDialog.adaptive(
       title: Text(widget.title),
+      contentPadding: const EdgeInsets.only(top: 16, bottom: 16),
       content: SingleChildScrollView(
         child: Slider(
           value: _value,
-          label: widget.label != null
-              ? widget.label!(_value)
-              : _value.toStringAsFixed(2),
+          label: widget.label != null ? widget.label!(_value) : _value.toStringAsFixed(2),
           min: widget.min,
           max: widget.max,
+          year2023: false,
           divisions: widget.divisions,
           onChanged: _onChanged,
         ),

@@ -256,12 +256,19 @@ class AlarmScreenState extends State<AlarmScreen> {
                                       ],
                                     ),
                                   ),
-                                  Text(
-                                    a.label,
-                                    style: TextStyle(
-                                      height: 1,
-                                      fontSize: 16,
-                                      color: colorTheme.secondary,
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.7,
+                                    child: Text(
+                                      a.label,
+                                      style: TextStyle(
+                                        height: 1,
+                                        fontSize: 16,
+                                        color: colorTheme.secondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],

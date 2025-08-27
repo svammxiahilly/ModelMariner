@@ -82,10 +82,7 @@ abstract class SettingTile extends StatelessWidget {
       final textWidget = title as Text;
       return Text(
         textWidget.data ?? '',
-        style: textWidget.style ??
-            const TextStyle(
-              fontSize: 16.5,
-            ),
+        style: textWidget.style ?? const TextStyle(),
         maxLines: textWidget.maxLines,
         overflow: textWidget.overflow,
         textAlign: textWidget.textAlign,

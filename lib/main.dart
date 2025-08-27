@@ -84,9 +84,18 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ).copyWith(
-            textTheme: ThemeData.light().textTheme.apply(
-              fontFamily: 'DefaultFont',
-            ),
+            textTheme: ThemeData.light().textTheme
+                .apply(fontFamily: 'DefaultFont')
+                .copyWith(
+                  bodyLarge: TextStyle(
+                    fontSize: 15.3,
+                    fontFamily: 'DefaultFont',
+                  ),
+                  bodyMedium: TextStyle(
+                    fontSize: 13.3,
+                    fontFamily: 'DefaultFont',
+                  ),
+                ),
 
             highlightColor: Colors.transparent,
 
@@ -110,9 +119,18 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ).copyWith(
-            textTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'DefaultFont',
-            ),
+            textTheme: ThemeData.dark().textTheme
+                .apply(fontFamily: 'DefaultFont')
+                .copyWith(
+                  bodyLarge: TextStyle(
+                    fontSize: 15.3,
+                    fontFamily: 'DefaultFont',
+                  ),
+                  bodyMedium: TextStyle(
+                    fontSize: 13.3,
+                    fontFamily: 'DefaultFont',
+                  ),
+                ),
             highlightColor: Colors.transparent,
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {

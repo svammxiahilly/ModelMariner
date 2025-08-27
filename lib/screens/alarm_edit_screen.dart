@@ -241,7 +241,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                 SettingTextFieldTile(
                   title: Text("Label"),
                   dialogTitle: "Label",
-
+                  maxLength: 35,
                   onSubmitted: (value) {
                     setState(() {
                       labelController.text = value;

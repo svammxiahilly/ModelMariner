@@ -9,7 +9,7 @@ class CancelButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () => Navigator.pop(context),
-      child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+      child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
     );
   }
 }
