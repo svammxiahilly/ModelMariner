@@ -297,9 +297,9 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
 
     final lapDuration = _lapDurations[index];
     if (lapDuration.inMilliseconds == fastestLap.inMilliseconds) {
-      return Color(0xffb1d18a);
+      return Colors.green;
     } else if (lapDuration.inMilliseconds == slowestLap.inMilliseconds) {
-      return Color(0xffffb4ab);
+      return Colors.red;
     } else {
       return colorTheme.secondary;
     }
@@ -341,6 +341,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                     FontVariation.weight(600),
                     FontVariation("ROND", 100),
                   ],
+                  color: colorTheme.onSurface,
                 ),
               ),
             ),

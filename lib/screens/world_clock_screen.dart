@@ -154,8 +154,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                   amPm,
                                   style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width /
-                                        12, // smaller size
+                                        MediaQuery.of(context).size.width / 12,
                                     fontFamily: "FlexFont",
 
                                     color: colorTheme.onSurfaceVariant,
@@ -168,9 +167,10 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                       ),
                 Text(
                   dateFormat1,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w500,
+                    color: colorTheme.onSurface,
                   ),
                 ),
 
