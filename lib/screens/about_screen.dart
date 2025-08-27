@@ -112,7 +112,7 @@ class AboutScreen extends StatelessWidget {
                   showLicensePage(
                     context: context,
                     applicationName: 'ClockMaster',
-                    applicationVersion: 'v1.4.0',
+                    applicationVersion: 'v1.4.1',
                     applicationIcon: Container(
                       clipBehavior: Clip.hardEdge,
                       margin: EdgeInsets.only(bottom: 16, top: 16),
@@ -343,7 +343,7 @@ class CheckUpdateButton extends StatefulWidget {
 }
 
 class _CheckUpdateButtonState extends State<CheckUpdateButton> {
-  final String currentVersion = 'v1.4.0';
+  final String currentVersion = 'v1.4.1';
   final String githubRepo = 'PranshulGG/ClockMaster';
   bool isChecking = false;
 

@@ -197,6 +197,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).colorScheme;
+    print(ThemeData.light().textTheme.bodyLarge!.color);
 
     _setupSystemUI();
 

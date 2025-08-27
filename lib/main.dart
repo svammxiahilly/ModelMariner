@@ -71,7 +71,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
-    final colorTheme = Theme.of(context).colorScheme;
+    final colorThemeDark = ColorScheme.fromSeed(
+      seedColor: themeController.seedColor,
+      brightness: Brightness.dark,
+    );
+
+    final colorThemeLight = ColorScheme.fromSeed(
+      seedColor: themeController.seedColor,
+      brightness: Brightness.light,
+    );
 
     return MaterialApp(
       title: 'ClockMaster',
@@ -89,13 +97,13 @@ class MyApp extends StatelessWidget {
                 .copyWith(
                   bodyLarge: TextStyle(
                     fontSize: 15.3,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: colorThemeLight.onSurface,
+
                     fontFamily: 'DefaultFont',
                   ),
                   bodyMedium: TextStyle(
                     fontSize: 13.3,
-                    color: Theme.of(context).colorScheme.onSurface,
-
+                    color: colorThemeLight.onSurface,
                     fontFamily: 'DefaultFont',
                   ),
                 ),
@@ -127,14 +135,13 @@ class MyApp extends StatelessWidget {
                 .copyWith(
                   bodyLarge: TextStyle(
                     fontSize: 15.3,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: colorThemeDark.onSurface,
 
                     fontFamily: 'DefaultFont',
                   ),
                   bodyMedium: TextStyle(
                     fontSize: 13.3,
-                    color: Theme.of(context).colorScheme.onSurface,
-
+                    color: colorThemeDark.onSurface,
                     fontFamily: 'DefaultFont',
                   ),
                 ),
