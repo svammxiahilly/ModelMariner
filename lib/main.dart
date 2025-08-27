@@ -89,13 +89,14 @@ class MyApp extends StatelessWidget {
                 .copyWith(
                   bodyLarge: TextStyle(
                     fontSize: 15.3,
-                    color: ThemeData.light().textTheme.bodyLarge!.color,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontFamily: 'DefaultFont',
                   ),
                   bodyMedium: TextStyle(
                     fontSize: 13.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+
                     fontFamily: 'DefaultFont',
-                    color: ThemeData.light().textTheme.bodyMedium!.color,
                   ),
                 ),
 
@@ -126,12 +127,13 @@ class MyApp extends StatelessWidget {
                 .copyWith(
                   bodyLarge: TextStyle(
                     fontSize: 15.3,
-                    color: ThemeData.dark().textTheme.bodyLarge!.color,
+                    color: Theme.of(context).colorScheme.onSurface,
+
                     fontFamily: 'DefaultFont',
                   ),
                   bodyMedium: TextStyle(
                     fontSize: 13.3,
-                    color: ThemeData.dark().textTheme.bodyMedium!.color,
+                    color: Theme.of(context).colorScheme.onSurface,
 
                     fontFamily: 'DefaultFont',
                   ),
