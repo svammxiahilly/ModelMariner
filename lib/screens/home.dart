@@ -197,7 +197,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).colorScheme;
-    print(ThemeData.light().textTheme.bodyLarge!.color);
 
     _setupSystemUI();
 
@@ -393,7 +392,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-
         onDestinationSelected: _onItemTapped,
         labelTextStyle: WidgetStateProperty.all(
           TextStyle(fontWeight: FontWeight.w500, color: colorTheme.onSurface),

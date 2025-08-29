@@ -86,10 +86,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme:
           ThemeData.from(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: themeController.seedColor,
-              brightness: Brightness.light,
-            ),
+            colorScheme: isMonochrome(themeController.seedColor)
+                ? ColorScheme.fromSeed(
+                    seedColor: themeController.seedColor,
+                    brightness: Brightness.light,
+                    dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+                  )
+                : ColorScheme.fromSeed(
+                    seedColor: themeController.seedColor,
+                    brightness: Brightness.light,
+                  ),
             useMaterial3: true,
           ).copyWith(
             textTheme: ThemeData.light().textTheme
@@ -124,10 +130,16 @@ class MyApp extends StatelessWidget {
 
       darkTheme:
           ThemeData.from(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: themeController.seedColor,
-              brightness: Brightness.dark,
-            ),
+            colorScheme: isMonochrome(themeController.seedColor)
+                ? ColorScheme.fromSeed(
+                    seedColor: themeController.seedColor,
+                    brightness: Brightness.dark,
+                    dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+                  )
+                : ColorScheme.fromSeed(
+                    seedColor: themeController.seedColor,
+                    brightness: Brightness.dark,
+                  ),
             useMaterial3: true,
           ).copyWith(
             textTheme: ThemeData.dark().textTheme
@@ -162,4 +174,9 @@ class MyApp extends StatelessWidget {
       home: const HomePage(),
     );
   }
+}
+
+bool isMonochrome(Color c, {double tol = 1.0 / 255.0}) {
+  final r = c.r, g = c.g, b = c.b;
+  return (r - g).abs() <= tol && (g - b).abs() <= tol && (r - b).abs() <= tol;
 }
