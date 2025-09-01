@@ -160,13 +160,34 @@ class AlarmScreenState extends State<AlarmScreen> {
                 final a = alarms[i];
                 final resultAlarms = getTimeAndAmPm(a);
                 final isLast = i == alarms.length - 1;
+                final isFirst = i == 0;
+                final isOnly = alarms.length == 1;
+
+                final firstBorderRadius = BorderRadius.only(
+                  topLeft: Radius.circular(18),
+                  topRight: Radius.circular(18),
+                  bottomLeft: Radius.circular(2.6),
+                  bottomRight: Radius.circular(2.6),
+                );
+                final lastBorderRadius = BorderRadius.only(
+                  bottomLeft: Radius.circular(18),
+                  bottomRight: Radius.circular(18),
+                  topLeft: Radius.circular(2.6),
+                  topRight: Radius.circular(2.6),
+                );
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 2),
                   key: ValueKey(a.id),
 
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: isOnly
+                        ? BorderRadius.circular(18)
+                        : isFirst
+                        ? firstBorderRadius
+                        : isLast
+                        ? lastBorderRadius
+                        : BorderRadius.zero,
 
                     child: Dismissible(
                       key: ValueKey(a.id),
@@ -174,13 +195,14 @@ class AlarmScreenState extends State<AlarmScreen> {
                       direction: DismissDirection.endToStart,
                       background: Container(
                         alignment: Alignment.centerRight,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: EdgeInsets.symmetric(horizontal: 30),
                         decoration: BoxDecoration(
                           color: colorTheme.errorContainer,
                         ),
                         child: Icon(
                           Icons.delete,
                           color: colorTheme.onErrorContainer,
+                          size: 40,
                         ),
                       ),
                       onDismissed: (direction) {
@@ -227,11 +249,8 @@ class AlarmScreenState extends State<AlarmScreen> {
                                           text: resultAlarms['time'],
                                           style: TextStyle(
                                             fontSize: 53,
-                                            fontFamily: "FunFont",
-                                            fontVariations: [
-                                              FontVariation.weight(600),
-                                              FontVariation("ROND", 100),
-                                            ],
+                                            fontFamily: "FlexFontEn",
+                                            fontWeight: FontWeight.w600,
                                             color: a.enabled
                                                 ? colorTheme.onSurface
                                                 : colorTheme.onSurfaceVariant,
@@ -247,7 +266,6 @@ class AlarmScreenState extends State<AlarmScreen> {
                                             resultAlarms['ampm'].toString(),
                                             style: TextStyle(
                                               fontSize: 26,
-                                              fontFamily: 'FlexFont',
                                               color:
                                                   colorTheme.onSurfaceVariant,
                                             ),
@@ -265,7 +283,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                                         height: 1,
                                         fontSize: 16,
                                         color: colorTheme.secondary,
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,

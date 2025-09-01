@@ -6,12 +6,12 @@ class UnitSettingsNotifier extends ChangeNotifier {
   String _timeFormat = "12 hr";
   bool _showSeconds = false;
   String _clockStyleMain = "Digital";
-
+  bool _useExpressiveVariant = false;
   // Getters
   String get timeFormat => _timeFormat;
   bool get showSeconds => _showSeconds;
   String get clockStyleMain => _clockStyleMain;
-
+  bool get useExpressiveVariant => _useExpressiveVariant;
   UnitSettingsNotifier() {
     _loadAllSettings();
   }
@@ -23,6 +23,9 @@ class UnitSettingsNotifier extends ChangeNotifier {
         await PreferencesHelper.getBool("showSeconds") ?? _showSeconds;
     _clockStyleMain =
         await PreferencesHelper.getString("ClockStyle") ?? _clockStyleMain;
+    _useExpressiveVariant =
+        await PreferencesHelper.getBool("useExpressiveVariant") ??
+        _useExpressiveVariant;
     notifyListeners();
   }
 
@@ -50,5 +53,11 @@ class UnitSettingsNotifier extends ChangeNotifier {
       PreferencesHelper.setString("ClockStyle", value);
       notifyListeners();
     }
+  }
+
+  void updateColorVariant(bool value) {
+    _useExpressiveVariant = value;
+    PreferencesHelper.setBool("useExpressiveVariant", value);
+    notifyListeners();
   }
 }

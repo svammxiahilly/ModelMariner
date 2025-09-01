@@ -68,13 +68,18 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     for (var t in timers) {
       if (t.isRunning && t.lastStartEpochMs != null) {
         final elapsed = ((now - t.lastStartEpochMs!) / 1000).floor();
-        final newRemaining = (t.initialSeconds - elapsed).clamp(0, 99999999);
+
+        final baselineDuration = t.currentDuration ?? t.initialSeconds;
+
+        final newRemaining = (baselineDuration - elapsed).clamp(0, 99999999);
 
         if (newRemaining != t.remainingSeconds) {
           t.remainingSeconds = newRemaining;
         }
       }
     }
+
+    if (mounted) setState(() {});
   }
 
   void _onReceiveTaskData(Object data) async {
@@ -366,6 +371,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
     if (startAfterAddingOneMin) {
       await _startServiceIfNotRunning();
+      _toggleStartStop(t);
     }
 
     setState(() {});
@@ -665,28 +671,58 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
                           await _persistTimers();
                         },
+                        proxyDecorator: (child, index, animation) {
+                          return Material(
+                            type: MaterialType.transparency,
+                            child: child,
+                          );
+                        },
                         itemBuilder: (ctx, i) {
                           final t = timers[i];
+
+                          final isLast = i == timers.length - 1;
+                          final isFirst = i == 0;
+                          final isOnly = timers.length == 1;
+
+                          final firstBorderRadius = BorderRadius.only(
+                            topLeft: Radius.circular(18),
+                            topRight: Radius.circular(18),
+                            bottomLeft: Radius.circular(2.6),
+                            bottomRight: Radius.circular(2.6),
+                          );
+                          final lastBorderRadius = BorderRadius.only(
+                            bottomLeft: Radius.circular(18),
+                            bottomRight: Radius.circular(18),
+                            topLeft: Radius.circular(2.6),
+                            topRight: Radius.circular(2.6),
+                          );
 
                           return Padding(
                             key: ValueKey(t.id),
 
-                            padding: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.only(bottom: 2),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: isOnly
+                                  ? BorderRadius.circular(18)
+                                  : isFirst
+                                  ? firstBorderRadius
+                                  : isLast
+                                  ? lastBorderRadius
+                                  : BorderRadius.circular(2),
 
                               child: Dismissible(
                                 key: ValueKey(t.id),
                                 direction: DismissDirection.endToStart,
                                 background: Container(
                                   alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  padding: EdgeInsets.symmetric(horizontal: 30),
                                   decoration: BoxDecoration(
                                     color: colorTheme.errorContainer,
                                   ),
                                   child: Icon(
                                     Icons.delete,
                                     color: colorTheme.onErrorContainer,
+                                    size: 40,
                                   ),
                                 ),
                                 onDismissed: (_) {
@@ -719,6 +755,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                         milliseconds: 500,
                                       ),
                                       openElevation: 0,
+                                      closedShape: RoundedRectangleBorder(),
                                       openShape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(50),
                                       ),
@@ -763,16 +800,10 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                     _format(remaining),
                                                     style: TextStyle(
                                                       fontSize: 45,
-                                                      fontFamily: "FunFont",
-                                                      fontVariations: [
-                                                        FontVariation.weight(
-                                                          600,
-                                                        ),
-                                                        FontVariation(
-                                                          "ROND",
-                                                          100,
-                                                        ),
-                                                      ],
+                                                      fontFamily: "FlexFontEn",
+                                                      fontWeight:
+                                                          FontWeight.w600,
+
                                                       color: t.isRunning
                                                           ? colorTheme.onSurface
                                                           : colorTheme

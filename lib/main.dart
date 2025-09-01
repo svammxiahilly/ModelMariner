@@ -71,22 +71,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
+
+    final useExpressiveVariant = context
+        .watch<UnitSettingsNotifier>()
+        .useExpressiveVariant;
     final colorThemeDark = ColorScheme.fromSeed(
-      seedColor: themeController.seedColor,
+      seedColor: themeController.seedColor ?? Colors.blue,
       brightness: Brightness.dark,
     );
 
     final colorThemeLight = ColorScheme.fromSeed(
-      seedColor: themeController.seedColor,
+      seedColor: themeController.seedColor ?? Colors.blue,
       brightness: Brightness.light,
     );
-
     return MaterialApp(
       title: 'ClockMaster',
       debugShowCheckedModeBanner: false,
       theme:
           ThemeData.from(
-            colorScheme: isMonochrome(themeController.seedColor)
+            colorScheme: useExpressiveVariant
+                ? ColorScheme.fromSeed(
+                    seedColor: themeController.seedColor ?? Colors.blue,
+                    brightness: Brightness.light,
+                    dynamicSchemeVariant: DynamicSchemeVariant.expressive,
+                  )
+                : isMonochrome(themeController.seedColor)
                 ? ColorScheme.fromSeed(
                     seedColor: themeController.seedColor,
                     brightness: Brightness.light,
@@ -99,18 +108,16 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
           ).copyWith(
             textTheme: ThemeData.light().textTheme
-                .apply(fontFamily: 'DefaultFont')
+                .apply(fontFamily: 'FlexFontEn')
                 .copyWith(
                   bodyLarge: TextStyle(
-                    fontSize: 15.3,
                     color: colorThemeLight.onSurface,
 
-                    fontFamily: 'DefaultFont',
+                    fontFamily: 'FlexFontEn',
                   ),
                   bodyMedium: TextStyle(
-                    fontSize: 13.3,
                     color: colorThemeLight.onSurface,
-                    fontFamily: 'DefaultFont',
+                    fontFamily: 'FlexFontEn',
                   ),
                 ),
 
@@ -130,7 +137,13 @@ class MyApp extends StatelessWidget {
 
       darkTheme:
           ThemeData.from(
-            colorScheme: isMonochrome(themeController.seedColor)
+            colorScheme: useExpressiveVariant
+                ? ColorScheme.fromSeed(
+                    seedColor: themeController.seedColor ?? Colors.blue,
+                    brightness: Brightness.dark,
+                    dynamicSchemeVariant: DynamicSchemeVariant.expressive,
+                  )
+                : isMonochrome(themeController.seedColor)
                 ? ColorScheme.fromSeed(
                     seedColor: themeController.seedColor,
                     brightness: Brightness.dark,
@@ -143,18 +156,16 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
           ).copyWith(
             textTheme: ThemeData.dark().textTheme
-                .apply(fontFamily: 'DefaultFont')
+                .apply(fontFamily: 'FlexFontEn')
                 .copyWith(
                   bodyLarge: TextStyle(
-                    fontSize: 15.3,
                     color: colorThemeDark.onSurface,
 
-                    fontFamily: 'DefaultFont',
+                    fontFamily: 'FlexFontEn',
                   ),
                   bodyMedium: TextStyle(
-                    fontSize: 13.3,
                     color: colorThemeDark.onSurface,
-                    fontFamily: 'DefaultFont',
+                    fontFamily: 'FlexFontEn',
                   ),
                 ),
             highlightColor: Colors.transparent,

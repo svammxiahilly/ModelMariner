@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import '../services/alarm_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -53,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final themeController = Provider.of<ThemeController>(context);
     final currentMode = themeController.themeMode;
     final isSupported = themeController.isDynamicColorSupported;
+    final colortheme = Theme.of(context).colorScheme;
     final currentTimeFormat =
         PreferencesHelper.getString("timeFormat") ?? "12 hr";
     final currentShowSeconds =
@@ -140,8 +142,155 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     SettingSwitchTile(
                       enabled: _useCustomTile,
-                      icon: IconWithWeight(Symbols.colorize, fill: 1),
+                      icon: _showTile
+                          ? GestureDetector(
+                              onTap: () {
+                                Color selectedColor =
+                                    PreferencesHelper.getColor(
+                                      "CustomMaterialColor",
+                                    ) ??
+                                    Colors.blue;
+
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  showDragHandle: true,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(28),
+                                    ),
+                                  ),
+                                  builder: (context) {
+                                    return Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      padding: EdgeInsets.only(
+                                        top: 0,
+                                        bottom:
+                                            MediaQuery.of(
+                                              context,
+                                            ).padding.bottom +
+                                            10,
+                                      ),
+                                      child: StatefulBuilder(
+                                        builder: (context, setModalState) {
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ColorPicker(
+                                                color: selectedColor,
+                                                onColorChanged: (Color color) {
+                                                  setModalState(() {
+                                                    selectedColor = color;
+                                                  });
+                                                },
+                                                pickersEnabled:
+                                                    const <
+                                                      ColorPickerType,
+                                                      bool
+                                                    >{
+                                                      ColorPickerType.primary:
+                                                          false,
+                                                      ColorPickerType.accent:
+                                                          false,
+                                                      ColorPickerType.both:
+                                                          true,
+                                                      ColorPickerType.custom:
+                                                          false,
+                                                      ColorPickerType.wheel:
+                                                          false,
+                                                    },
+                                                spacing: 6,
+                                                runSpacing: 6,
+                                                subheading: Divider(),
+                                                borderRadius: 50,
+                                              ),
+                                              SizedBox(height: 12),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                    ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    OutlinedButton(
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop();
+                                                      },
+                                                      child: Text(
+                                                        'Cancel',
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    FilledButton(
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop();
+                                                        setState(() {
+                                                          PreferencesHelper.setColor(
+                                                            "CustomMaterialColor",
+                                                            selectedColor,
+                                                          );
+                                                          Provider.of<
+                                                                ThemeController
+                                                              >(
+                                                                context,
+                                                                listen: false,
+                                                              )
+                                                              .setSeedColor(
+                                                                selectedColor,
+                                                              );
+                                                        });
+                                                      },
+                                                      child: Text(
+                                                        'Save',
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                width: 24,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: PreferencesHelper.getColor(
+                                    "CustomMaterialColor",
+                                  ),
+                                  borderRadius: BorderRadius.circular(50),
+                                  border: Border.all(
+                                    width: 1,
+                                    color: colortheme.outlineVariant,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Icon(Symbols.colorize, fill: 1, weight: 500),
                       title: Text("Use custom color"),
+                      description: Text(
+                        "Select a seed color to generate the theme",
+                      ),
                       toggled:
                           PreferencesHelper.getBool("usingCustomSeed") ?? false,
                       onChanged: (value) {
@@ -161,39 +310,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Provider.of<ThemeController>(
                               context,
                               listen: false,
-                            ).setSeedColor(Colors.blue);
+                            ).setSeedColor(
+                              PreferencesHelper.getColor("weatherThemeColor") ??
+                                  Colors.blue,
+                            );
                           }
                         });
                         _showTile = value;
                       },
                     ),
-
-                    SettingColorTile(
-                      enabled: _showTile,
-                      icon: IconWithWeight(Symbols.colors, fill: 1),
-                      title: Text('Primary color'),
-                      description: Text(
-                        'Select a seed color to generate the theme',
-                      ),
-                      dialogTitle: 'Color',
-                      initialColor:
-                          PreferencesHelper.getColor("CustomMaterialColor") ??
-                          Colors.blue,
-                      colorPickers: [ColorPickerType.primary],
-                      onSubmitted: (value) {
-                        setState(() {
-                          PreferencesHelper.setColor(
-                            "CustomMaterialColor",
-                            value,
-                          );
-                          Provider.of<ThemeController>(
-                            context,
-                            listen: false,
-                          ).setSeedColor(value);
-                        });
+                    SettingSwitchTile(
+                      icon: Icon(null, fill: 1, weight: 500),
+                      title: Text('Use expressive palette'),
+                      toggled:
+                          PreferencesHelper.getBool("useExpressiveVariant") ??
+                          false,
+                      onChanged: (value) {
+                        context.read<UnitSettingsNotifier>().updateColorVariant(
+                          value,
+                        );
+                        setState(() {});
                       },
                     ),
 
+                    // SettingColorTile(
+                    //   enabled: _showTile,
+                    //   icon: IconWithWeight(Symbols.colors, fill: 1),
+                    //   title: Text('Primary color'),
+                    //   description: Text(
+                    //     'Select a seed color to generate the theme',
+                    //   ),
+                    //   dialogTitle: 'Color',
+                    //   initialColor:
+                    //       PreferencesHelper.getColor("CustomMaterialColor") ??
+                    //       Colors.blue,
+                    //   colorPickers: [ColorPickerType.primary],
+                    //   onSubmitted: (value) {
+                    //     setState(() {
+                    //       PreferencesHelper.setColor(
+                    //         "CustomMaterialColor",
+                    //         value,
+                    //       );
+                    //       Provider.of<ThemeController>(
+                    //         context,
+                    //         listen: false,
+                    //       ).setSeedColor(value);
+                    //     });
+                    //   },
+                    // ),
                     SettingSwitchTile(
                       enabled: isSupported
                           ? _showTile

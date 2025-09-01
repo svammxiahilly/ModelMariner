@@ -116,12 +116,10 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                           return Text(
                             text,
                             style: TextStyle(
-                              fontFamily: "FunFont",
+                              fontFamily: "FlexFontEn",
                               fontSize: fontSize,
-                              fontVariations: [
-                                FontVariation.weight(700),
-                                FontVariation("ROND", 100),
-                              ],
+                              fontWeight: FontWeight.w700,
+
                               color: colorTheme.onSurface,
                             ),
                             textAlign: TextAlign.center,

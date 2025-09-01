@@ -336,11 +336,8 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                 key: ValueKey<String>(elapsedStr),
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.width / 3.5,
-                  fontFamily: "FunFont",
-                  fontVariations: [
-                    FontVariation.weight(600),
-                    FontVariation("ROND", 100),
-                  ],
+                  fontFamily: "FlexFontEn",
+                  fontWeight: FontWeight.w600,
                   color: colorTheme.onSurface,
                 ),
               ),

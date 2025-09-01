@@ -138,11 +138,8 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                 style: TextStyle(
                                   fontSize:
                                       MediaQuery.of(context).size.width / 5,
-                                  fontFamily: "FunFont",
-                                  fontVariations: [
-                                    FontVariation.weight(200),
-                                    FontVariation("ROND", 100),
-                                  ],
+                                  fontFamily: "FlexFontEn",
+
                                   color: colorTheme.onSurface,
                                 ),
                               ),
@@ -204,8 +201,8 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
 
                   final isFirst = index == 0;
                   final isLast = index == savedTimezones.length - 1;
-                  final firstRadius = isFirst ? 18.0 : 0.0;
-                  final lastRadius = isLast ? 18.0 : 0.0;
+                  final firstRadius = isFirst ? 18.0 : 2.6;
+                  final lastRadius = isLast ? 18.0 : 2.6;
 
                   return Container(
                     padding: EdgeInsets.only(

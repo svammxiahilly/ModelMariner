@@ -59,6 +59,9 @@ dependencies:
   flutter_displaymode: ^0.6.0
   url_launcher: ^6.3.1
   flutter_markdown: ^0.7.7+1
+  expressive_loading_indicator: ^0.0.1
+  material_new_shapes: ^1.0.0
+  flex_color_picker: ^3.7.1
 
   settings_tiles:
     path: ./settings_tiles_custom
@@ -97,10 +100,16 @@ flutter:
         - asset: assets/fonts/static_Bold.ttf
           weight: 700
 
-    - family: FunFont
+    - family: FlexFontEn
       fonts:
-        - asset: assets/fonts/fun_font.ttf
+        - asset: assets/fonts/flex-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/flex-Medium.ttf
           weight: 500
+        - asset: assets/fonts/flex-Medium.ttf
+          weight: 600
+        - asset: assets/fonts/flex-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:
