@@ -15,3 +15,5 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
+    "sourceMap": false,
+    "skipLibCheck": true
