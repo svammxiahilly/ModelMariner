@@ -225,7 +225,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                                 ? themeBrightness == Brightness.dark
                                       ? colorTheme.onPrimary
                                       : colorTheme.primaryContainer
-                                : colorTheme.surfaceContainerLow,
+                                : colorTheme.surfaceContainerLowest,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

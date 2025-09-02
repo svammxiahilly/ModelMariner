@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_tiles/settings_tiles.dart';
 import '../controllers/theme_controller.dart';
@@ -64,14 +65,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final currentClockStyle =
         PreferencesHelper.getString("ClockStyle") ?? "Digital";
 
-    final optionsTheme = {"Auto": "Auto", "Dark": "Dark", "Light": "Light"};
-    final optionsTimeFormat = {"12 hr": "12 hr", "24 hr": "24 hr"};
+    final optionsTheme = {
+      "Auto": "sys_theme".tr(),
+      "Dark": "dark_theme".tr(),
+      "Light": "light_theme".tr(),
+    };
+    final optionsTimeFormat = {
+      "12 hr": "12 ${'hr'.tr()}",
+      "24 hr": "24 ${'hr'.tr()}",
+    };
     final optionsScreenSaverClockStyle = {
-      "Analog": "Analog",
-      "Digital": "Digital",
+      "Analog": "clock_style_analog".tr(),
+      "Digital": "clock_style_digital".tr(),
     };
 
-    final optionsClockStyle = {"Analog": "Analog", "Digital": "Digital"};
+    final optionsClockStyle = {
+      "Analog": "clock_style_analog".tr(),
+      "Digital": "clock_style_digital".tr(),
+    };
 
     final alwaysRunService =
         PreferencesHelper.getBool('alwaysRunService') ?? false;
@@ -89,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar.large(
-            title: Text('Settings'),
+            title: Text('settings'.tr()),
             titleSpacing: 0,
             backgroundColor: Theme.of(context).colorScheme.surface,
             scrolledUnderElevation: 1,
@@ -100,12 +111,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 SettingSection(
                   styleTile: true,
-                  title: SettingSectionTitle("App looks", noPadding: true),
+                  title: SettingSectionTitle("app_looks".tr(), noPadding: true),
                   tiles: [
                     SettingSingleOptionTile(
                       icon: IconWithWeight(Symbols.routine, fill: 1),
-                      title: Text('App theme'),
-                      dialogTitle: 'App theme',
+                      title: Text('app_theme'.tr()),
+                      dialogTitle: 'app_theme'.tr(),
                       value: SettingTileValue(
                         optionsTheme[currentMode == ThemeMode.light
                             ? "Light"
@@ -222,7 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                                         ).pop();
                                                       },
                                                       child: Text(
-                                                        'Cancel',
+                                                        'cancel'.tr(),
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
@@ -252,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                                         });
                                                       },
                                                       child: Text(
-                                                        'Save',
+                                                        'save'.tr(),
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
@@ -287,10 +298,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             )
                           : Icon(Symbols.colorize, fill: 1, weight: 500),
-                      title: Text("Use custom color"),
-                      description: Text(
-                        "Select a seed color to generate the theme",
-                      ),
+                      title: Text("use_custom_color".tr()),
+                      description: Text("use_custom_color_sub".tr()),
                       toggled:
                           PreferencesHelper.getBool("usingCustomSeed") ?? false,
                       onChanged: (value) {
@@ -321,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SettingSwitchTile(
                       icon: Icon(null, fill: 1, weight: 500),
-                      title: Text('Use expressive palette'),
+                      title: Text('use_expressive_color'.tr()),
                       toggled:
                           PreferencesHelper.getBool("useExpressiveVariant") ??
                           false,
@@ -340,10 +349,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 : true
                           : false,
                       icon: IconWithWeight(Symbols.wallpaper, fill: 1),
-                      title: Text("Dynamic colors"),
+                      title: Text("dynamic_colors".tr()),
 
                       description: Text(
-                        "${"Use wallpaper colors"} ${isSupported ? "" : "(Android 12+)"}",
+                        "${"dynamic_colors_sub".tr()} ${isSupported ? "" : "(Android 12+)"}",
                       ),
                       toggled:
                           PreferencesHelper.getBool("DynamicColors") ?? false,
@@ -372,10 +381,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     SettingSwitchTile(
                       icon: IconWithWeight(Symbols.lock_clock, fill: 1),
-                      title: Text("Prevent Screen Sleep"),
-                      description: Text(
-                        "Keeps the device awake while the app is running",
-                      ),
+                      title: Text("prevent_screen_sleep".tr()),
+                      description: Text("prevent_screen_sleep_sub".tr()),
                       toggled: preventScreenSleep,
                       onChanged: (value) async {
                         PreferencesHelper.setBool('PreventScreenSleep', value);
@@ -390,15 +397,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 10),
                 SettingSection(
                   styleTile: true,
-                  title: SettingSectionTitle("Clock", noPadding: true),
+                  title: SettingSectionTitle("clock".tr(), noPadding: true),
                   tiles: [
                     SettingSingleOptionTile(
                       icon: IconWithWeight(Symbols.farsight_digital, fill: 1),
-                      title: Text('Clock style'),
+                      title: Text('clock_style'.tr()),
                       value: SettingTileValue(
                         optionsClockStyle[currentClockStyle]!,
                       ),
-                      dialogTitle: 'Clock style',
+                      dialogTitle: 'clock_style'.tr(),
                       options: optionsClockStyle.values.toList(),
                       initialOption: optionsClockStyle[currentClockStyle]!,
                       onSubmitted: (value) {
@@ -416,11 +423,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Symbols.nest_clock_farsight_analog,
                         fill: 1,
                       ),
-                      title: Text('Time format'),
+                      title: Text('time_format'.tr()),
                       value: SettingTileValue(
                         optionsTimeFormat[currentTimeFormat]!,
                       ),
-                      dialogTitle: 'Time format',
+                      dialogTitle: 'time_format'.tr(),
                       options: optionsTimeFormat.values.toList(),
                       initialOption: optionsTimeFormat[currentTimeFormat]!,
                       onSubmitted: (value) {
@@ -435,7 +442,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SettingSwitchTile(
                       icon: IconWithWeight(Symbols.timer_10_select, fill: 1),
-                      title: Text("Display time with seconds"),
+                      title: Text("display_time_seconds".tr()),
                       toggled: currentShowSeconds,
                       onChanged: (value) {
                         context.read<UnitSettingsNotifier>().updateShowSeconds(
@@ -450,7 +457,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 10),
                 SettingSection(
                   styleTile: true,
-                  title: SettingSectionTitle("Alarm", noPadding: true),
+                  title: SettingSectionTitle("alarm".tr(), noPadding: true),
                   tiles: [
                     //                     Slider(
                     //   value: _volume,
@@ -460,8 +467,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // ),
                     SettingSliderTile(
                       icon: IconWithWeight(Symbols.volume_up, fill: 1),
-                      title: Text("Alarm volume"),
-                      dialogTitle: "Alarm volume",
+                      title: Text("alarm_volume".tr()),
+                      dialogTitle: "alarm_volume".tr(),
                       initialValue: _volume,
                       min: 0.0,
                       max: 1.0,
@@ -474,10 +481,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SettingSwitchTile(
                       icon: IconWithWeight(Symbols.construction, fill: 1),
-                      title: Text("Always run background service"),
-                      description: Text(
-                        "Use this if alarms aren’t working; it may prevent the app from being killed but uses more battery",
-                      ),
+                      title: Text("always_run_service".tr()),
+                      description: Text("always_run_service_sub".tr()),
                       toggled: alwaysRunService,
                       onChanged: (value) async {
                         PreferencesHelper.setBool('alwaysRunService', value);
@@ -500,12 +505,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 10),
                 SettingSection(
                   styleTile: true,
-                  title: SettingSectionTitle("Screen saver", noPadding: true),
+                  title: SettingSectionTitle(
+                    "screen_saver".tr(),
+                    noPadding: true,
+                  ),
                   tiles: [
                     SettingSliderTile(
                       icon: IconWithWeight(Symbols.brightness_7, fill: 1),
-                      title: Text("Screen saver brightness"),
-                      dialogTitle: "Brightness",
+                      title: Text("screen_saver_brightness".tr()),
+                      dialogTitle: "brightness".tr(),
                       initialValue: _sliderValueFraction,
                       min: 0.0,
                       max: 1.0,
@@ -523,10 +531,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SettingSwitchTile(
                       icon: IconWithWeight(Symbols.backlight_high_off, fill: 1),
-                      title: Text("Night mode"),
-                      description: Text(
-                        "Uses a full black scheme for dark rooms",
-                      ),
+                      title: Text("night_mode_screen_saver".tr()),
+                      description: Text("night_mode_screen_saver_sub".tr()),
                       toggled: useFullBlackForScreenSaver,
                       onChanged: (value) async {
                         PreferencesHelper.setBool(

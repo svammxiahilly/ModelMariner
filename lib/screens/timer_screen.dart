@@ -751,7 +751,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
                                     final tileColor = remaining == 0
                                         ? colorTheme.primaryContainer
-                                        : colorTheme.surfaceContainerLow;
+                                        : colorTheme.surfaceContainerLowest;
 
                                     final finished = remaining == 0;
 

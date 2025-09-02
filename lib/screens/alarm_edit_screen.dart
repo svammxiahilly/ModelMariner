@@ -126,59 +126,80 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
             ),
 
             SizedBox(height: 10),
-            Text(
-              widget.alarm == null ? 'add_alarm'.tr() : 'edit_alarm'.tr(),
-              style: TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 12),
 
-            GestureDetector(
-              onTap: () async {
-                final picked = await showTimePicker(
-                  context: context,
-                  initialTime: time,
-                  builder: (context, child) {
-                    return MediaQuery(
-                      data: MediaQuery.of(
-                        context,
-                      ).copyWith(alwaysUse24HourFormat: is24HourFormat),
-                      child: child!,
-                    );
-                  },
-                );
-                if (picked != null) setState(() => time = picked);
-              },
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: _formatTimeWithoutAmPm(
-                        time,
-                        is24HourFormat,
-                        context,
-                      ),
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width / 5,
-                        fontFamily: 'FlexFontEn',
-                        fontWeight: FontWeight.w600,
-                        color: colorTheme.onSurface,
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: time,
+                        builder: (context, child) {
+                          return MediaQuery(
+                            data: MediaQuery.of(
+                              context,
+                            ).copyWith(alwaysUse24HourFormat: is24HourFormat),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) setState(() => time = picked);
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: _formatTimeWithoutAmPm(
+                              time,
+                              is24HourFormat,
+                              context,
+                            ),
+                            style: TextStyle(
+                              fontSize: 46,
+                              fontFamily: 'FlexFontEn',
+                              fontWeight: FontWeight.w500,
+                              color: colorTheme.onSurface,
+                            ),
+                          ),
+                          TextSpan(text: " "),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.baseline,
+                            baseline: TextBaseline.alphabetic,
+                            child: Text(
+                              _getAmPm(time, is24HourFormat, context),
+                              style: TextStyle(
+                                fontSize: 24,
+                                color: colorTheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    TextSpan(text: " "),
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.baseline,
-                      baseline: TextBaseline.alphabetic,
-                      child: Text(
-                        _getAmPm(time, is24HourFormat, context),
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width / 11,
-                          color: colorTheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+
+                  FilledButton.tonal(
+                    onPressed: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: time,
+                        builder: (context, child) {
+                          return MediaQuery(
+                            data: MediaQuery.of(
+                              context,
+                            ).copyWith(alwaysUse24HourFormat: is24HourFormat),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) setState(() => time = picked);
+                    },
+                    child: Text("edit".tr()),
+                  ),
+                ],
               ),
             ),
 
