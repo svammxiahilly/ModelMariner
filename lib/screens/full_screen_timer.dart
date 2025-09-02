@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../helpers/icon_helper.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -160,7 +161,7 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                         child: IconWithWeight(
                           Symbols.restart_alt,
                           size: 40,
-                          color: colorTheme.onSecondaryContainer,
+                          color: colorTheme.onPrimaryContainer,
                         ),
                       ),
                     ),
@@ -181,7 +182,7 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                     heroTag: "idk_random_tag_stop_wow_WOWOW",
 
                     label: Text(
-                      "Add +1:00",
+                      "add_one_min_large".tr(),
                       style: TextStyle(
                         fontSize: 24,
                         color: colorTheme.onTertiaryContainer,

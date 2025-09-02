@@ -62,6 +62,7 @@ dependencies:
   expressive_loading_indicator: ^0.0.1
   material_new_shapes: ^1.0.0
   flex_color_picker: ^3.7.1
+  easy_localization: ^3.0.7+1
 
   settings_tiles:
     path: ./settings_tiles_custom
@@ -89,6 +90,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/translations/
 
   fonts:
     - family: DefaultFont

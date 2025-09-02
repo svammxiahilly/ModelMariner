@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -86,10 +87,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   final List<String> _pagesLabel = [
-    "Alarm",
-    "World clock",
-    "StopWatch",
-    "Timer",
+    "alarm".tr(),
+    "world_clock".tr(),
+    "stopwatch".tr(),
+    "timer".tr(),
   ];
 
   void _onItemTapped(int index) {
@@ -257,19 +258,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
                 padding: EdgeInsets.only(left: 14),
                 // child: Text('Settings', style: TextStyle(fontSize: 16)),
-                child: menuItemRow(Symbols.settings, "Settings"),
+                child: menuItemRow(Symbols.settings, "settings".tr()),
               ),
               PopupMenuItem<String>(
                 value: 'openScreenSaver',
                 padding: EdgeInsets.only(left: 14, right: 6),
                 // child: Text('Screen saver', style: TextStyle(fontSize: 16)),
-                child: menuItemRow(Symbols.mobile_text_2, "Screen saver"),
+                child: menuItemRow(Symbols.mobile_text_2, "screen_saver".tr()),
               ),
               PopupMenuItem<String>(
                 value: 'openAboutScreen',
                 padding: EdgeInsets.only(left: 14, right: 6),
                 // child: Text('About', style: TextStyle(fontSize: 16)),
-                child: menuItemRow(Symbols.info, "About"),
+                child: menuItemRow(Symbols.info, "about".tr()),
               ),
             ],
           ),
@@ -397,26 +398,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           TextStyle(fontWeight: FontWeight.w500, color: colorTheme.onSurface),
         ),
 
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: IconWithWeight(Symbols.alarm),
             selectedIcon: IconWithWeight(Symbols.alarm, fill: 1),
-            label: 'Alarm',
+            label: 'alarm'.tr(),
           ),
           NavigationDestination(
             icon: IconWithWeight(Symbols.schedule),
             selectedIcon: IconWithWeight(Symbols.schedule, fill: 1),
-            label: 'Clock',
+            label: 'clock'.tr(),
           ),
           NavigationDestination(
             icon: IconWithWeight(Symbols.hourglass_empty),
             selectedIcon: IconWithWeight(Symbols.hourglass_top, fill: 1),
-            label: 'Stopwatch',
+            label: 'stopwatch'.tr(),
           ),
           NavigationDestination(
             icon: IconWithWeight(Symbols.timer),
             selectedIcon: IconWithWeight(Symbols.timer, fill: 1),
-            label: 'Timer',
+            label: 'timer'.tr(),
           ),
         ],
       ),

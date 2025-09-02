@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -152,7 +153,6 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                                   style: TextStyle(
                                     fontSize:
                                         MediaQuery.of(context).size.width / 12,
-                                    fontFamily: "FlexFont",
 
                                     color: colorTheme.onSurfaceVariant,
                                   ),
@@ -177,7 +177,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                         alignment: Alignment.centerLeft,
                         padding: const EdgeInsets.only(left: 16),
                         child: Text(
-                          "Saved timezones",
+                          "saved_timezones".tr(),
                           style: TextStyle(
                             fontSize: 16,
                             color: colorTheme.primary,
@@ -246,9 +246,9 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                           final controller = ScaffoldMessenger.of(context)
                               .showSnackBar(
                                 SnackBar(
-                                  content: Text('$removedTz deleted'),
+                                  content: Text('$removedTz ${"deleted".tr()}'),
                                   action: SnackBarAction(
-                                    label: 'Undo',
+                                    label: 'undo'.tr(),
                                     onPressed: () {
                                       undoPressed = true;
                                       // Restore in Hive directly

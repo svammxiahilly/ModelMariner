@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -35,6 +36,21 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     _startUITimer();
     _initForegroundTaskAndLoad();
     PreferencesHelper.setBool("isFullScreen", false);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused) {
+      if (timers.any((t) => t.isRunning)) {
+        await _startServiceIfNotRunning();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (await FlutterForegroundTask.isRunningService) {
+        await FlutterForegroundTask.stopService();
+      }
+    }
   }
 
   @override
@@ -168,7 +184,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     await _loadTimers();
 
     if (timers.any((t) => t.isRunning)) {
-      await _startServiceIfNotRunning();
+      // await _startServiceIfNotRunning();
     }
   }
 
@@ -304,7 +320,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     setState(() {});
 
     if (startAfterAdding) {
-      await _startServiceIfNotRunning();
+      // await _startServiceIfNotRunning();
     }
   }
 
@@ -335,7 +351,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     setState(() {});
 
     if (timers.any((x) => x.isRunning)) {
-      await _startServiceIfNotRunning();
+      // await _startServiceIfNotRunning();
     } else {
       await _stopServiceIfNoRunningTimers();
     }
@@ -357,23 +373,14 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   bool startAfterAddingOneMin = false;
 
   Future<void> _addOneMinute(TimerModel t) async {
-    await FlutterForegroundTask.stopService();
     final idx = timers.indexWhere((x) => x.id == t.id);
     if (idx == -1) return;
+
     timers[idx].remainingSeconds += 60;
-    timers[idx].currentDuration += 60;
+    timers[idx].currentDuration =
+        (timers[idx].currentDuration ?? timers[idx].remainingSeconds) + 60;
+
     await _persistTimers();
-    if (getRunningTimersCount() == 0) {
-      startAfterAddingOneMin = false;
-    } else {
-      startAfterAddingOneMin = true;
-    }
-
-    if (startAfterAddingOneMin) {
-      await _startServiceIfNotRunning();
-      _toggleStartStop(t);
-    }
-
     setState(() {});
   }
 
@@ -402,7 +409,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Edit Timer Label'),
+        title: Text('edit_timer_label'.tr()),
         content: TextField(
           controller: controller,
           decoration: InputDecoration(hintText: 'Enter label'),
@@ -411,7 +418,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Cancel',
+              'cancel'.tr(),
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
             ),
           ),
@@ -423,7 +430,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               Navigator.pop(ctx);
             },
             child: Text(
-              'Save',
+              'save'.tr(),
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
             ),
           ),
@@ -650,7 +657,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                 size: 60,
                               ),
                               Text(
-                                "No timers",
+                                "no_timers".tr(),
                                 style: TextStyle(
                                   fontSize: 30,
                                   color: colorTheme.onSurfaceVariant,
@@ -728,7 +735,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                 onDismissed: (_) {
                                   _deleteTimer(t);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Timer deleted')),
+                                    SnackBar(
+                                      content: Text('timer_deleted'.tr()),
+                                    ),
                                   );
                                 },
                                 child: ValueListenableBuilder<int>(
@@ -782,7 +791,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                 child: Text(
                                                   t.uiLabel.isNotEmpty
                                                       ? t.uiLabel
-                                                      : 'Timer label',
+                                                      : 'timer_label'.tr(),
                                                   style: TextStyle(
                                                     height: 1,
                                                     fontSize: 16,
@@ -857,7 +866,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                     onPressed: () =>
                                                         _addOneMinute(t),
 
-                                                    child: const Text("+1 Min"),
+                                                    child: Text(
+                                                      "add_one_min".tr(),
+                                                    ),
                                                   ),
 
                                                   Row(

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../models/alarm_data_model.dart';
 import 'package:settings_tiles/settings_tiles.dart';
@@ -126,7 +127,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
 
             SizedBox(height: 10),
             Text(
-              widget.alarm == null ? 'Add Alarm' : 'Edit Alarm',
+              widget.alarm == null ? 'add_alarm'.tr() : 'edit_alarm'.tr(),
               style: TextStyle(fontSize: 18),
               textAlign: TextAlign.center,
             ),
@@ -236,8 +237,8 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
               styleTile: true,
               tiles: [
                 SettingTextFieldTile(
-                  title: Text("Label"),
-                  dialogTitle: "Label",
+                  title: Text("label".tr()),
+                  dialogTitle: "label".tr(),
                   maxLength: 35,
                   onSubmitted: (value) {
                     setState(() {
@@ -248,7 +249,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                   value: Text(labelController.text),
                 ),
                 SettingSwitchTile(
-                  title: const Text('Vibrate'),
+                  title: Text('vibrate'.tr()),
                   toggled: vibrate,
                   onChanged: (v) => setState(() => vibrate = v),
                 ),
@@ -259,8 +260,8 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                   onTap: _pickSound,
                 ),
                 SettingSliderTile(
-                  title: Text("Snooze time"),
-                  dialogTitle: "Snooze",
+                  title: Text("snooze_time".tr()),
+                  dialogTitle: "snooze".tr(),
                   initialValue: snoozeTime!.round().toDouble(),
                   min: 1,
                   max: 30,
@@ -298,7 +299,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                       size: 20,
                     ),
                     label: Text(
-                      widget.alarm == null ? 'Cancel' : 'Delete',
+                      widget.alarm == null ? 'cancel'.tr() : 'delete'.tr(),
                       style: TextStyle(fontSize: 18),
                     ),
                     style: FilledButton.styleFrom(
@@ -360,7 +361,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                     },
                     icon: Icon(Icons.save, size: 20),
                     label: Text(
-                      widget.alarm == null ? 'Add' : 'Save',
+                      widget.alarm == null ? 'add'.tr() : 'save'.tr(),
                       style: TextStyle(fontSize: 18),
                     ),
                     style: FilledButton.styleFrom(

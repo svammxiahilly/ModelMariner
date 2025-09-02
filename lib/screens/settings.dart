@@ -333,31 +333,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     ),
 
-                    // SettingColorTile(
-                    //   enabled: _showTile,
-                    //   icon: IconWithWeight(Symbols.colors, fill: 1),
-                    //   title: Text('Primary color'),
-                    //   description: Text(
-                    //     'Select a seed color to generate the theme',
-                    //   ),
-                    //   dialogTitle: 'Color',
-                    //   initialColor:
-                    //       PreferencesHelper.getColor("CustomMaterialColor") ??
-                    //       Colors.blue,
-                    //   colorPickers: [ColorPickerType.primary],
-                    //   onSubmitted: (value) {
-                    //     setState(() {
-                    //       PreferencesHelper.setColor(
-                    //         "CustomMaterialColor",
-                    //         value,
-                    //       );
-                    //       Provider.of<ThemeController>(
-                    //         context,
-                    //         listen: false,
-                    //       ).setSeedColor(value);
-                    //     });
-                    //   },
-                    // ),
                     SettingSwitchTile(
                       enabled: isSupported
                           ? _showTile

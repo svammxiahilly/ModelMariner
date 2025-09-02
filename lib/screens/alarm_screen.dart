@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/alarm_data_model.dart';
 import '../services/alarm_service.dart';
 import '../screens/alarm_edit_screen.dart';
@@ -105,9 +105,9 @@ class AlarmScreenState extends State<AlarmScreen> {
   }
 
   String _repeatDaysText(List<int> days) {
-    if (days.isEmpty) return 'One-time';
+    if (days.isEmpty) return 'one_time'.tr();
     const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    if (days.length == 7) return 'Every day';
+    if (days.length == 7) return 'every_day'.tr();
     return days.map((d) => names[d - 1]).join(', ');
   }
 
@@ -130,7 +130,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                       size: 60,
                     ),
                     Text(
-                      "No alarms",
+                      "no_alarms".tr(),
                       style: TextStyle(
                         fontSize: 30,
                         color: colorTheme.onSurfaceVariant,
@@ -209,7 +209,7 @@ class AlarmScreenState extends State<AlarmScreen> {
                         _delete(a);
                         SnackUtil.showSnackBar(
                           context: context,
-                          message: "Alarm deleted",
+                          message: "alarm_deleted".tr(),
                         );
                       },
                       child: GestureDetector(
@@ -278,7 +278,9 @@ class AlarmScreenState extends State<AlarmScreen> {
                                     width:
                                         MediaQuery.of(context).size.width / 1.7,
                                     child: Text(
-                                      a.label,
+                                      a.label == 'Your label'
+                                          ? 'your_label'.tr()
+                                          : a.label,
                                       style: TextStyle(
                                         height: 1,
                                         fontSize: 16,

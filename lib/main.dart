@@ -12,9 +12,20 @@ import 'notifiers/settings_notifier.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
+
+const easySupportedLocales = [Locale('en')];
+
+final flutterSupportedLocales = easySupportedLocales
+    .map((l) => Locale(l.languageCode))
+    .toSet()
+    .toList();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await EasyLocalization.ensureInitialized();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -39,28 +50,19 @@ void main() async {
 
   await FlutterDisplayMode.setHighRefreshRate();
 
-  // FlutterForegroundTask.init(
-  //   androidNotificationOptions: AndroidNotificationOptions(
-  //     channelId: 'timer_channel',
-  //     channelName: 'Timers',
-  //     channelDescription: 'Running timers in background',
-  //     channelImportance: NotificationChannelImportance.LOW,
-  //     priority: NotificationPriority.LOW,
-  //   ),
-  //   iosNotificationOptions: const IOSNotificationOptions(),
-  //   foregroundTaskOptions: ForegroundTaskOptions(
-  //     eventAction: ForegroundTaskEventAction.repeat(1000),
-  //     autoRunOnBoot: false,
-  //   ),
-  // );
-
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => themeController),
-        ChangeNotifierProvider(create: (_) => UnitSettingsNotifier()),
-      ],
-      child: const MyApp(),
+    EasyLocalization(
+      supportedLocales: easySupportedLocales,
+      path: 'assets/translations',
+      fallbackLocale: Locale('en'),
+      saveLocale: true,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => themeController),
+          ChangeNotifierProvider(create: (_) => UnitSettingsNotifier()),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }
@@ -87,6 +89,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ClockMaster',
       debugShowCheckedModeBanner: false,
+      locale: context.locale,
+      supportedLocales: flutterSupportedLocales,
+      localizationsDelegates: context.localizationDelegates,
+      localeResolutionCallback: (locale, supportedLocales) {
+        return context.locale;
+      },
+      builder: (context, child) {
+        return Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: child!,
+        );
+      },
       theme:
           ThemeData.from(
             colorScheme: useExpressiveVariant

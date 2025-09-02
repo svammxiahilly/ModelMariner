@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
 import 'package:flutter/material.dart';
@@ -471,7 +472,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
               heroTag: "idk_random_tag_stop_wow",
 
               label: Text(
-                "Lap",
+                "lap".tr(),
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
               ),
             ),
