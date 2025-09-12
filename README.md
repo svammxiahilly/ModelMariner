@@ -19,7 +19,10 @@
     
   [Contact](https://github.com/PranshulGG/ClockMaster?tab=readme-ov-file#contact) • [License](https://github.com/PranshulGG/ClockMaster?tab=readme-ov-file#license)
  </div>
-    
+       <div align="center">
+   <h3>ClockMaster: The Clock App That Looks Great and Does More</h3>
+   
+   </div>
 <div align="center">
  <a href="https://github.com/PranshulGG/ClockMaster/releases"><img alt="GitHub" src="https://user-images.githubusercontent.com/69304392/148696068-0cfea65d-b18f-4685-82b5-329a330b1c0d.png" height="80"/></a>
    </div>
