@@ -373,3 +373,35 @@ func score(a reliability.Aggregate, w map[Objective]float64, r objectiveRange) (
 		total += s
 	}
 	if wc, ok := w[ObjLatency]; ok {
+		s := normLowerBetter(a.P95LatencyMS, r.minLat, r.maxLat) * wc
+		comp["latency"] = s
+		total += s
+	}
+	if wc, ok := w[ObjQuality]; ok {
+		s := normHigherBetter(a.MeanQuality, r.minQual, r.maxQual) * wc
+		comp["quality"] = s
+		total += s
+	}
+	if wc, ok := w[ObjReliability]; ok {
+		s := normHigherBetter(a.WilsonLower, r.minRel, r.maxRel) * wc
+		comp["reliability"] = s
+		total += s
+	}
+	return total, comp
+}
+
+func toSet(xs []string) map[string]bool {
+	m := make(map[string]bool, len(xs))
+	for _, x := range xs {
+		m[strings.TrimSpace(x)] = true
+	}
+	return m
+}
+
+func almostEqual(a, b float64) bool {
+	d := a - b
+	if d < 0 {
+		d = -d
+	}
+	return d <= 1e-9
+}
