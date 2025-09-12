@@ -257,19 +257,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 value: 'openSettings',
 
                 padding: EdgeInsets.only(left: 14),
-                // child: Text('Settings', style: TextStyle(fontSize: 16)),
                 child: menuItemRow(Symbols.settings, "settings".tr()),
               ),
               PopupMenuItem<String>(
                 value: 'openScreenSaver',
                 padding: EdgeInsets.only(left: 14, right: 6),
-                // child: Text('Screen saver', style: TextStyle(fontSize: 16)),
                 child: menuItemRow(Symbols.mobile_text_2, "screen_saver".tr()),
               ),
               PopupMenuItem<String>(
                 value: 'openAboutScreen',
                 padding: EdgeInsets.only(left: 14, right: 6),
-                // child: Text('About', style: TextStyle(fontSize: 16)),
                 child: menuItemRow(Symbols.info, "about".tr()),
               ),
             ],
@@ -397,11 +394,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         labelTextStyle: WidgetStateProperty.all(
           TextStyle(fontWeight: FontWeight.w500, color: colorTheme.onSurface),
         ),
-
         destinations: [
           NavigationDestination(
             icon: IconWithWeight(Symbols.alarm),
             selectedIcon: IconWithWeight(Symbols.alarm, fill: 1),
+
             label: 'alarm'.tr(),
           ),
           NavigationDestination(
