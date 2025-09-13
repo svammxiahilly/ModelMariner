@@ -83,7 +83,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
     for (var t in timers) {
       if (t.isRunning && t.lastStartEpochMs != null) {
-        // Use the currentDuration as the baseline (should have been set when started)
         final baselineDuration = t.currentDuration;
         final elapsed = ((now - t.lastStartEpochMs!) / 1000).floor();
 
@@ -331,7 +330,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final model = timers[idx];
 
     if (model.isRunning) {
-      // Pause
       if (model.lastStartEpochMs != null) {
         final elapsed = ((now - model.lastStartEpochMs!) / 1000).floor();
         model.remainingSeconds = (model.currentDuration - elapsed).clamp(
@@ -342,9 +340,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       model.isRunning = false;
       model.lastStartEpochMs = null;
     } else {
-      // Resume
-      model.currentDuration =
-          model.remainingSeconds; // ✅ reset baseline correctly
+      model.currentDuration = model.remainingSeconds;
       model.lastStartEpochMs = now;
       model.isRunning = true;
     }
@@ -747,10 +743,17 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                 child: ValueListenableBuilder<int>(
                                   valueListenable: t.remainingNotifier,
                                   builder: (context, remaining, _) {
-                                    final progress = t.initialSeconds > 0
-                                        ? 1 -
-                                              (t.remainingSeconds /
-                                                  t.initialSeconds)
+                                    final denominator =
+                                        (t.isRunning &&
+                                            t.currentDuration != null)
+                                        ? t.currentDuration!
+                                        : t.initialSeconds;
+
+                                    final progress = denominator > 0
+                                        ? (1.0 -
+                                                  (t.remainingSeconds /
+                                                      denominator))
+                                              .clamp(0.0, 1.0)
                                         : 0.0;
 
                                     final tileColor = remaining == 0

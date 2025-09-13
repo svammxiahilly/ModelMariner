@@ -81,8 +81,8 @@ class MyTaskHandler extends TaskHandler {
           int newRemaining = m['remainingSeconds'] - elapsedSec;
           if (newRemaining <= 0) {
             if (m['isRunning'] == true) {
-              LoopingRingtone().stop();
-              LoopingRingtone().play(intervalSeconds: 3);
+              loopingRingtone.stop();
+              loopingRingtone.play(intervalSeconds: 3);
               FlutterForegroundTask.updateService(
                 notificationTitle: 'Timer Finished',
 
@@ -116,55 +116,58 @@ class MyTaskHandler extends TaskHandler {
         changedTimers.add(m);
       }
     }
-
-    final runningTimers = data.where((e) => e['isRunning'] == true).toList();
+    final runningTimers = data
+        .where((e) => e['isRunning'] == true)
+        .toList(growable: false);
     final pausedTimers = data
-        .where((e) => e['isRunning'] == false && e['remainingSeconds'] > 0)
-        .toList();
+        .where(
+          (e) => e['isRunning'] == false && (e['remainingSeconds'] ?? 0) > 0,
+        )
+        .toList(growable: false);
 
     final activeId = prefs.getString('activeTimerId');
 
     Map<String, dynamic>? t;
 
-    if (runningTimers.isNotEmpty) {
-      t = activeId != null
-          ? runningTimers.firstWhere(
-              (x) => x['id'] == activeId,
-              orElse: () => runningTimers.first,
-            )
-          : runningTimers.first;
-    } else if (pausedTimers.isNotEmpty) {
-      t = activeId != null
-          ? pausedTimers.firstWhere(
-              (x) => x['id'] == activeId,
-              orElse: () => pausedTimers.first,
-            )
-          : pausedTimers.first;
+    if (activeId != null) {
+      try {
+        t = data.firstWhere((x) => x['id'] == activeId);
+      } catch (e) {
+        t = null;
+      }
+    }
+
+    if (t == null) {
+      if (runningTimers.isNotEmpty) {
+        t = runningTimers.first;
+      } else if (pausedTimers.isNotEmpty) {
+        t = pausedTimers.first;
+      }
     }
 
     String title = 'Timer Finished';
     String text = 'Timer';
 
-    Map<String, dynamic>? tlabel;
-
-    if (runningTimers.isNotEmpty) {
-      tlabel = runningTimers.first;
-    } else if (pausedTimers.isNotEmpty) {
-      tlabel = pausedTimers.first;
-    }
-
     if (t != null) {
-      title = formatForNotification(t['remainingSeconds']);
+      final int rem = (t['remainingSeconds'] ?? 0) is int
+          ? t['remainingSeconds']
+          : int.tryParse('${t['remainingSeconds']}') ?? 0;
+      title = formatForNotification(rem);
+
       if (runningTimers.length > 1) {
         text = 'Running ${runningTimers.length} timers';
       } else {
-        text = t['isRunning']
-            ? 'Running • ${tlabel!['uiLabel']}'
-            : 'Paused • ${tlabel!['uiLabel']}';
+        final uiLabel = t['uiLabel'] ?? '';
+        text = (t['isRunning'] == true)
+            ? 'Running • $uiLabel'
+            : 'Paused • $uiLabel';
       }
+    } else {
+      title = 'Timers';
+      text = 'No active timers';
     }
 
-    FlutterForegroundTask.updateService(
+    await FlutterForegroundTask.updateService(
       notificationTitle: title,
       notificationText: text,
       notificationButtons: _buildNotificationButtons(
@@ -258,7 +261,7 @@ class MyTaskHandler extends TaskHandler {
           m['isRunning'] = false;
           m['lastStartEpochMs'] = null;
           data[idx] = m;
-          loopingRingtone.stop();
+
           final activeId = prefs.getString('activeTimerId');
           if (activeId != null && activeId == m['id']) {
             await prefs.remove('activeTimerId');
@@ -270,10 +273,24 @@ class MyTaskHandler extends TaskHandler {
         final idx = findTargetIndex();
         if (idx != -1) {
           final m = Map<String, dynamic>.from(data[idx]);
-          m['remainingSeconds'] = (m['remainingSeconds'] ?? 0) + 60;
+
+          final oldRemaining = (m['remainingSeconds'] ?? 0) as int;
+          m['remainingSeconds'] = oldRemaining + 60;
+
+          if (m['isRunning'] == true) {
+            final nowMs = DateTime.now().millisecondsSinceEpoch;
+            final oldCurr = (m['currentDuration'] is int)
+                ? m['currentDuration'] as int
+                : oldRemaining;
+            m['currentDuration'] = oldCurr + 60;
+
+            m['lastStartEpochMs'] = nowMs;
+          }
+
           data[idx] = m;
         }
       }
+      // await FlutterForegroundTask.stopService();
     } else if (id == BTN_RESET_ALL) {
       for (var i = 0; i < data.length; i++) {
         final m = Map<String, dynamic>.from(data[i]);
@@ -297,7 +314,38 @@ class MyTaskHandler extends TaskHandler {
     FlutterForegroundTask.sendDataToMain({'type': 'timers_updated'});
 
     final anyRunning = data.any((t) => t['isRunning'] == true);
-    if (!anyRunning) {
+    final anyPending = data.any((t) => (t['remainingSeconds'] ?? 0) > 0);
+
+    if (anyRunning || anyPending) {
+      if (id == "btn_reset") {
+        await FlutterForegroundTask.stopService();
+        return;
+      }
+      await FlutterForegroundTask.updateService(
+        notificationTitle: (data.isNotEmpty
+            ? formatForNotification(
+                (data.firstWhere(
+                      (t) => (t['remainingSeconds'] ?? 0) > 0,
+                    )['remainingSeconds'] ??
+                    0),
+              )
+            : 'Timers'),
+        notificationText: (() {
+          final runningCount = data.where((t) => t['isRunning'] == true).length;
+          if (runningCount > 0) return 'Running $runningCount timers';
+          final firstPending = data.firstWhere(
+            (t) => (t['remainingSeconds'] ?? 0) > 0,
+            orElse: () => null,
+          );
+          return firstPending != null
+              ? 'Paused • ${firstPending['uiLabel']}'
+              : 'Timers';
+        }()),
+        notificationButtons: _buildNotificationButtons(
+          data.map((e) => Map<String, dynamic>.from(e)).toList(),
+        ),
+      );
+    } else {
       await FlutterForegroundTask.stopService();
     }
   }

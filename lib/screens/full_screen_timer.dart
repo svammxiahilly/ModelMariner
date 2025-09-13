@@ -131,6 +131,29 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                           );
                         },
                       ),
+                      Positioned(
+                        bottom: 60,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Symbols.notification_sound,
+                              color: colorTheme.onSurface,
+                              size: 20,
+                              fill: 1,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _getEndTime(remaining),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: colorTheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -276,5 +299,18 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
         ),
       ),
     );
+  }
+}
+
+String _getEndTime(int remainingSeconds) {
+  final is24HourFormat = PreferencesHelper.getString("timeFormat") == '24 hr';
+
+  final now = DateTime.now();
+  final endTime = now.add(Duration(seconds: remainingSeconds));
+
+  if (is24HourFormat) {
+    return DateFormat.Hm().format(endTime);
+  } else {
+    return DateFormat.jm().format(endTime);
   }
 }

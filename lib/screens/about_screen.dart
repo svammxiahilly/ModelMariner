@@ -110,17 +110,34 @@ class AboutScreen extends StatelessWidget {
                 leading: CircleAvatar(radius: 23, child: Icon(Symbols.license)),
                 title: Text("third_party_licenses".tr()),
                 onTap: () {
-                  showLicensePage(
-                    context: context,
-                    applicationName: 'ClockMaster',
-                    applicationVersion: 'v1.4.2',
-                    applicationIcon: Container(
-                      clipBehavior: Clip.hardEdge,
-                      margin: EdgeInsets.only(bottom: 16, top: 16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: SvgPicture.string(appIcon, width: 60, height: 60),
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      reverseTransitionDuration: Duration(milliseconds: 200),
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return LicensePage(
+                          applicationName: 'ClockMaster',
+                          applicationVersion: 'v1.4.3',
+                          applicationIcon: Container(
+                            clipBehavior: Clip.hardEdge,
+                            margin: EdgeInsets.only(bottom: 16, top: 16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: SvgPicture.string(
+                              appIcon,
+                              width: 60,
+                              height: 60,
+                            ),
+                          ),
+                        );
+                      },
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
                     ),
                   );
                 },
@@ -183,39 +200,40 @@ class TermsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final markdownData = '''
-**Terms & Conditions**  
 
-These terms and conditions apply to the ClockMaster app (hereby referred to as "Application") for mobile devices that was created by Pranshul (hereby referred to as "Service Provider") as an Open Source service.
+These Terms & Conditions apply to the **ClockMaster** app (the "Application") for mobile devices.  
+This app was created by **Pranshul** as an open-source, hobby project. By using the Application, you agree to the following:  
 
-Upon downloading or utilizing the Application, you are automatically agreeing to the following terms. It is strongly advised that you thoroughly read and understand these terms prior to using the Application. Unauthorized copying, modification of the Application, any part of the Application, or our trademarks is strictly prohibited. Any attempts to extract the source code of the Application, translate the Application into other languages, or create derivative versions are not permitted. All trademarks, copyrights, database rights, and other intellectual property rights related to the Application remain the property of the Service Provider.
+## Use of the Application  
+- The Application is provided **as-is**, free of charge, and without any guarantees of reliability, availability, or accuracy.  
+- You may use, modify, and distribute the Application in accordance with its open-source license.  
+- You may **not** misrepresent the origin of the Application or use its name/trademarks without permission.  
 
-The Service Provider is dedicated to ensuring that the Application is as beneficial and efficient as possible. As such, they reserve the right to modify the Application or charge for their services at any time and for any reason. The Service Provider assures you that any charges for the Application or its services will be clearly communicated to you.
+## Data & Privacy  
+- The Application does **not collect, store, or share** any personal information.  
+- The Application may request permission to send **notifications**, which are handled entirely on your device.  
+- For more details, please see the Privacy Policy.  
 
-The Application stores and processes personal data that you have provided to the Service Provider in order to provide the Service. It is your responsibility to maintain the security of your phone and access to the Application. The Service Provider strongly advise against jailbreaking or rooting your phone, which involves removing software restrictions and limitations imposed by the official operating system of your device. Such actions could expose your phone to malware, viruses, malicious programs, compromise your phone's security features, and may result in the Application not functioning correctly or at all.
+## Liability  
+- The Service Provider (Pranshul) is **not liable** for any direct or indirect damages, losses, or issues that may arise from using the Application.  
+- This includes (but is not limited to) inaccurate information, device issues, or mobile data charges.  
+- You are responsible for ensuring your device is compatible and has sufficient internet and battery to use the Application.  
 
-Please be aware that the Service Provider does not assume responsibility for certain aspects. Some functions of the Application require an active internet connection, which can be Wi-Fi or provided by your mobile network provider. The Service Provider cannot be held responsible if the Application does not function at full capacity due to lack of access to Wi-Fi or if you have exhausted your data allowance.
+## Updates & Availability  
+- The Application may be updated from time to time.  
+- There is no guarantee that the Application will always remain available, functional, or supported on all operating system versions.  
+- The Service Provider may discontinue the Application at any time without prior notice.  
 
-If you are using the application outside of a Wi-Fi area, please be aware that your mobile network provider's agreement terms still apply. Consequently, you may incur charges from your mobile provider for data usage during the connection to the application, or other third-party charges. By using the application, you accept responsibility for any such charges, including roaming data charges if you use the application outside of your home territory (i.e., region or country) without disabling data roaming. If you are not the bill payer for the device on which you are using the application, they assume that you have obtained permission from the bill payer.
+## Changes to These Terms  
+These Terms & Conditions may be updated in the future. Updates will be posted in the project repository or within the Application. Continued use of the Application means you accept any revised terms.  
 
-Similarly, the Service Provider cannot always assume responsibility for your usage of the application. For instance, it is your responsibility to ensure that your device remains charged. If your device runs out of battery and you are unable to access the Service, the Service Provider cannot be held responsible.
+## Contact  
+If you have any questions about these Terms & Conditions, please contact:  
+📧 **pranshul.devmain@gmail.com**  
 
-In terms of the Service Provider's responsibility for your use of the application, it is important to note that while they strive to ensure that it is updated and accurate at all times, they do rely on third parties to provide information to them so that they can make it available to you. The Service Provider accepts no liability for any loss, direct or indirect, that you experience as a result of relying entirely on this functionality of the application.
 
-The Service Provider may wish to update the application at some point. The application is currently available as per the requirements for the operating system (and for any additional systems they decide to extend the availability of the application to) may change, and you will need to download the updates if you want to continue using the application. The Service Provider does not guarantee that it will always update the application so that it is relevant to you and/or compatible with the particular operating system version installed on your device. However, you agree to always accept updates to the application when offered to you. The Service Provider may also wish to cease providing the application and may terminate its use at any time without providing termination notice to you. Unless they inform you otherwise, upon any termination, (a) the rights and licenses granted to you in these terms will end; (b) you must cease using the application, and (if necessary) delete it from your device.
 
-**Changes to These Terms and Conditions**
 
-The Service Provider may periodically update their Terms and Conditions. Therefore, you are advised to review this page regularly for any changes. The Service Provider will notify you of any changes by posting the new Terms and Conditions on this page.
-
-These terms and conditions are effective as of 2025-08-27
-
-**Contact Us**
-
-If you have any questions or suggestions about the Terms and Conditions, please do not hesitate to contact the Service Provider at pranshul.devmain@gmail.com.
-
-* * *
-
-This Terms and Conditions page was generated by [App Privacy Policy Generator](https://app-privacy-policy-generator.nisrulz.com/)
 ''';
 
     return Scaffold(
@@ -244,76 +262,31 @@ class PolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final markdownData = '''
-**Privacy Policy**
 
-This privacy policy applies to the ClockMaster app (hereby referred to as "Application") for mobile devices that was created by Pranshul (hereby referred to as "Service Provider") as an Open Source service. This service is intended for use "AS IS".
+ClockMaster is an open-source application.  
 
-**Information Collection and Use**
+We respect your privacy. This application:  
 
-The Application collects information when you download and use it. This information may include information such as
+- Does **not collect, store, or share** any personal information.  
+- Does **not track** your IP address, usage data, or any identifiers.  
+- Does **not send data** to us or to third parties.  
 
-*   Your device's Internet Protocol address (e.g. IP address)
-*   The pages of the Application that you visit, the time and date of your visit, the time spent on those pages
-*   The time spent on the Application
-*   The operating system you use on your mobile device
+## Notifications  
+The app may request permission to send you notifications.  
+- Granting notification permission is **Required on Android 12+**.  
+- Notifications are generated and handled **locally on your device**.  
+- No notification data is collected, stored, or shared.  
 
-The Application does not gather precise information about the location of your mobile device.
+## Children  
+This application does not knowingly collect any personal information from anyone, including children under 13.  
 
-The Application collects your device's location, which helps the Service Provider determine your approximate geographical location and make use of in below ways:
+## Changes  
+If this Privacy Policy changes, we will update it here. Continued use of the app after changes means you accept the revised policy.  
 
-*   Geolocation Services: The Service Provider utilizes location data to provide features such as personalized content, relevant recommendations, and location-based services.
-*   Analytics and Improvements: Aggregated and anonymized location data helps the Service Provider to analyze user behavior, identify trends, and improve the overall performance and functionality of the Application.
-*   Third-Party Services: Periodically, the Service Provider may transmit anonymized location data to external services. These services assist them in enhancing the Application and optimizing their offerings.
+## Contact  
+If you have any questions about privacy while using ClockMaster, please contact us at:  
+📧 **pranshul.devmain@gmail.com**  
 
-The Service Provider may use the information you provided to contact you from time to time to provide you with important information, required notices and marketing promotions.
-
-For a better experience, while using the Application, the Service Provider may require you to provide us with certain personally identifiable information. The information that the Service Provider request will be retained by them and used as described in this privacy policy.
-
-**Third Party Access**
-
-Only aggregated, anonymized data is periodically transmitted to external services to aid the Service Provider in improving the Application and their service. The Service Provider may share your information with third parties in the ways that are described in this privacy statement.
-
-The Service Provider may disclose User Provided and Automatically Collected Information:
-
-*   as required by law, such as to comply with a subpoena, or similar legal process;
-*   when they believe in good faith that disclosure is necessary to protect their rights, protect your safety or the safety of others, investigate fraud, or respond to a government request;
-*   with their trusted services providers who work on their behalf, do not have an independent use of the information we disclose to them, and have agreed to adhere to the rules set forth in this privacy statement.
-
-**Opt-Out Rights**
-
-You can stop all collection of information by the Application easily by uninstalling it. You may use the standard uninstall processes as may be available as part of your mobile device or via the mobile application marketplace or network.
-
-**Data Retention Policy**
-
-The Service Provider will retain User Provided data for as long as you use the Application and for a reasonable time thereafter. If you'd like them to delete User Provided Data that you have provided via the Application, please contact them at pranshul.devmain@gmail.com and they will respond in a reasonable time.
-
-**Children**
-
-The Service Provider does not use the Application to knowingly solicit data from or market to children under the age of 13.
-
-The Service Provider does not knowingly collect personally identifiable information from children. The Service Provider encourages all children to never submit any personally identifiable information through the Application and/or Services. The Service Provider encourage parents and legal guardians to monitor their children's Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to the Service Provider through the Application and/or Services, please contact the Service Provider (pranshul.devmain@gmail.com) so that they will be able to take the necessary actions. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf).
-
-**Security**
-
-The Service Provider is concerned about safeguarding the confidentiality of your information. The Service Provider provides physical, electronic, and procedural safeguards to protect information the Service Provider processes and maintains.
-
-**Changes**
-
-This Privacy Policy may be updated from time to time for any reason. The Service Provider will notify you of any changes to the Privacy Policy by updating this page with the new Privacy Policy. You are advised to consult this Privacy Policy regularly for any changes, as continued use is deemed approval of all changes.
-
-This privacy policy is effective as of 2025-08-27
-
-**Your Consent**
-
-By using the Application, you are consenting to the processing of your information as set forth in this Privacy Policy now and as amended by us.
-
-**Contact Us**
-
-If you have any questions regarding privacy while using the Application, or have questions about the practices, please contact the Service Provider via email at pranshul.devmain@gmail.com.
-
-* * *
-
-This privacy policy page was generated by [App Privacy Policy Generator](https://app-privacy-policy-generator.nisrulz.com/)
 ''';
 
     return Scaffold(
@@ -344,7 +317,7 @@ class CheckUpdateButton extends StatefulWidget {
 }
 
 class _CheckUpdateButtonState extends State<CheckUpdateButton> {
-  final String currentVersion = 'v1.4.2';
+  final String currentVersion = 'v1.4.3';
   final String githubRepo = 'PranshulGG/ClockMaster';
   bool isChecking = false;
 
