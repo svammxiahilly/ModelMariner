@@ -33,7 +33,7 @@ class TimerModel {
     initialSeconds: m['initialSeconds'],
     isRunning: m['isRunning'],
     lastStartEpochMs: m['lastStartEpochMs'],
-  );
+  )..currentDuration = (m['currentDuration'] ?? m['remainingSeconds']);
 
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -43,5 +43,6 @@ class TimerModel {
     'initialSeconds': initialSeconds,
     'isRunning': isRunning,
     'lastStartEpochMs': lastStartEpochMs,
+    'currentDuration': currentDuration,
   };
 }

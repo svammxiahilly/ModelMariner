@@ -83,9 +83,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
     for (var t in timers) {
       if (t.isRunning && t.lastStartEpochMs != null) {
+        // Use the currentDuration as the baseline (should have been set when started)
+        final baselineDuration = t.currentDuration;
         final elapsed = ((now - t.lastStartEpochMs!) / 1000).floor();
-
-        final baselineDuration = t.currentDuration ?? t.initialSeconds;
 
         final newRemaining = (baselineDuration - elapsed).clamp(0, 99999999);
 
@@ -331,9 +331,10 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final model = timers[idx];
 
     if (model.isRunning) {
+      // Pause
       if (model.lastStartEpochMs != null) {
         final elapsed = ((now - model.lastStartEpochMs!) / 1000).floor();
-        model.remainingSeconds = (model.remainingSeconds - elapsed).clamp(
+        model.remainingSeconds = (model.currentDuration - elapsed).clamp(
           0,
           99999999,
         );
@@ -341,8 +342,11 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       model.isRunning = false;
       model.lastStartEpochMs = null;
     } else {
-      model.isRunning = true;
+      // Resume
+      model.currentDuration =
+          model.remainingSeconds; // ✅ reset baseline correctly
       model.lastStartEpochMs = now;
+      model.isRunning = true;
     }
 
     await _persistTimers();
@@ -743,10 +747,10 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                 child: ValueListenableBuilder<int>(
                                   valueListenable: t.remainingNotifier,
                                   builder: (context, remaining, _) {
-                                    final progress = t.currentDuration > 0
+                                    final progress = t.initialSeconds > 0
                                         ? 1 -
                                               (t.remainingSeconds /
-                                                  t.currentDuration)
+                                                  t.initialSeconds)
                                         : 0.0;
 
                                     final tileColor = remaining == 0
