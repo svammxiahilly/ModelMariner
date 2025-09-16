@@ -131,7 +131,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     }
 
     if (data is Map &&
-        data['type'] == 'timers_updated' &&
+        (data['type'] == 'timers_updated' || data['type'] == 'timers_tick') &&
         data['timers'] != null) {
       final incoming = (data['timers'] as List)
           .map((e) => TimerModel.fromMap(Map<String, dynamic>.from(e)))
@@ -140,17 +140,17 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       for (final updated in incoming) {
         final idx = timers.indexWhere((t) => t.id == updated.id);
         if (idx != -1) {
-          if (updated.remainingSeconds < timers[idx].remainingSeconds) {
-            timers[idx].remainingSeconds = updated.remainingSeconds;
-            timers[idx].isRunning = updated.isRunning;
-            timers[idx].lastStartEpochMs = updated.lastStartEpochMs;
-          }
+          timers[idx].isRunning = updated.isRunning;
+          timers[idx].lastStartEpochMs = updated.lastStartEpochMs;
+          timers[idx].currentDuration = updated.currentDuration;
+          timers[idx].remainingSeconds = updated.remainingSeconds;
         } else {
           timers.add(updated);
         }
       }
 
       if (mounted) setState(() {});
+      return;
     }
   }
 
@@ -203,15 +203,12 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         if (t.isRunning && t.lastStartEpochMs != null) {
           final elapsedSec = ((now - t.lastStartEpochMs!) / 1000).floor();
           if (elapsedSec > 0) {
-            t.remainingSeconds = (t.remainingSeconds - elapsedSec).clamp(
-              0,
-              99999999,
-            );
+            final newRem = (t.currentDuration - elapsedSec).clamp(0, 99999999);
+            t.remainingSeconds = newRem;
             if (t.remainingSeconds <= 0) {
               t.isRunning = false;
               t.lastStartEpochMs = null;
-            } else {
-              t.lastStartEpochMs = now;
+              t.currentDuration = 0;
             }
           }
         }
@@ -328,21 +325,29 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final idx = timers.indexWhere((x) => x.id == t.id);
     if (idx == -1) return;
     final model = timers[idx];
-
+    final prefs = await SharedPreferences.getInstance();
     if (model.isRunning) {
+      // pause
       if (model.lastStartEpochMs != null) {
         final elapsed = ((now - model.lastStartEpochMs!) / 1000).floor();
         model.remainingSeconds = (model.currentDuration - elapsed).clamp(
           0,
           99999999,
         );
+        model.currentDuration = model.remainingSeconds;
       }
       model.isRunning = false;
       model.lastStartEpochMs = null;
+      final activeId = prefs.getString('activeTimerId');
+      if (activeId != null && activeId == model.id) {
+        await prefs.remove('activeTimerId');
+      }
     } else {
+      // start
       model.currentDuration = model.remainingSeconds;
       model.lastStartEpochMs = now;
       model.isRunning = true;
+      await prefs.setString('activeTimerId', model.id);
     }
 
     await _persistTimers();
@@ -364,6 +369,12 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     timers[idx].currentDuration = timers[idx].initialSeconds;
     timers[idx].isRunning = false;
     timers[idx].lastStartEpochMs = null;
+
+    final prefs = await SharedPreferences.getInstance();
+    final activeId = prefs.getString('activeTimerId');
+    if (activeId != null && activeId == t.id) {
+      await prefs.remove('activeTimerId');
+    }
     await _persistTimers();
     await FlutterForegroundTask.stopService();
     setState(() {});

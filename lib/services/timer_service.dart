@@ -10,34 +10,36 @@ void startCallback() {
   FlutterForegroundTask.setTaskHandler(MyTaskHandler());
 }
 
-final LoopingRingtone loopingRingtone = LoopingRingtone();
+final AlarmRingtone alarmRingtone = AlarmRingtone();
 
-class LoopingRingtone {
-  Timer? _loopTimer;
+class AlarmRingtone {
+  bool _isPlaying = false;
 
-  void play({int intervalSeconds = 3}) {
-    FlutterRingtonePlayer().play(
-      android: AndroidSounds.notification,
-      ios: IosSounds.alarm,
-      looping: false,
-      volume: 1.0,
-    );
-
-    _loopTimer?.cancel();
-    _loopTimer = Timer.periodic(Duration(seconds: intervalSeconds), (_) {
-      FlutterRingtonePlayer().play(
-        android: AndroidSounds.notification,
-        ios: IosSounds.alarm,
-        looping: false,
+  void play() {
+    if (_isPlaying) return;
+    try {
+      // Use the static API and guard multiple plays
+      FlutterRingtonePlayer().playAlarm(
+        looping: true,
         volume: 1.0,
+        asAlarm: true,
       );
-    });
+      _isPlaying = true;
+    } catch (e) {
+      // optional: log
+      print('AlarmRingtone.play error: $e');
+    }
   }
 
   void stop() {
-    _loopTimer?.cancel();
-    _loopTimer = null;
-    FlutterRingtonePlayer().stop();
+    if (!_isPlaying) return;
+    try {
+      FlutterRingtonePlayer().stop();
+    } catch (e) {
+      print('AlarmRingtone.stop error: $e');
+    } finally {
+      _isPlaying = false;
+    }
   }
 }
 
@@ -80,30 +82,36 @@ class MyTaskHandler extends TaskHandler {
         if (elapsedSec > 0) {
           int newRemaining = m['remainingSeconds'] - elapsedSec;
           if (newRemaining <= 0) {
+            // Timer just finished
             if (m['isRunning'] == true) {
-              loopingRingtone.stop();
-              loopingRingtone.play(intervalSeconds: 3);
+              // stop any previous sound and start the alarm (guarded by AlarmRingtone)
+              alarmRingtone.stop();
+              alarmRingtone.play();
+
+              // mark the timer as finished so selection logic can prefer it
+              m['remainingSeconds'] = 0;
+              m['isRunning'] = false;
+              m['lastStartEpochMs'] = null;
+              m['finishedAtEpochMs'] = now; // new field
+
+              // persist the finished timer as active so notifications show it
+              await prefs.setString('activeTimerId', m['id']);
+
+              // immediate notification update for the finished timer (optional)
               FlutterForegroundTask.updateService(
                 notificationTitle: 'Timer Finished',
-
-                notificationText: 'Timer',
-
+                notificationText: (m['uiLabel'] ?? 'Timer'),
                 notificationButtons: [
-                  NotificationButton(
-                    id: m['isRunning'] ? 'pause' : 'start',
-                    text: m['isRunning'] ? 'Pause' : 'Start',
-                  ),
+                  NotificationButton(id: 'pause', text: 'Pause'),
                   const NotificationButton(id: 'reset', text: 'Reset'),
                 ],
               );
+            } else {
+              // already not running but ensure remaining is 0
+              m['remainingSeconds'] = 0;
+              m['lastStartEpochMs'] = null;
+              if (m['finishedAtEpochMs'] == null) m['finishedAtEpochMs'] = now;
             }
-            m['remainingSeconds'] = 0;
-            m['isRunning'] = false;
-            m['lastStartEpochMs'] = null;
-          } else {
-            m['remainingSeconds'] = newRemaining;
-            m['lastStartEpochMs'] = now;
-            LoopingRingtone().stop();
           }
         }
 
@@ -125,26 +133,10 @@ class MyTaskHandler extends TaskHandler {
         )
         .toList(growable: false);
 
-    final activeId = prefs.getString('activeTimerId');
-
-    Map<String, dynamic>? t;
-
-    if (activeId != null) {
-      try {
-        t = data.firstWhere((x) => x['id'] == activeId);
-      } catch (e) {
-        t = null;
-      }
-    }
-
-    if (t == null) {
-      if (runningTimers.isNotEmpty) {
-        t = runningTimers.first;
-      } else if (pausedTimers.isNotEmpty) {
-        t = pausedTimers.first;
-      }
-    }
-
+    final t = _selectNotificationTimer(
+      data.map((e) => Map<String, dynamic>.from(e)).toList(),
+      prefs,
+    );
     String title = 'Timer Finished';
     String text = 'Timer';
 
@@ -195,6 +187,35 @@ class MyTaskHandler extends TaskHandler {
     }
   }
 
+  Map<String, dynamic>? _selectNotificationTimer(
+    List<Map<String, dynamic>> data,
+    SharedPreferences prefs,
+  ) {
+    if (data.isEmpty) return null;
+
+    final activeId = prefs.getString('activeTimerId');
+    if (activeId != null) {
+      try {
+        final candidate = data.firstWhere((x) => x['id'] == activeId);
+        return candidate;
+      } catch (e) {}
+    }
+
+    final runningTimers = data
+        .where((e) => e['isRunning'] == true)
+        .toList(growable: false);
+    if (runningTimers.isNotEmpty) return runningTimers.first;
+
+    final pausedTimers = data
+        .where(
+          (e) => e['isRunning'] == false && (e['remainingSeconds'] ?? 0) > 0,
+        )
+        .toList(growable: false);
+    if (pausedTimers.isNotEmpty) return pausedTimers.first;
+
+    return null;
+  }
+
   @override
   void onReceiveData(Object data) {}
 
@@ -241,7 +262,7 @@ class MyTaskHandler extends TaskHandler {
             );
             m['isRunning'] = false;
             m['lastStartEpochMs'] = null;
-            loopingRingtone.stop();
+            alarmRingtone.stop();
           } else {
             m['lastStartEpochMs'] = DateTime.now().millisecondsSinceEpoch;
             m['isRunning'] = true;
@@ -260,12 +281,16 @@ class MyTaskHandler extends TaskHandler {
           m['remainingSeconds'] = m['initialSeconds'];
           m['isRunning'] = false;
           m['lastStartEpochMs'] = null;
+          m.remove('finishedAtEpochMs'); // clear finished marker
           data[idx] = m;
 
           final activeId = prefs.getString('activeTimerId');
           if (activeId != null && activeId == m['id']) {
             await prefs.remove('activeTimerId');
           }
+
+          // stop alarm sound if this was the finished timer
+          alarmRingtone.stop();
         }
       }
     } else if (id == BTN_ADD_MIN) {
@@ -299,7 +324,7 @@ class MyTaskHandler extends TaskHandler {
         m['lastStartEpochMs'] = null;
         data[i] = m;
       }
-      loopingRingtone.stop();
+      alarmRingtone.stop();
       await prefs.remove('activeTimerId');
     }
 
@@ -321,29 +346,38 @@ class MyTaskHandler extends TaskHandler {
         await FlutterForegroundTask.stopService();
         return;
       }
+      final timersList = data.map((e) => Map<String, dynamic>.from(e)).toList();
+      final displayTimer = _selectNotificationTimer(timersList, prefs);
+
+      String title;
+      String text;
+
+      if (displayTimer != null) {
+        final int rem = (displayTimer['remainingSeconds'] ?? 0) is int
+            ? displayTimer['remainingSeconds']
+            : int.tryParse('${displayTimer['remainingSeconds']}') ?? 0;
+        title = formatForNotification(rem);
+
+        final runningCount = timersList
+            .where((t) => t['isRunning'] == true)
+            .length;
+        if (runningCount > 1) {
+          text = 'Running $runningCount timers';
+        } else {
+          final uiLabel = displayTimer['uiLabel'] ?? '';
+          text = (displayTimer['isRunning'] == true)
+              ? 'Running • $uiLabel'
+              : 'Paused • $uiLabel';
+        }
+      } else {
+        title = 'Timers';
+        text = 'No active timers';
+      }
+
       await FlutterForegroundTask.updateService(
-        notificationTitle: (data.isNotEmpty
-            ? formatForNotification(
-                (data.firstWhere(
-                      (t) => (t['remainingSeconds'] ?? 0) > 0,
-                    )['remainingSeconds'] ??
-                    0),
-              )
-            : 'Timers'),
-        notificationText: (() {
-          final runningCount = data.where((t) => t['isRunning'] == true).length;
-          if (runningCount > 0) return 'Running $runningCount timers';
-          final firstPending = data.firstWhere(
-            (t) => (t['remainingSeconds'] ?? 0) > 0,
-            orElse: () => null,
-          );
-          return firstPending != null
-              ? 'Paused • ${firstPending['uiLabel']}'
-              : 'Timers';
-        }()),
-        notificationButtons: _buildNotificationButtons(
-          data.map((e) => Map<String, dynamic>.from(e)).toList(),
-        ),
+        notificationTitle: title,
+        notificationText: text,
+        notificationButtons: _buildNotificationButtons(timersList),
       );
     } else {
       await FlutterForegroundTask.stopService();

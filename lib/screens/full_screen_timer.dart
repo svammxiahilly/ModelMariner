@@ -112,7 +112,11 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                               constraints.biggest.shortestSide / 1.1;
                           final text = _format(remaining);
 
-                          final fontSize = circleSize / (text.length * 0.75);
+                          final duration = Duration(seconds: remaining);
+
+                          final factor = duration.inHours >= 1 ? 0.7 : 0.75;
+
+                          final fontSize = circleSize / (text.length * factor);
 
                           return Text(
                             text,
@@ -132,14 +136,14 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
                         },
                       ),
                       Positioned(
-                        bottom: 60,
+                        bottom: 70,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Symbols.notification_sound,
                               color: colorTheme.onSurface,
-                              size: 20,
+                              size: 19,
                               fill: 1,
                             ),
                             const SizedBox(width: 5),
