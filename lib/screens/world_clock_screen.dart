@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../notifiers/settings_notifier.dart';
 import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class WorldClockScreen extends StatefulWidget {
   const WorldClockScreen({super.key});
@@ -95,8 +96,8 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                 clockStyle == "Analog"
                     ? Center(
                         child: SizedBox(
-                          width: 200,
-                          height: 200,
+                          width: 180,
+                          height: 180,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
@@ -201,149 +202,139 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
 
                   final isFirst = index == 0;
                   final isLast = index == savedTimezones.length - 1;
-                  final firstRadius = isFirst ? 18.0 : 2.6;
-                  final lastRadius = isLast ? 18.0 : 2.6;
 
                   return Container(
                     padding: EdgeInsets.only(
                       left: 10,
-                      top: isFirst ? 10 : 2,
+                      top: isFirst ? 10 : 4,
                       bottom: isLast ? 130 : 0,
                       right: 10,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(firstRadius),
-                        topRight: Radius.circular(firstRadius),
-                        bottomLeft: Radius.circular(lastRadius),
-                        bottomRight: Radius.circular(lastRadius),
+
+                    child: Slidable(
+                      key: Key(tzName + index.toString()),
+                      endActionPane: ActionPane(
+                        motion: StretchMotion(),
+
+                        children: [
+                          CustomSlidableAction(
+                            onPressed: (context) {
+                              final removedTz = savedTimezones[index];
+                              box.deleteAt(index);
+
+                              bool undoPressed = false;
+
+                              ScaffoldMessenger.of(context).clearSnackBars();
+
+                              final controller = ScaffoldMessenger.of(context)
+                                  .showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '$removedTz ${"deleted".tr()}',
+                                      ),
+                                      action: SnackBarAction(
+                                        label: 'undo'.tr(),
+                                        onPressed: () {
+                                          undoPressed = true;
+                                          box.add(removedTz);
+                                        },
+                                      ),
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                            },
+                            borderRadius: BorderRadius.circular(999),
+                            backgroundColor: colorTheme.errorContainer,
+                            child: Icon(
+                              Icons.delete,
+                              color: colorTheme.onErrorContainer,
+                              size: 30,
+                            ),
+                          ),
+                        ],
                       ),
 
-                      child: Dismissible(
-                        key: Key(tzName + index.toString()),
-                        direction: DismissDirection.endToStart,
-
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          decoration: BoxDecoration(
-                            color: colorTheme.errorContainer,
-                          ),
-                          padding: EdgeInsets.only(right: 20),
-                          child: Icon(
-                            Icons.delete,
-                            color: colorTheme.onErrorContainer,
-                          ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorTheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(22),
                         ),
-
-                        onDismissed: (direction) {
-                          final removedTz = savedTimezones[index];
-                          box.deleteAt(index);
-
-                          bool undoPressed = false;
-
-                          ScaffoldMessenger.of(context).clearSnackBars();
-
-                          final controller = ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                                SnackBar(
-                                  content: Text('$removedTz ${"deleted".tr()}'),
-                                  action: SnackBarAction(
-                                    label: 'undo'.tr(),
-                                    onPressed: () {
-                                      undoPressed = true;
-                                      // Restore in Hive directly
-                                      box.add(removedTz);
-                                    },
+                        padding: EdgeInsets.symmetric(
+                          horizontal: clockStyle == "Analog" ? 25 : 16,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  formatCityName(tzName),
+                                  style: TextStyle(
+                                    color: colorTheme.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: clockStyle == "Analog" ? 24 : 18,
                                   ),
-                                  duration: const Duration(seconds: 3),
                                 ),
-                              );
-                        },
+                                Text(
+                                  formatOffset(offset),
+                                  style: TextStyle(
+                                    color: colorTheme.onSurfaceVariant,
+                                    fontSize: clockStyle == "Analog" ? 24 : 16,
+                                  ),
+                                ),
+                              ],
+                            ),
 
-                        child: Container(
-                          color: colorTheme.surfaceContainerLowest,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: clockStyle == "Analog" ? 25 : 16,
-                            vertical: 10,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    formatCityName(tzName),
+                            clockStyle == "Analog"
+                                ? SizedBox(
+                                    width: 80,
+                                    height: 80,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        SvgPicture.string(
+                                          buildClockFaceSvg(
+                                            colorTheme.surfaceContainerLowest,
+                                            colorTheme.tertiaryContainer,
+                                          ),
+                                        ),
+                                        AnalogClock(
+                                          dateTime: tzTime,
+                                          dialColor: Colors.transparent,
+                                          hourNumberColor: null,
+                                          markingColor: null,
+                                          hourHandColor: colorTheme.tertiary,
+                                          hourHandWidthFactor: 1.3,
+                                          minuteHandWidthFactor: 1.1,
+                                          hourHandLengthFactor: 0.8,
+                                          secondHandWidthFactor: 1.3,
+                                          centerPointWidthFactor: 0.8,
+                                          minuteHandLengthFactor: 0.9,
+                                          secondHandLengthFactor: 0.8,
+                                          minuteHandColor: colorTheme.secondary,
+                                          centerPointColor:
+                                              colorTheme.secondary,
+                                          secondHandColor: showSeconds
+                                              ? colorTheme.onSurface
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Text(
+                                    formattedTzTime,
                                     style: TextStyle(
-                                      color: colorTheme.onSurface,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width /
+                                          12,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: clockStyle == "Analog"
-                                          ? 24
-                                          : 18,
+                                      color: colorTheme.secondary,
                                     ),
                                   ),
-                                  Text(
-                                    formatOffset(offset),
-                                    style: TextStyle(
-                                      color: colorTheme.onSurfaceVariant,
-                                      fontSize: clockStyle == "Analog"
-                                          ? 24
-                                          : 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              clockStyle == "Analog"
-                                  ? SizedBox(
-                                      width: 80,
-                                      height: 80,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          SvgPicture.string(
-                                            buildClockFaceSvg(
-                                              colorTheme.surfaceContainerLow,
-                                              colorTheme.tertiaryContainer,
-                                            ),
-                                          ),
-                                          AnalogClock(
-                                            dateTime: tzTime,
-                                            dialColor: Colors.transparent,
-                                            hourNumberColor: null,
-                                            markingColor: null,
-                                            hourHandColor: colorTheme.tertiary,
-                                            hourHandWidthFactor: 1.3,
-                                            minuteHandWidthFactor: 1.1,
-                                            hourHandLengthFactor: 0.8,
-                                            secondHandWidthFactor: 1.3,
-                                            centerPointWidthFactor: 0.8,
-                                            minuteHandLengthFactor: 0.9,
-                                            secondHandLengthFactor: 0.8,
-                                            minuteHandColor:
-                                                colorTheme.secondary,
-                                            centerPointColor:
-                                                colorTheme.secondary,
-                                            secondHandColor: showSeconds
-                                                ? colorTheme.onSurface
-                                                : null,
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : Text(
-                                      formattedTzTime,
-                                      style: TextStyle(
-                                        fontSize:
-                                            MediaQuery.of(context).size.width /
-                                            12,
-                                        fontWeight: FontWeight.w500,
-                                        color: colorTheme.secondary,
-                                      ),
-                                    ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
                     ),

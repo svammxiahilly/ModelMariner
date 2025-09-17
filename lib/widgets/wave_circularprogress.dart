@@ -6,12 +6,18 @@ class CircularWavePainter extends CustomPainter {
   final Color progressColor;
   final Color backgroundColor;
   final double progress;
+  final double strokeWidth;
+  final double amplitudeValue;
+  final double gapAngleValue;
 
-  CircularWavePainter(
+  const CircularWavePainter(
     this.waveValue,
     this.progressColor,
     this.backgroundColor,
     this.progress,
+    this.strokeWidth,
+    this.amplitudeValue,
+    this.gapAngleValue,
   );
 
   @override
@@ -21,21 +27,21 @@ class CircularWavePainter extends CustomPainter {
 
     final progressPaint = Paint()
       ..color = progressColor
-      ..strokeWidth = 14
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
     final bgPaint = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 14
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    final amplitude = progress < 0.02 ? 0 : 5.0;
+    final amplitude = progress < 0.02 ? 0 : amplitudeValue;
     final frequency = progress < 0.02 ? 0 : 12.0;
 
     final sweepAngle = 2 * pi;
-    final gapAngle = progress < 0.02 ? 0 : 0.045;
+    final gapAngle = progress < 0.02 ? 0 : gapAngleValue;
 
     Path progressPath = Path();
     Path backgroundPath = Path();
@@ -88,8 +94,18 @@ class CircularWavePainter extends CustomPainter {
 }
 
 class WavyCircularProgress extends StatefulWidget {
-  final double progress; // target progress
-  const WavyCircularProgress({super.key, required this.progress});
+  final double progress;
+  final double strokeWidth;
+  final double amplitude;
+  final double gapAngle;
+
+  const WavyCircularProgress({
+    super.key,
+    required this.progress,
+    this.strokeWidth = 14,
+    this.amplitude = 5.0,
+    this.gapAngle = 0.045,
+  });
 
   @override
   State<WavyCircularProgress> createState() => _WavyCircularProgressState();
@@ -132,7 +148,10 @@ class _WavyCircularProgressState extends State<WavyCircularProgress>
                 _waveController.value,
                 colorTheme.primary,
                 colorTheme.secondaryContainer,
-                animatedProgress, // 👈 smooth animated value
+                animatedProgress,
+                widget.strokeWidth,
+                widget.amplitude,
+                widget.gapAngle,
               ),
             );
           },

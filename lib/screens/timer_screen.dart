@@ -12,7 +12,9 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:animations/animations.dart';
 import '../models/timer_model.dart';
 import 'full_screen_timer.dart';
+import '../widgets/wave_circularprogress.dart';
 import '../services/timer_service.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -26,6 +28,13 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   List<TimerModel> timers = [];
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
   Timer? _uiTimer;
+  bool shouldRing = true;
+
+  bool _isAppVisible = false;
+
+  void init() {
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void initState() {
@@ -41,6 +50,8 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
+    _isAppVisible = state == AppLifecycleState.resumed;
+    shouldRing = state == AppLifecycleState.resumed;
 
     if (state == AppLifecycleState.paused) {
       if (timers.any((t) => t.isRunning)) {
@@ -48,6 +59,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       }
     } else if (state == AppLifecycleState.resumed) {
       if (await FlutterForegroundTask.isRunningService) {
+        FlutterForegroundTask.sendDataToTask("STOP_ALARM");
         await FlutterForegroundTask.stopService();
       }
     }
@@ -59,6 +71,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     _uiTimer?.cancel();
     _taskDataListenable.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -327,6 +340,12 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final model = timers[idx];
     final prefs = await SharedPreferences.getInstance();
     if (model.isRunning) {
+      alarmRingtone.stop();
+      shouldRing = false;
+    } else {
+      shouldRing = true;
+    }
+    if (model.isRunning) {
       // pause
       if (model.lastStartEpochMs != null) {
         final elapsed = ((now - model.lastStartEpochMs!) / 1000).floor();
@@ -379,6 +398,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     await FlutterForegroundTask.stopService();
     setState(() {});
     await _stopServiceIfNoRunningTimers();
+
+    alarmRingtone.stop();
+    shouldRing = true;
   }
 
   bool startAfterAddingOneMin = false;
@@ -393,6 +415,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
     await _persistTimers();
     setState(() {});
+
+    alarmRingtone.stop();
+    shouldRing = true;
   }
 
   Future<void> _deleteTimer(TimerModel t) async {
@@ -400,6 +425,8 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     await _persistTimers();
     await FlutterForegroundTask.stopService();
     setState(() {});
+    alarmRingtone.stop();
+    shouldRing = true;
     await _stopServiceIfNoRunningTimers();
   }
 
@@ -697,263 +724,445 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                         },
                         itemBuilder: (ctx, i) {
                           final t = timers[i];
-
-                          final isLast = i == timers.length - 1;
-                          final isFirst = i == 0;
-                          final isOnly = timers.length == 1;
-
-                          final firstBorderRadius = BorderRadius.only(
-                            topLeft: Radius.circular(18),
-                            topRight: Radius.circular(18),
-                            bottomLeft: Radius.circular(2.6),
-                            bottomRight: Radius.circular(2.6),
-                          );
-                          final lastBorderRadius = BorderRadius.only(
-                            bottomLeft: Radius.circular(18),
-                            bottomRight: Radius.circular(18),
-                            topLeft: Radius.circular(2.6),
-                            topRight: Radius.circular(2.6),
-                          );
-
                           return Padding(
                             key: ValueKey(t.id),
 
-                            padding: const EdgeInsets.only(bottom: 2),
-                            child: ClipRRect(
-                              borderRadius: isOnly
-                                  ? BorderRadius.circular(18)
-                                  : isFirst
-                                  ? firstBorderRadius
-                                  : isLast
-                                  ? lastBorderRadius
-                                  : BorderRadius.circular(2),
+                            padding: const EdgeInsets.only(bottom: 4),
+                            // child: ClipRRect(
+                            //   borderRadius: BorderRadius.circular(22),
 
-                              child: Dismissible(
-                                key: ValueKey(t.id),
-                                direction: DismissDirection.endToStart,
-                                background: Container(
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.symmetric(horizontal: 30),
-                                  decoration: BoxDecoration(
-                                    color: colorTheme.errorContainer,
-                                  ),
-                                  child: Icon(
-                                    Icons.delete,
-                                    color: colorTheme.onErrorContainer,
-                                    size: 40,
-                                  ),
-                                ),
-                                onDismissed: (_) {
-                                  _deleteTimer(t);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('timer_deleted'.tr()),
+                            //   child: Dismissible(
+                            //     key: ValueKey(t.id),
+                            //     direction: DismissDirection.endToStart,
+                            //     background: Container(
+                            //       alignment: Alignment.centerRight,
+                            //       padding: EdgeInsets.symmetric(horizontal: 30),
+                            //       decoration: BoxDecoration(
+                            //         color: colorTheme.errorContainer,
+                            //       ),
+                            //       child: Icon(
+                            //         Icons.delete,
+                            //         color: colorTheme.onErrorContainer,
+                            //         size: 40,
+                            //       ),
+                            //     ),
+                            //     onDismissed: (_) {
+                            //       _deleteTimer(t);
+                            //       ScaffoldMessenger.of(context).showSnackBar(
+                            //         SnackBar(
+                            //           content: Text('timer_deleted'.tr()),
+                            //         ),
+                            //       );
+                            //     },
+                            child: Slidable(
+                              key: ValueKey(t.id),
+                              closeOnScroll: true,
+                              endActionPane: ActionPane(
+                                motion: StretchMotion(),
+                                children: [
+                                  CustomSlidableAction(
+                                    onPressed: (context) async {
+                                      _deleteTimer(t);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('timer_deleted'.tr()),
+                                        ),
+                                      );
+                                    },
+
+                                    borderRadius: BorderRadius.circular(999),
+                                    backgroundColor: colorTheme.errorContainer,
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: colorTheme.onErrorContainer,
+                                      size: 30,
                                     ),
-                                  );
-                                },
-                                child: ValueListenableBuilder<int>(
-                                  valueListenable: t.remainingNotifier,
-                                  builder: (context, remaining, _) {
-                                    final denominator =
-                                        (t.isRunning &&
-                                            t.currentDuration != null)
-                                        ? t.currentDuration!
-                                        : t.initialSeconds;
+                                  ),
+                                ],
+                              ),
+                              child: ValueListenableBuilder<int>(
+                                valueListenable: t.remainingNotifier,
+                                builder: (context, remaining, _) {
+                                  final denominator =
+                                      (t.isRunning && t.currentDuration != null)
+                                      ? t.currentDuration!
+                                      : t.initialSeconds;
 
-                                    final progress = denominator > 0
-                                        ? (1.0 -
-                                                  (t.remainingSeconds /
-                                                      denominator))
-                                              .clamp(0.0, 1.0)
-                                        : 0.0;
+                                  final progress = denominator > 0
+                                      ? (1.0 -
+                                                (t.remainingSeconds /
+                                                    denominator))
+                                            .clamp(0.0, 1.0)
+                                      : 0.0;
 
-                                    final tileColor = remaining == 0
-                                        ? colorTheme.primaryContainer
-                                        : colorTheme.surfaceContainerLowest;
+                                  final tileColor = remaining == 0
+                                      ? colorTheme.primaryContainer
+                                      : colorTheme.surfaceContainerLow;
 
-                                    final finished = remaining == 0;
+                                  final finished = remaining == 0;
 
-                                    final isLast = i == timers.length - 1;
+                                  if (finished) {
+                                    if (shouldRing && _isAppVisible) {
+                                      alarmRingtone.stop();
+                                      alarmRingtone.play();
+                                    }
+                                    shouldRing = false;
+                                  }
 
-                                    return OpenContainer(
-                                      closedElevation: 0,
-                                      closedColor: tileColor,
-                                      transitionDuration: Duration(
-                                        milliseconds: 500,
-                                      ),
-                                      openElevation: 0,
-                                      closedShape: RoundedRectangleBorder(),
-                                      openShape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(50),
-                                      ),
-                                      transitionType:
-                                          ContainerTransitionType.fadeThrough,
-                                      openColor: colorTheme.surface,
-                                      closedBuilder: (context, openContainer) {
-                                        return Container(
-                                          padding: const EdgeInsets.only(
-                                            top: 5,
-                                            bottom: 10,
-                                            right: 12,
-                                            left: 12,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 0,
-                                                  top: 10,
-                                                ),
-                                                child: Text(
-                                                  t.uiLabel.isNotEmpty
-                                                      ? t.uiLabel
-                                                      : 'timer_label'.tr(),
-                                                  style: TextStyle(
-                                                    height: 1,
-                                                    fontSize: 16,
-                                                    color: colorTheme.secondary,
-                                                  ),
-                                                ),
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                  final isLast = i == timers.length - 1;
 
-                                                children: [
-                                                  Text(
-                                                    _format(remaining),
-                                                    style: TextStyle(
-                                                      fontSize: 45,
-                                                      fontFamily: "FlexFontEn",
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                  return OpenContainer(
+                                    closedElevation: 0,
+                                    closedColor: tileColor,
+                                    transitionDuration: Duration(
+                                      milliseconds: 500,
+                                    ),
+                                    openElevation: 0,
+                                    closedShape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(22),
+                                    ),
+                                    openShape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50),
+                                    ),
+                                    transitionType:
+                                        ContainerTransitionType.fadeThrough,
+                                    openColor: colorTheme.surface,
+                                    closedBuilder: (context, openContainer) {
+                                      return Container(
+                                        padding: const EdgeInsets.only(
+                                          top: 5,
+                                          bottom: 5,
+                                          right: 10,
+                                          left: 5,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
 
-                                                      color: t.isRunning
-                                                          ? colorTheme.onSurface
-                                                          : colorTheme
-                                                                .onSurfaceVariant,
-                                                    ),
-                                                  ),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    children: [
-                                                      SizedBox(
-                                                        width: 38,
-                                                        height: 38,
-                                                        child: IconButton(
-                                                          onPressed: () =>
-                                                              _showEditLabelDialog(
-                                                                t,
-                                                              ),
-                                                          icon: IconWithWeight(
-                                                            Symbols.edit,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                              LinearProgressIndicator(
-                                                value: progress,
-                                                year2023: false,
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  FilledButton.tonal(
-                                                    style:
-                                                        FilledButton.styleFrom(
-                                                          minimumSize: Size(
-                                                            46,
-                                                            35,
-                                                          ),
-                                                          backgroundColor:
-                                                              finished
-                                                              ? colorTheme
-                                                                    .surface
-                                                              : null,
-                                                        ),
-                                                    onPressed: () =>
-                                                        _addOneMinute(t),
+                                              children: [
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
 
-                                                    child: Text(
-                                                      "add_one_min".tr(),
-                                                    ),
-                                                  ),
-
-                                                  Row(
-                                                    spacing: 5,
-                                                    children: [
-                                                      SizedBox(
-                                                        width: 42,
-                                                        height: 35,
-                                                        child: IconButton.filled(
-                                                          tooltip: t.isRunning
-                                                              ? 'Stop'
-                                                              : 'Start',
-                                                          onPressed: () =>
-                                                              _toggleStartStop(
-                                                                t,
-                                                              ),
-                                                          icon: Icon(
-                                                            t.isRunning
-                                                                ? Icons.pause
-                                                                : Icons
-                                                                      .play_arrow,
-                                                            size: 18,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 42,
-                                                        height: 35,
-                                                        child: IconButton.filledTonal(
-                                                          style: ButtonStyle(
-                                                            backgroundColor:
-                                                                WidgetStateProperty.all(
-                                                                  finished
-                                                                      ? colorTheme
-                                                                            .surface
-                                                                      : null,
+                                                  children: [
+                                                    Stack(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      children: [
+                                                        Positioned(
+                                                          child: SizedBox(
+                                                            width: 80,
+                                                            height: 80,
+                                                            child:
+                                                                WavyCircularProgress(
+                                                                  progress:
+                                                                      progress,
+                                                                  strokeWidth:
+                                                                      7,
+                                                                  amplitude:
+                                                                      2.0,
+                                                                  gapAngle:
+                                                                      0.15,
                                                                 ),
                                                           ),
-                                                          tooltip: 'Reset',
-                                                          onPressed: () =>
-                                                              _resetTimer(t),
-                                                          icon: const Icon(
-                                                            Icons.refresh,
-                                                            size: 18,
+                                                        ),
+                                                        Positioned(
+                                                          child: IconButton(
+                                                            onPressed: () {
+                                                              _toggleStartStop(
+                                                                t,
+                                                              );
+                                                            },
+                                                            icon: Icon(
+                                                              t.isRunning
+                                                                  ? Icons.pause
+                                                                  : Icons
+                                                                        .play_arrow,
+                                                              size: 30,
+                                                            ),
                                                           ),
                                                         ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(width: 6),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        SizedBox(
+                                                          width:
+                                                              MediaQuery.of(
+                                                                context,
+                                                              ).size.width /
+                                                              2.1,
+                                                          child: Text(
+                                                            t.uiLabel.isNotEmpty
+                                                                ? t.uiLabel
+                                                                : 'timer_label'
+                                                                      .tr(),
+                                                            style: TextStyle(
+                                                              height: 1,
+                                                              fontSize: 15,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color: colorTheme
+                                                                  .secondary,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+
+                                                        Text(
+                                                          _format(remaining),
+                                                          style: TextStyle(
+                                                            fontSize: 40,
+                                                            fontFamily:
+                                                                "FlexFontEn",
+                                                            fontWeight:
+                                                                FontWeight.w600,
+
+                                                            color: t.isRunning
+                                                                ? colorTheme
+                                                                      .onSurface
+                                                                : colorTheme
+                                                                      .onSurfaceVariant,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                // buttons
+                                                Column(
+                                                  spacing: 3,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 42,
+                                                      height: 35,
+                                                      child: IconButton.filled(
+                                                        tooltip: "Edit label",
+                                                        onPressed: () =>
+                                                            _showEditLabelDialog(
+                                                              t,
+                                                            ),
+                                                        icon: Icon(
+                                                          Icons.edit,
+                                                          size: 18,
+                                                        ),
+                                                        style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty.all(
+                                                                colorTheme
+                                                                    .surfaceContainerLowest,
+                                                              ),
+                                                          foregroundColor:
+                                                              WidgetStateProperty.all(
+                                                                colorTheme
+                                                                    .onSurface,
+                                                              ),
+                                                        ),
                                                       ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                      openBuilder: (context, _) {
-                                        return TimerDetailPage(
-                                          timer: t,
-                                          onToggle: () => _toggleStartStop(t),
-                                          onReset: () => _resetTimer(t),
-                                          onAddMinute: () => _addOneMinute(t),
-                                          onDelete: () => _deleteTimer(t),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 42,
+                                                      height: 35,
+                                                      child: IconButton.filledTonal(
+                                                        style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty.all(
+                                                                finished
+                                                                    ? colorTheme
+                                                                          .surface
+                                                                    : colorTheme
+                                                                          .surfaceContainerLowest,
+                                                              ),
+                                                          foregroundColor:
+                                                              WidgetStateProperty.all(
+                                                                colorTheme
+                                                                    .onSurface,
+                                                              ),
+                                                        ),
+                                                        tooltip: 'Reset',
+                                                        onPressed: () =>
+                                                            _resetTimer(t),
+                                                        icon: const Icon(
+                                                          Icons.refresh,
+                                                          size: 18,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            // Padding(
+                                            //   padding: const EdgeInsets.only(
+                                            //     left: 0,
+                                            //     top: 10,
+                                            //   ),
+                                            //   child: Text(
+                                            //     t.uiLabel.isNotEmpty
+                                            //         ? t.uiLabel
+                                            //         : 'timer_label'.tr(),
+                                            //     style: TextStyle(
+                                            //       height: 1,
+                                            //       fontSize: 16,
+                                            //       color: colorTheme.secondary,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            // Row(
+                                            //   mainAxisAlignment:
+                                            //       MainAxisAlignment
+                                            //           .spaceBetween,
+
+                                            //   children: [
+                                            //     Text(
+                                            //       _format(remaining),
+                                            //       style: TextStyle(
+                                            //         fontSize: 45,
+                                            //         fontFamily: "FlexFontEn",
+                                            //         fontWeight:
+                                            //             FontWeight.w600,
+
+                                            //         color: t.isRunning
+                                            //             ? colorTheme.onSurface
+                                            //             : colorTheme
+                                            //                   .onSurfaceVariant,
+                                            //       ),
+                                            //     ),
+                                            //     Column(
+                                            //       crossAxisAlignment:
+                                            //           CrossAxisAlignment.end,
+                                            //       children: [
+                                            //         SizedBox(
+                                            //           width: 38,
+                                            //           height: 38,
+                                            //           child: IconButton(
+                                            //             onPressed: () =>
+                                            //                 _showEditLabelDialog(
+                                            //                   t,
+                                            //                 ),
+                                            //             icon: IconWithWeight(
+                                            //               Symbols.edit,
+                                            //             ),
+                                            //           ),
+                                            //         ),
+                                            //       ],
+                                            //     ),
+                                            //   ],
+                                            // ),
+                                            // LinearProgressIndicator(
+                                            //   value: progress,
+                                            //   year2023: false,
+                                            // ),
+                                            // const SizedBox(height: 4),
+                                            // Row(
+                                            //   mainAxisAlignment:
+                                            //       MainAxisAlignment
+                                            //           .spaceBetween,
+                                            //   children: [
+                                            //     FilledButton.tonal(
+                                            //       style:
+                                            //           FilledButton.styleFrom(
+                                            //             minimumSize: Size(
+                                            //               46,
+                                            //               35,
+                                            //             ),
+                                            //             backgroundColor:
+                                            //                 finished
+                                            //                 ? colorTheme
+                                            //                       .surface
+                                            //                 : null,
+                                            //           ),
+                                            //       onPressed: () =>
+                                            //           _addOneMinute(t),
+
+                                            //       child: Text(
+                                            //         "add_one_min".tr(),
+                                            //       ),
+                                            //     ),
+
+                                            //     Row(
+                                            //       spacing: 5,
+                                            //       children: [
+                                            //         SizedBox(
+                                            //           width: 42,
+                                            //           height: 35,
+                                            //           child: IconButton.filled(
+                                            //             tooltip: t.isRunning
+                                            //                 ? 'Stop'
+                                            //                 : 'Start',
+                                            //             onPressed: () =>
+                                            //                 _toggleStartStop(
+                                            //                   t,
+                                            //                 ),
+                                            //             icon: Icon(
+                                            //               t.isRunning
+                                            //                   ? Icons.pause
+                                            //                   : Icons
+                                            //                         .play_arrow,
+                                            //               size: 18,
+                                            //             ),
+                                            //           ),
+                                            //         ),
+                                            //         SizedBox(
+                                            //           width: 42,
+                                            //           height: 35,
+                                            //           child: IconButton.filledTonal(
+                                            //             style: ButtonStyle(
+                                            //               backgroundColor:
+                                            //                   WidgetStateProperty.all(
+                                            //                     finished
+                                            //                         ? colorTheme
+                                            //                               .surface
+                                            //                         : null,
+                                            //                   ),
+                                            //             ),
+                                            //             tooltip: 'Reset',
+                                            //             onPressed: () =>
+                                            //                 _resetTimer(t),
+                                            //             icon: const Icon(
+                                            //               Icons.refresh,
+                                            //               size: 18,
+                                            //             ),
+                                            //           ),
+                                            //         ),
+                                            //       ],
+                                            //     ),
+                                            //   ],
+                                            // ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    openBuilder: (context, _) {
+                                      return TimerDetailPage(
+                                        timer: t,
+                                        onToggle: () => _toggleStartStop(t),
+                                        onReset: () => _resetTimer(t),
+                                        onAddMinute: () => _addOneMinute(t),
+                                        onDelete: () => _deleteTimer(t),
+                                      );
+                                    },
+                                  );
+                                },
                               ),
                             ),
                           );

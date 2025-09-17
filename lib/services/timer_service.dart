@@ -18,7 +18,6 @@ class AlarmRingtone {
   void play() {
     if (_isPlaying) return;
     try {
-      // Use the static API and guard multiple plays
       FlutterRingtonePlayer().playAlarm(
         looping: true,
         volume: 1.0,
@@ -26,7 +25,6 @@ class AlarmRingtone {
       );
       _isPlaying = true;
     } catch (e) {
-      // optional: log
       print('AlarmRingtone.play error: $e');
     }
   }
@@ -82,22 +80,17 @@ class MyTaskHandler extends TaskHandler {
         if (elapsedSec > 0) {
           int newRemaining = m['remainingSeconds'] - elapsedSec;
           if (newRemaining <= 0) {
-            // Timer just finished
             if (m['isRunning'] == true) {
-              // stop any previous sound and start the alarm (guarded by AlarmRingtone)
               alarmRingtone.stop();
               alarmRingtone.play();
 
-              // mark the timer as finished so selection logic can prefer it
               m['remainingSeconds'] = 0;
               m['isRunning'] = false;
               m['lastStartEpochMs'] = null;
-              m['finishedAtEpochMs'] = now; // new field
+              m['finishedAtEpochMs'] = now;
 
-              // persist the finished timer as active so notifications show it
               await prefs.setString('activeTimerId', m['id']);
 
-              // immediate notification update for the finished timer (optional)
               FlutterForegroundTask.updateService(
                 notificationTitle: 'Timer Finished',
                 notificationText: (m['uiLabel'] ?? 'Timer'),
@@ -107,7 +100,6 @@ class MyTaskHandler extends TaskHandler {
                 ],
               );
             } else {
-              // already not running but ensure remaining is 0
               m['remainingSeconds'] = 0;
               m['lastStartEpochMs'] = null;
               if (m['finishedAtEpochMs'] == null) m['finishedAtEpochMs'] = now;
@@ -217,7 +209,11 @@ class MyTaskHandler extends TaskHandler {
   }
 
   @override
-  void onReceiveData(Object data) {}
+  void onReceiveData(Object data) {
+    if (data == "STOP_ALARM") {
+      alarmRingtone.stop();
+    }
+  }
 
   @override
   void onNotificationButtonPressed(String id) async {
@@ -281,7 +277,7 @@ class MyTaskHandler extends TaskHandler {
           m['remainingSeconds'] = m['initialSeconds'];
           m['isRunning'] = false;
           m['lastStartEpochMs'] = null;
-          m.remove('finishedAtEpochMs'); // clear finished marker
+          m.remove('finishedAtEpochMs');
           data[idx] = m;
 
           final activeId = prefs.getString('activeTimerId');
@@ -289,7 +285,6 @@ class MyTaskHandler extends TaskHandler {
             await prefs.remove('activeTimerId');
           }
 
-          // stop alarm sound if this was the finished timer
           alarmRingtone.stop();
         }
       }

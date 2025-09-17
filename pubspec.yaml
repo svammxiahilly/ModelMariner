@@ -63,6 +63,7 @@ dependencies:
   material_new_shapes: ^1.0.0
   flex_color_picker: ^3.7.1
   easy_localization: ^3.0.7+1
+  flutter_slidable: ^4.0.1
 
   settings_tiles:
     path: ./settings_tiles_custom

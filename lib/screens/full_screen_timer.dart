@@ -57,10 +57,21 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
     return ValueListenableBuilder<int>(
       valueListenable: widget.timer.remainingNotifier,
       builder: (context, remaining, _) {
-        final progress = widget.timer.currentDuration > 0
-            ? 1 - (widget.timer.remainingSeconds / widget.timer.currentDuration)
-            : 0.0;
+        // final progress = widget.timer.currentDuration > 0
+        //     ? 1 - (widget.timer.remainingSeconds / widget.timer.currentDuration)
+        //     : 0.0;
 
+        final denominator =
+            (widget.timer.isRunning && widget.timer.currentDuration != null)
+            ? widget.timer.currentDuration!
+            : widget.timer.initialSeconds;
+
+        final progress = denominator > 0
+            ? (1.0 - (widget.timer.remainingSeconds / denominator)).clamp(
+                0.0,
+                1.0,
+              )
+            : 0.0;
         final finished = widget.timer.remainingSeconds == 0;
 
         return Scaffold(
