@@ -15,6 +15,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
+import 'services/pomodoro_service.dart';
 
 const easySupportedLocales = [Locale('en')];
 
@@ -28,6 +29,7 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
 
+  await initializeService();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

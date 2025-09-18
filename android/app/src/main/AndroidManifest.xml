@@ -59,15 +59,15 @@
             android:resource="@drawable/baseline_hourglass" />
 
                     <!-- Alarm Screen Activity -->
-<activity
-    android:name=".AlarmActivity"
-    android:showWhenLocked="true"
-    android:turnScreenOn="true"
-    android:excludeFromRecents="true"
-    android:launchMode="singleTop"
-    android:hardwareAccelerated="true"
-    android:theme="@style/alarmActivityTheme"
-    />
+                <activity
+                    android:name=".AlarmActivity"
+                    android:showWhenLocked="true"
+                    android:turnScreenOn="true"
+                    android:excludeFromRecents="true"
+                    android:launchMode="singleTop"
+                    android:hardwareAccelerated="true"
+                    android:theme="@style/alarmActivityTheme"
+                    />
 
 
 
@@ -89,6 +89,16 @@
             android:name=".AlwaysOnAlarmService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+
+        <receiver android:exported="false"
+                android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
+
+        <service
+            android:name="com.dexterous.flutterlocalnotifications.ForegroundService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="mediaPlayback" /> 
 
 
 

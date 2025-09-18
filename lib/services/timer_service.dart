@@ -1,3 +1,4 @@
+// Shit code
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -102,10 +103,8 @@ class MyTaskHandler extends TaskHandler {
               ],
             );
           } else {
-            // Normal tick: reduce remaining, and reset baseline so next tick only uses delta since now.
             m['remainingSeconds'] = newRemaining;
             m['currentDuration'] = newRemaining;
-            // IMPORTANT: set lastStartEpochMs to now so next tick uses delta since this tick (avoid double counting)
             m['lastStartEpochMs'] = now;
           }
           shouldUpdate = true;
@@ -119,7 +118,6 @@ class MyTaskHandler extends TaskHandler {
       }
     }
 
-    // Build notification text/title as before, using the (potentially) updated data list
     final runningTimers = data
         .where((e) => e['isRunning'] == true)
         .toList(growable: false);
@@ -159,9 +157,7 @@ class MyTaskHandler extends TaskHandler {
     );
 
     if (changed) {
-      // persist full array
       await prefs.setString(prefKey, jsonEncode(data));
-      // send the full timers array so the UI can fully sync
       FlutterForegroundTask.sendDataToMain({
         'type': 'timers_tick',
         'timers': data,
@@ -334,7 +330,6 @@ class MyTaskHandler extends TaskHandler {
       'timers': data,
     });
 
-    // send timers_updated with timers payload (previously you sent it without timers)
     FlutterForegroundTask.sendDataToMain({
       'type': 'timers_updated',
       'timers': data,

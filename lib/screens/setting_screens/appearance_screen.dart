@@ -9,6 +9,8 @@ import '../../notifiers/settings_notifier.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/snack_util.dart';
+import 'package:restart_app/restart_app.dart';
 
 class AppearanceScreen extends StatefulWidget {
   const AppearanceScreen({super.key});
@@ -346,6 +348,41 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     ),
                   ],
                 ),
+
+                SizedBox(height: 10),
+                SettingSection(
+                  styleTile: true,
+                  title: SettingSectionTitle("Animations", noPadding: true),
+                  tiles: [
+                    SettingSwitchTile(
+                      icon: IconWithWeight(Symbols.animation, fill: 1),
+                      title: Text("Container transform animation"),
+                      description: Text(
+                        "Smoothly transition a container into a full screen page. Turn this off if you notice lag or freezing",
+                      ),
+                      toggled: openContainerAnimation,
+                      onChanged: (value) {
+                        PreferencesHelper.setBool(
+                          "UseopenContainerAnimation",
+                          value,
+                        );
+                        setState(() {
+                          SnackUtil.showSnackBar(
+                            context: context,
+                            message: "restart_for_changes".tr(),
+                            actionLabel: "Restart",
+                            duration: Duration(seconds: 30),
+                            onActionPressed: () {
+                              Restart.restartApp();
+                            },
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 200),
               ],
             ),
           ),

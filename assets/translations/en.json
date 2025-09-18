@@ -71,5 +71,6 @@
   "timer_label": "Timer label",
   "edit": "Edit",
   "appearance": "Appearance",
-  "appearance_sub": "Themes, animations, and display"
+  "appearance_sub": "Themes, animations, and display",
+  "restart_for_changes": "Restart to apply changes"
 }

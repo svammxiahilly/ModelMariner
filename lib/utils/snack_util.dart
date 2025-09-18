@@ -8,17 +8,11 @@ class SnackUtil {
     String? actionLabel,
     VoidCallback? onActionPressed,
   }) {
-
     final snackBar = SnackBar(
-      content: Text(
-        message,
-      ),
+      content: Text(message),
       duration: duration,
       action: (actionLabel != null && onActionPressed != null)
-          ? SnackBarAction(
-              label: actionLabel,
-              onPressed: onActionPressed,
-            )
+          ? SnackBarAction(label: actionLabel, onPressed: onActionPressed)
           : null,
     );
 

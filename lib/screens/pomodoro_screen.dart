@@ -3,8 +3,9 @@ import 'dart:async';
 import '../widgets/wave_circularprogress.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:clockmaster/helpers/icon_helper.dart';
-import 'setting_screens/pomo_setting_screen.dart';
 import '../helpers/preferences_helper.dart';
+
+import 'package:flutter_background_service/flutter_background_service.dart';
 
 enum TimerMode { pomodoro, shortBreak, longBreak }
 
@@ -17,6 +18,7 @@ class PomodoroScreen extends StatefulWidget {
 
 class _PomodoroScreenState extends State<PomodoroScreen> {
   int pomodoroMinutes = PreferencesHelper.getInt("pomoFocusTime") ?? 25;
+
   int shortBreakMinutes = PreferencesHelper.getInt("pomoShortBreakTime") ?? 5;
   int longBreakMinutes = PreferencesHelper.getInt("pomoLongBreakTime") ?? 15;
 
@@ -34,10 +36,53 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   bool autoStartNext =
       PreferencesHelper.getBool("autoStartSessionpomo") ?? false;
 
+  Future<bool> isServiceRunning() async {
+    final service = FlutterBackgroundService();
+    final running = await service.isRunning();
+    return running;
+  }
+
   @override
   void initState() {
     super.initState();
+    _updateServiceState();
+    FlutterBackgroundService().on("update").listen((event) {
+      if (event != null && mounted) {
+        setState(() {
+          if (event.containsKey('total')) {
+            totalSeconds = event['total'] as int;
+          }
+
+          if (event.containsKey('remaining')) {
+            remainingSeconds = event['remaining'] as int;
+          }
+
+          if (event.containsKey('isRunning')) {
+            isRunning = event['isRunning'] as bool;
+          }
+
+          if (event['reset'] == true) {
+            remainingSeconds = totalSeconds;
+            isRunning = false;
+          }
+        });
+
+        if ((event['finished'] as bool?) == true) {
+          _onSessionComplete();
+        }
+      }
+    });
+
     _setMode(currentMode, reset: true);
+  }
+
+  Future<void> _updateServiceState() async {
+    final running = await isServiceRunning();
+    if (mounted) {
+      setState(() {
+        isRunning = running;
+      });
+    }
   }
 
   void _setMode(TimerMode mode, {bool reset = false}) {
@@ -47,6 +92,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       remainingSeconds = totalSeconds;
       isRunning = false;
       _cancelTimer();
+      _service.invoke("resetTimer");
     } else {
       remainingSeconds = totalSeconds;
     }
@@ -64,49 +110,41 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     }
   }
 
-  void _start() {
+  void _cancelTimer() {}
+
+  final _service = FlutterBackgroundService();
+
+  void _start() async {
     if (isRunning) return;
-    _timer ??= Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    final duration = _minutesForMode(currentMode) * 60;
+
+    final started = await _service.isRunning();
+    if (!started) {
+      await _service.startService();
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    _service.invoke("startTimer", {"duration": duration});
+
     isRunning = true;
     setState(() {});
   }
 
   void _pause() {
+    _service.invoke("pauseTimer");
     isRunning = false;
-    _cancelTimer();
     setState(() {});
   }
 
-  void _reset({bool keepMode = true}) {
-    _cancelTimer();
+  void _reset({bool keepMode = true}) async {
     isRunning = false;
     totalSeconds = _minutesForMode(currentMode) * 60;
     remainingSeconds = totalSeconds;
     setState(() {});
-  }
-
-  void _cancelTimer() {
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  void _tick() {
-    if (!mounted) return;
-    if (!isRunning) return;
-
-    if (remainingSeconds > 0) {
-      setState(() {
-        remainingSeconds -= 1;
-      });
-    } else {
-      _onSessionComplete();
-    }
+    _service.invoke("resetTimer");
   }
 
   void _onSessionComplete() {
-    _cancelTimer();
-    isRunning = false;
-
     if (currentMode == TimerMode.pomodoro) {
       completedPomodoros += 1;
       if (completedPomodoros % cyclesBeforeLongBreak == 0) {
@@ -122,6 +160,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) _start();
       });
+      isRunning = true;
+    } else {
+      isRunning = false;
     }
 
     setState(() {});
@@ -157,60 +198,10 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     });
   }
 
-  // Future<void> _editMinutesDialog(TimerMode mode) async {
-  //   final controller = TextEditingController(
-  //     text: _minutesForMode(mode).toString(),
-  //   );
-
-  //   final result = await showDialog<int>(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: Text('Set minutes for ${_modeName(mode)}'),
-  //         content: TextField(
-  //           controller: controller,
-  //           keyboardType: TextInputType.number,
-  //           decoration: const InputDecoration(hintText: 'Minutes (e.g. 25)'),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context, null),
-  //             child: const Text('Cancel'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               final v = int.tryParse(controller.text.trim());
-  //               Navigator.pop(context, v);
-  //             },
-  //             child: const Text('OK'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-
-  //   if (result != null && result > 0) {
-  //     setState(() {
-  //       switch (mode) {
-  //         case TimerMode.pomodoro:
-  //           pomodoroMinutes = result.clamp(1, 180);
-  //           break;
-  //         case TimerMode.shortBreak:
-  //           shortBreakMinutes = result.clamp(1, 60);
-  //           break;
-  //         case TimerMode.longBreak:
-  //           longBreakMinutes = result.clamp(1, 240);
-  //           break;
-  //       }
-  //       if (currentMode == mode) _reset(keepMode: true);
-  //     });
-  //   }
-  // }
-
   String _modeName(TimerMode mode) {
     switch (mode) {
       case TimerMode.pomodoro:
-        return 'Pomodoro';
+        return 'Focus';
       case TimerMode.shortBreak:
         return 'Short Break';
       case TimerMode.longBreak:
@@ -259,7 +250,6 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       backgroundColor: _modeColor(currentMode),
       appBar: AppBar(
         backgroundColor: _modeColor(currentMode),
-
         title: Text(
           _modeName(currentMode),
           style: TextStyle(
@@ -270,19 +260,42 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         ),
         toolbarHeight: 65,
         centerTitle: true,
+        titleSpacing: 0,
 
         actions: [
           IconButton(
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PomoSettingScreen()),
-              );
-            },
-            icon: Icon(Icons.settings),
+            tooltip: 'Reset timer',
+            onPressed: () => _setMode(TimerMode.pomodoro, reset: true),
+            icon: Icon(Icons.refresh, color: colorTheme.onSurface),
           ),
           SizedBox(width: 5),
         ],
+        bottom: PreferredSize(
+          preferredSize: Size(100, 20),
+          child: Container(
+            padding: const EdgeInsets.only(
+              left: 10,
+              right: 10,
+              top: 3,
+              bottom: 3,
+            ),
+
+            decoration: BoxDecoration(
+              color: colorTheme.tertiary,
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Text(
+              'Next • ${_modeName(_nextMode)}',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: colorTheme.onTertiary,
+              ),
+            ),
+          ),
+        ),
       ),
+
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         child: Column(
@@ -334,31 +347,6 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                               ),
                             );
                           },
-                        ),
-
-                        Positioned(
-                          bottom: 70,
-                          child: Container(
-                            padding: const EdgeInsets.only(
-                              left: 10,
-                              right: 10,
-                              top: 3,
-                              bottom: 3,
-                            ),
-
-                            decoration: BoxDecoration(
-                              color: colorTheme.tertiary,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: Text(
-                              'Next • ${_modeName(_nextMode)}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: colorTheme.onTertiary,
-                              ),
-                            ),
-                          ),
                         ),
                       ],
                     ),

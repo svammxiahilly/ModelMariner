@@ -317,7 +317,7 @@ class CheckUpdateButton extends StatefulWidget {
 }
 
 class _CheckUpdateButtonState extends State<CheckUpdateButton> {
-  final String currentVersion = 'v1.4.3';
+  final String currentVersion = 'v1.5.0';
   final String githubRepo = 'PranshulGG/ClockMaster';
   bool isChecking = false;
 

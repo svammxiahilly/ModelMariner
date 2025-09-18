@@ -32,6 +32,9 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   bool _isAppVisible = false;
 
+  final useAnimation =
+      PreferencesHelper.getBool("UseopenContainerAnimation") ?? true;
+
   @override
   void initState() {
     super.initState();
@@ -116,7 +119,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       for (final updated in incoming) {
         final idx = timers.indexWhere((t) => t.id == updated.id);
         if (idx != -1) {
-          // UPDATE IN-PLACE instead of replacing:
           timers[idx].updateFrom(updated);
         } else {
           timers.add(updated);
@@ -149,12 +151,10 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       for (final updated in incoming) {
         final idx = timers.indexWhere((t) => t.id == updated.id);
         if (idx != -1) {
-          // you already partly do this; keep updating fields individually
           timers[idx].isRunning = updated.isRunning;
           timers[idx].lastStartEpochMs = updated.lastStartEpochMs;
           timers[idx].currentDuration = updated.currentDuration;
           timers[idx].remainingSeconds = updated.remainingSeconds;
-          // ensure notifier triggers:
           timers[idx].remainingNotifier.value = updated.remainingSeconds;
         } else {
           timers.add(updated);
@@ -801,190 +801,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                     transitionType:
                                         ContainerTransitionType.fadeThrough,
                                     openColor: colorTheme.surface,
-                                    closedBuilder: (context, openContainer) {
-                                      return Container(
-                                        padding: const EdgeInsets.only(
-                                          top: 5,
-                                          bottom: 5,
-                                          right: 10,
-                                          left: 5,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-
-                                              children: [
-                                                Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-
-                                                  children: [
-                                                    Stack(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      children: [
-                                                        Positioned(
-                                                          child: SizedBox(
-                                                            width: 80,
-                                                            height: 80,
-                                                            child: WavyCircularProgress(
-                                                              progress:
-                                                                  progress,
-                                                              strokeWidth: 7,
-                                                              amplitude: 2.0,
-                                                              gapAngle: 0.15,
-                                                              gapAngleStartValue:
-                                                                  0.05,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          child: IconButton(
-                                                            onPressed: () {
-                                                              _toggleStartStop(
-                                                                t,
-                                                              );
-                                                            },
-                                                            icon: Icon(
-                                                              t.isRunning
-                                                                  ? Icons.pause
-                                                                  : Icons
-                                                                        .play_arrow,
-                                                              size: 30,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(width: 6),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        SizedBox(
-                                                          width:
-                                                              MediaQuery.of(
-                                                                context,
-                                                              ).size.width /
-                                                              2.1,
-                                                          child: Text(
-                                                            t.uiLabel.isNotEmpty
-                                                                ? t.uiLabel
-                                                                : 'timer_label'
-                                                                      .tr(),
-                                                            style: TextStyle(
-                                                              height: 1,
-                                                              fontSize: 15,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color: colorTheme
-                                                                  .secondary,
-                                                            ),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-
-                                                        Text(
-                                                          _format(remaining),
-                                                          style: TextStyle(
-                                                            fontSize: 40,
-                                                            fontFamily:
-                                                                "FlexFontEn",
-                                                            fontWeight:
-                                                                FontWeight.w600,
-
-                                                            color: t.isRunning
-                                                                ? colorTheme
-                                                                      .onSurface
-                                                                : colorTheme
-                                                                      .onSurfaceVariant,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-
-                                                // buttons
-                                                Column(
-                                                  spacing: 3,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 42,
-                                                      height: 35,
-                                                      child: IconButton.filled(
-                                                        tooltip: "Edit label",
-                                                        onPressed: () =>
-                                                            _showEditLabelDialog(
-                                                              t,
-                                                            ),
-                                                        icon: Icon(
-                                                          Icons.edit,
-                                                          size: 18,
-                                                        ),
-                                                        style: ButtonStyle(
-                                                          backgroundColor:
-                                                              WidgetStateProperty.all(
-                                                                colorTheme
-                                                                    .surfaceContainerLowest,
-                                                              ),
-                                                          foregroundColor:
-                                                              WidgetStateProperty.all(
-                                                                colorTheme
-                                                                    .onSurface,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 42,
-                                                      height: 35,
-                                                      child: IconButton.filledTonal(
-                                                        style: ButtonStyle(
-                                                          backgroundColor:
-                                                              WidgetStateProperty.all(
-                                                                finished
-                                                                    ? colorTheme
-                                                                          .surface
-                                                                    : colorTheme
-                                                                          .surfaceContainerLowest,
-                                                              ),
-                                                          foregroundColor:
-                                                              WidgetStateProperty.all(
-                                                                colorTheme
-                                                                    .onSurface,
-                                                              ),
-                                                        ),
-                                                        tooltip: 'Reset',
-                                                        onPressed: () =>
-                                                            _resetTimer(t),
-                                                        icon: const Icon(
-                                                          Icons.refresh,
-                                                          size: 18,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
                                     openBuilder: (context, _) {
                                       return TimerDetailPage(
                                         timer: t,
@@ -992,6 +808,246 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                         onReset: () => _resetTimer(t),
                                         onAddMinute: () => _addOneMinute(t),
                                         onDelete: () => _deleteTimer(t),
+                                      );
+                                    },
+                                    closedBuilder: (context, openContainer) {
+                                      return GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+
+                                        child: Container(
+                                          padding: const EdgeInsets.only(
+                                            top: 5,
+                                            bottom: 5,
+                                            right: 10,
+                                            left: 5,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+
+                                                children: [
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+
+                                                    children: [
+                                                      Stack(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        children: [
+                                                          Positioned(
+                                                            child: SizedBox(
+                                                              width: 80,
+                                                              height: 80,
+                                                              child: WavyCircularProgress(
+                                                                progress:
+                                                                    progress,
+                                                                strokeWidth: 7,
+                                                                amplitude: 2.0,
+                                                                gapAngle: 0.15,
+                                                                gapAngleStartValue:
+                                                                    0.05,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          Positioned(
+                                                            child: IconButton(
+                                                              onPressed: () {
+                                                                _toggleStartStop(
+                                                                  t,
+                                                                );
+                                                              },
+                                                              icon: Icon(
+                                                                t.isRunning
+                                                                    ? Icons
+                                                                          .pause
+                                                                    : Icons
+                                                                          .play_arrow,
+                                                                size: 30,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(width: 6),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          SizedBox(
+                                                            width:
+                                                                MediaQuery.of(
+                                                                  context,
+                                                                ).size.width /
+                                                                2.1,
+                                                            child: Text(
+                                                              t
+                                                                      .uiLabel
+                                                                      .isNotEmpty
+                                                                  ? t.uiLabel
+                                                                  : 'timer_label'
+                                                                        .tr(),
+                                                              style: TextStyle(
+                                                                height: 1,
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: colorTheme
+                                                                    .secondary,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ),
+
+                                                          Text(
+                                                            _format(remaining),
+                                                            style: TextStyle(
+                                                              fontSize: 40,
+                                                              fontFamily:
+                                                                  "FlexFontEn",
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+
+                                                              color: t.isRunning
+                                                                  ? colorTheme
+                                                                        .onSurface
+                                                                  : colorTheme
+                                                                        .onSurfaceVariant,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+
+                                                  // buttons
+                                                  Column(
+                                                    spacing: 3,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 42,
+                                                        height: 35,
+                                                        child: IconButton.filled(
+                                                          tooltip: "Edit label",
+                                                          onPressed: () =>
+                                                              _showEditLabelDialog(
+                                                                t,
+                                                              ),
+                                                          icon: Icon(
+                                                            Icons.edit,
+                                                            size: 18,
+                                                          ),
+                                                          style: ButtonStyle(
+                                                            backgroundColor:
+                                                                WidgetStateProperty.all(
+                                                                  colorTheme
+                                                                      .surfaceContainerLowest,
+                                                                ),
+                                                            foregroundColor:
+                                                                WidgetStateProperty.all(
+                                                                  colorTheme
+                                                                      .onSurface,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 42,
+                                                        height: 35,
+                                                        child: IconButton.filledTonal(
+                                                          style: ButtonStyle(
+                                                            backgroundColor:
+                                                                WidgetStateProperty.all(
+                                                                  finished
+                                                                      ? colorTheme
+                                                                            .surface
+                                                                      : colorTheme
+                                                                            .surfaceContainerLowest,
+                                                                ),
+                                                            foregroundColor:
+                                                                WidgetStateProperty.all(
+                                                                  colorTheme
+                                                                      .onSurface,
+                                                                ),
+                                                          ),
+                                                          tooltip: 'Reset',
+                                                          onPressed: () =>
+                                                              _resetTimer(t),
+                                                          icon: const Icon(
+                                                            Icons.refresh,
+                                                            size: 18,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          !useAnimation
+                                              ? Navigator.of(context).push(
+                                                  PageRouteBuilder(
+                                                    opaque: true,
+                                                    fullscreenDialog: true,
+                                                    reverseTransitionDuration:
+                                                        Duration(
+                                                          milliseconds: 200,
+                                                        ),
+                                                    pageBuilder:
+                                                        (
+                                                          context,
+                                                          animation,
+                                                          secondaryAnimation,
+                                                        ) {
+                                                          return TimerDetailPage(
+                                                            timer: t,
+                                                            onToggle: () =>
+                                                                _toggleStartStop(
+                                                                  t,
+                                                                ),
+                                                            onReset: () =>
+                                                                _resetTimer(t),
+                                                            onAddMinute: () =>
+                                                                _addOneMinute(
+                                                                  t,
+                                                                ),
+                                                            onDelete: () =>
+                                                                _deleteTimer(t),
+                                                          );
+                                                        },
+                                                    transitionsBuilder:
+                                                        (
+                                                          context,
+                                                          animation,
+                                                          secondaryAnimation,
+                                                          child,
+                                                        ) {
+                                                          return FadeTransition(
+                                                            opacity: animation,
+                                                            child: child,
+                                                          );
+                                                        },
+                                                  ),
+                                                )
+                                              : openContainer();
+                                        },
                                       );
                                     },
                                   );
