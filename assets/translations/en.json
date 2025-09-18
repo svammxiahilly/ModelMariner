@@ -69,5 +69,7 @@
   "no_timers": "No timers",
   "timer_deleted": "Timer deleted",
   "timer_label": "Timer label",
-  "edit": "Edit"
+  "edit": "Edit",
+  "appearance": "Appearance",
+  "appearance_sub": "Themes, animations, and display"
 }

@@ -32,10 +32,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   bool _isAppVisible = false;
 
-  void init() {
-    WidgetsBinding.instance.addObserver(this);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -71,7 +67,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     _uiTimer?.cancel();
     _taskDataListenable.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -121,7 +116,8 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       for (final updated in incoming) {
         final idx = timers.indexWhere((t) => t.id == updated.id);
         if (idx != -1) {
-          timers[idx] = updated;
+          // UPDATE IN-PLACE instead of replacing:
+          timers[idx].updateFrom(updated);
         } else {
           timers.add(updated);
         }
@@ -153,10 +149,13 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       for (final updated in incoming) {
         final idx = timers.indexWhere((t) => t.id == updated.id);
         if (idx != -1) {
+          // you already partly do this; keep updating fields individually
           timers[idx].isRunning = updated.isRunning;
           timers[idx].lastStartEpochMs = updated.lastStartEpochMs;
           timers[idx].currentDuration = updated.currentDuration;
           timers[idx].remainingSeconds = updated.remainingSeconds;
+          // ensure notifier triggers:
+          timers[idx].remainingNotifier.value = updated.remainingSeconds;
         } else {
           timers.add(updated);
         }
@@ -450,7 +449,10 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         title: Text('edit_timer_label'.tr()),
         content: TextField(
           controller: controller,
-          decoration: InputDecoration(hintText: 'Enter label'),
+          decoration: InputDecoration(
+            hintText: 'Enter label',
+            border: OutlineInputBorder(),
+          ),
         ),
         actions: [
           TextButton(
@@ -506,7 +508,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     children: [
                       Container(
                         height: 50,
-                        width: 60,
+                        width: 65,
 
                         decoration: BoxDecoration(
                           color: colorTheme.tertiaryContainer,
@@ -525,7 +527,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       ),
                       Container(
                         height: 50,
-                        width: 60,
+                        width: 70,
 
                         decoration: BoxDecoration(
                           color: colorTheme.tertiaryContainer,
@@ -544,7 +546,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       ),
                       Container(
                         height: 50,
-                        width: 60,
+                        width: 65,
 
                         decoration: BoxDecoration(
                           color: colorTheme.tertiaryContainer,
@@ -727,33 +729,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           return Padding(
                             key: ValueKey(t.id),
 
-                            padding: const EdgeInsets.only(bottom: 4),
-                            // child: ClipRRect(
-                            //   borderRadius: BorderRadius.circular(22),
-
-                            //   child: Dismissible(
-                            //     key: ValueKey(t.id),
-                            //     direction: DismissDirection.endToStart,
-                            //     background: Container(
-                            //       alignment: Alignment.centerRight,
-                            //       padding: EdgeInsets.symmetric(horizontal: 30),
-                            //       decoration: BoxDecoration(
-                            //         color: colorTheme.errorContainer,
-                            //       ),
-                            //       child: Icon(
-                            //         Icons.delete,
-                            //         color: colorTheme.onErrorContainer,
-                            //         size: 40,
-                            //       ),
-                            //     ),
-                            //     onDismissed: (_) {
-                            //       _deleteTimer(t);
-                            //       ScaffoldMessenger.of(context).showSnackBar(
-                            //         SnackBar(
-                            //           content: Text('timer_deleted'.tr()),
-                            //         ),
-                            //       );
-                            //     },
+                            padding: const EdgeInsets.only(bottom: 6),
                             child: Slidable(
                               key: ValueKey(t.id),
                               closeOnScroll: true,
@@ -785,11 +761,7 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                               child: ValueListenableBuilder<int>(
                                 valueListenable: t.remainingNotifier,
                                 builder: (context, remaining, _) {
-                                  final denominator =
-                                      (t.isRunning && t.currentDuration != null)
-                                      ? t.currentDuration!
-                                      : t.initialSeconds;
-
+                                  final denominator = t.initialSeconds;
                                   final progress = denominator > 0
                                       ? (1.0 -
                                                 (t.remainingSeconds /
@@ -860,17 +832,15 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                           child: SizedBox(
                                                             width: 80,
                                                             height: 80,
-                                                            child:
-                                                                WavyCircularProgress(
-                                                                  progress:
-                                                                      progress,
-                                                                  strokeWidth:
-                                                                      7,
-                                                                  amplitude:
-                                                                      2.0,
-                                                                  gapAngle:
-                                                                      0.15,
-                                                                ),
+                                                            child: WavyCircularProgress(
+                                                              progress:
+                                                                  progress,
+                                                              strokeWidth: 7,
+                                                              amplitude: 2.0,
+                                                              gapAngle: 0.15,
+                                                              gapAngleStartValue:
+                                                                  0.05,
+                                                            ),
                                                           ),
                                                         ),
                                                         Positioned(
@@ -1011,143 +981,6 @@ class TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                                 ),
                                               ],
                                             ),
-                                            // Padding(
-                                            //   padding: const EdgeInsets.only(
-                                            //     left: 0,
-                                            //     top: 10,
-                                            //   ),
-                                            //   child: Text(
-                                            //     t.uiLabel.isNotEmpty
-                                            //         ? t.uiLabel
-                                            //         : 'timer_label'.tr(),
-                                            //     style: TextStyle(
-                                            //       height: 1,
-                                            //       fontSize: 16,
-                                            //       color: colorTheme.secondary,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                            // Row(
-                                            //   mainAxisAlignment:
-                                            //       MainAxisAlignment
-                                            //           .spaceBetween,
-
-                                            //   children: [
-                                            //     Text(
-                                            //       _format(remaining),
-                                            //       style: TextStyle(
-                                            //         fontSize: 45,
-                                            //         fontFamily: "FlexFontEn",
-                                            //         fontWeight:
-                                            //             FontWeight.w600,
-
-                                            //         color: t.isRunning
-                                            //             ? colorTheme.onSurface
-                                            //             : colorTheme
-                                            //                   .onSurfaceVariant,
-                                            //       ),
-                                            //     ),
-                                            //     Column(
-                                            //       crossAxisAlignment:
-                                            //           CrossAxisAlignment.end,
-                                            //       children: [
-                                            //         SizedBox(
-                                            //           width: 38,
-                                            //           height: 38,
-                                            //           child: IconButton(
-                                            //             onPressed: () =>
-                                            //                 _showEditLabelDialog(
-                                            //                   t,
-                                            //                 ),
-                                            //             icon: IconWithWeight(
-                                            //               Symbols.edit,
-                                            //             ),
-                                            //           ),
-                                            //         ),
-                                            //       ],
-                                            //     ),
-                                            //   ],
-                                            // ),
-                                            // LinearProgressIndicator(
-                                            //   value: progress,
-                                            //   year2023: false,
-                                            // ),
-                                            // const SizedBox(height: 4),
-                                            // Row(
-                                            //   mainAxisAlignment:
-                                            //       MainAxisAlignment
-                                            //           .spaceBetween,
-                                            //   children: [
-                                            //     FilledButton.tonal(
-                                            //       style:
-                                            //           FilledButton.styleFrom(
-                                            //             minimumSize: Size(
-                                            //               46,
-                                            //               35,
-                                            //             ),
-                                            //             backgroundColor:
-                                            //                 finished
-                                            //                 ? colorTheme
-                                            //                       .surface
-                                            //                 : null,
-                                            //           ),
-                                            //       onPressed: () =>
-                                            //           _addOneMinute(t),
-
-                                            //       child: Text(
-                                            //         "add_one_min".tr(),
-                                            //       ),
-                                            //     ),
-
-                                            //     Row(
-                                            //       spacing: 5,
-                                            //       children: [
-                                            //         SizedBox(
-                                            //           width: 42,
-                                            //           height: 35,
-                                            //           child: IconButton.filled(
-                                            //             tooltip: t.isRunning
-                                            //                 ? 'Stop'
-                                            //                 : 'Start',
-                                            //             onPressed: () =>
-                                            //                 _toggleStartStop(
-                                            //                   t,
-                                            //                 ),
-                                            //             icon: Icon(
-                                            //               t.isRunning
-                                            //                   ? Icons.pause
-                                            //                   : Icons
-                                            //                         .play_arrow,
-                                            //               size: 18,
-                                            //             ),
-                                            //           ),
-                                            //         ),
-                                            //         SizedBox(
-                                            //           width: 42,
-                                            //           height: 35,
-                                            //           child: IconButton.filledTonal(
-                                            //             style: ButtonStyle(
-                                            //               backgroundColor:
-                                            //                   WidgetStateProperty.all(
-                                            //                     finished
-                                            //                         ? colorTheme
-                                            //                               .surface
-                                            //                         : null,
-                                            //                   ),
-                                            //             ),
-                                            //             tooltip: 'Reset',
-                                            //             onPressed: () =>
-                                            //                 _resetTimer(t),
-                                            //             icon: const Icon(
-                                            //               Icons.refresh,
-                                            //               size: 18,
-                                            //             ),
-                                            //           ),
-                                            //         ),
-                                            //       ],
-                                            //     ),
-                                            //   ],
-                                            // ),
                                           ],
                                         ),
                                       );

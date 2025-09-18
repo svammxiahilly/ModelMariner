@@ -137,6 +137,7 @@ class _AlarmEditContentState extends State<AlarmEditContent> {
                       final picked = await showTimePicker(
                         context: context,
                         initialTime: time,
+
                         builder: (context, child) {
                           return MediaQuery(
                             data: MediaQuery.of(

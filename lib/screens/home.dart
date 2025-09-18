@@ -24,6 +24,7 @@ import '../helpers/preferences_helper.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'about_screen.dart';
+import 'pomodoro_screen.dart';
 
 class BatteryOptimizationHelper {
   static Future<bool> isIgnoringBatteryOptimizations() async {
@@ -215,7 +216,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         scrolledUnderElevation: 0,
         actions: [
           PopupMenuButton<String>(
-            icon: const IconWithWeight(Symbols.more_vert, weight: 900),
+            icon: const Icon(Icons.more_vert),
             elevation: 0,
             color: colorTheme.surfaceContainerHigh,
             shape: RoundedRectangleBorder(
@@ -250,8 +251,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 await Navigator.of(
                   context,
                 ).push(MaterialPageRoute(builder: (_) => const AboutScreen()));
+              } else if (value == "openPomodoroScreen") {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PomodoroScreen()),
+                );
               }
             },
+
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
                 value: 'openSettings',
@@ -269,10 +275,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 padding: EdgeInsets.only(left: 14, right: 6),
                 child: menuItemRow(Symbols.info, "about".tr()),
               ),
+              PopupMenuItem<String>(
+                value: 'openPomodoroScreen',
+                padding: EdgeInsets.only(left: 14, right: 6),
+                child: menuItemRow(
+                  Symbols.nest_clock_farsight_analog,
+                  "Pomodoro",
+                ),
+              ),
             ],
           ),
 
-          SizedBox(width: 8),
+          SizedBox(width: 5),
         ],
       ),
       body: IndexedStack(index: _selectedIndex, children: _pages),

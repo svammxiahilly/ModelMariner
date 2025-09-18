@@ -45,4 +45,16 @@ class TimerModel {
     'lastStartEpochMs': lastStartEpochMs,
     'currentDuration': currentDuration,
   };
+
+  void updateFrom(TimerModel other) {
+    label = other.label;
+    uiLabel = other.uiLabel;
+    remainingSeconds = other.remainingSeconds;
+    initialSeconds = other.initialSeconds;
+    isRunning = other.isRunning;
+    lastStartEpochMs = other.lastStartEpochMs;
+    currentDuration = other.currentDuration;
+
+    remainingNotifier.value = remainingSeconds;
+  }
 }

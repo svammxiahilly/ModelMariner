@@ -446,7 +446,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
               FloatingActionButton.large(
                 shape: const CircleBorder(),
                 onPressed: _reset,
-                backgroundColor: colorTheme.secondaryContainer,
+                backgroundColor: colorTheme.primaryContainer,
                 heroTag: "idk_cool_random_tag",
 
                 elevation: 0,
@@ -454,7 +454,7 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
                 child: IconWithWeight(
                   Symbols.restart_alt,
                   size: 40,
-                  color: colorTheme.onSecondaryContainer,
+                  color: colorTheme.onPrimaryContainer,
                 ),
               ),
             ],
@@ -468,12 +468,16 @@ class _StopWatchScreenState extends State<StopWatchScreen> {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
             child: FloatingActionButton.extended(
               onPressed: _isRunning ? _lap : null,
-              backgroundColor: colorTheme.secondaryContainer,
+              backgroundColor: colorTheme.tertiaryContainer,
               heroTag: "idk_random_tag_stop_wow",
 
               label: Text(
                 "lap".tr(),
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500,
+                  color: colorTheme.onTertiaryContainer,
+                ),
               ),
             ),
           ),

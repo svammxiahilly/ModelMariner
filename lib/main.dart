@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:material_color_utilities/contrast/contrast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home.dart';
 import 'package:flutter/services.dart';

@@ -9,6 +9,7 @@ class CircularWavePainter extends CustomPainter {
   final double strokeWidth;
   final double amplitudeValue;
   final double gapAngleValue;
+  final double gapAngleStartValue;
 
   const CircularWavePainter(
     this.waveValue,
@@ -18,6 +19,7 @@ class CircularWavePainter extends CustomPainter {
     this.strokeWidth,
     this.amplitudeValue,
     this.gapAngleValue,
+    this.gapAngleStartValue,
   );
 
   @override
@@ -41,7 +43,7 @@ class CircularWavePainter extends CustomPainter {
     final frequency = progress < 0.02 ? 0 : 12.0;
 
     final sweepAngle = 2 * pi;
-    final gapAngle = progress < 0.02 ? 0 : gapAngleValue;
+    final gapAngle = progress < gapAngleStartValue ? 0 : gapAngleValue;
 
     Path progressPath = Path();
     Path backgroundPath = Path();
@@ -98,6 +100,7 @@ class WavyCircularProgress extends StatefulWidget {
   final double strokeWidth;
   final double amplitude;
   final double gapAngle;
+  final double gapAngleStartValue;
 
   const WavyCircularProgress({
     super.key,
@@ -105,6 +108,7 @@ class WavyCircularProgress extends StatefulWidget {
     this.strokeWidth = 14,
     this.amplitude = 5.0,
     this.gapAngle = 0.045,
+    this.gapAngleStartValue = 0.02,
   });
 
   @override
@@ -152,6 +156,7 @@ class _WavyCircularProgressState extends State<WavyCircularProgress>
                 widget.strokeWidth,
                 widget.amplitude,
                 widget.gapAngle,
+                widget.gapAngleStartValue,
               ),
             );
           },

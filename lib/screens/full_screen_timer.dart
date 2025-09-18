@@ -26,7 +26,8 @@ class TimerDetailPage extends StatefulWidget {
   State<TimerDetailPage> createState() => _TimerDetailPageState();
 }
 
-class _TimerDetailPageState extends State<TimerDetailPage> {
+class _TimerDetailPageState extends State<TimerDetailPage>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -36,6 +37,7 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
   @override
   void dispose() {
     PreferencesHelper.setBool("isFullScreen", false);
+
     super.dispose();
   }
 
@@ -57,15 +59,7 @@ class _TimerDetailPageState extends State<TimerDetailPage> {
     return ValueListenableBuilder<int>(
       valueListenable: widget.timer.remainingNotifier,
       builder: (context, remaining, _) {
-        // final progress = widget.timer.currentDuration > 0
-        //     ? 1 - (widget.timer.remainingSeconds / widget.timer.currentDuration)
-        //     : 0.0;
-
-        final denominator =
-            (widget.timer.isRunning && widget.timer.currentDuration != null)
-            ? widget.timer.currentDuration!
-            : widget.timer.initialSeconds;
-
+        final denominator = widget.timer.initialSeconds;
         final progress = denominator > 0
             ? (1.0 - (widget.timer.remainingSeconds / denominator)).clamp(
                 0.0,

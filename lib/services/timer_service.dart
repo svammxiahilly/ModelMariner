@@ -78,36 +78,38 @@ class MyTaskHandler extends TaskHandler {
         int elapsedSec = (elapsedMs / 1000).floor();
 
         if (elapsedSec > 0) {
-          int newRemaining = m['remainingSeconds'] - elapsedSec;
+          int oldRemaining = (m['remainingSeconds'] ?? 0) as int;
+          int newRemaining = (oldRemaining - elapsedSec).clamp(0, 99999999);
+
           if (newRemaining <= 0) {
-            if (m['isRunning'] == true) {
-              alarmRingtone.stop();
-              alarmRingtone.play();
+            // timer finished
+            m['remainingSeconds'] = 0;
+            m['isRunning'] = false;
+            m['lastStartEpochMs'] = null;
+            m['finishedAtEpochMs'] = now;
 
-              m['remainingSeconds'] = 0;
-              m['isRunning'] = false;
-              m['lastStartEpochMs'] = null;
-              m['finishedAtEpochMs'] = now;
+            await prefs.setString('activeTimerId', m['id']);
 
-              await prefs.setString('activeTimerId', m['id']);
+            alarmRingtone.stop();
+            alarmRingtone.play();
 
-              FlutterForegroundTask.updateService(
-                notificationTitle: 'Timer Finished',
-                notificationText: (m['uiLabel'] ?? 'Timer'),
-                notificationButtons: [
-                  NotificationButton(id: 'pause', text: 'Pause'),
-                  const NotificationButton(id: 'reset', text: 'Reset'),
-                ],
-              );
-            } else {
-              m['remainingSeconds'] = 0;
-              m['lastStartEpochMs'] = null;
-              if (m['finishedAtEpochMs'] == null) m['finishedAtEpochMs'] = now;
-            }
+            FlutterForegroundTask.updateService(
+              notificationTitle: 'Timer Finished',
+              notificationText: (m['uiLabel'] ?? 'Timer'),
+              notificationButtons: [
+                NotificationButton(id: 'pause', text: 'Pause'),
+                const NotificationButton(id: 'reset', text: 'Reset'),
+              ],
+            );
+          } else {
+            // Normal tick: reduce remaining, and reset baseline so next tick only uses delta since now.
+            m['remainingSeconds'] = newRemaining;
+            m['currentDuration'] = newRemaining;
+            // IMPORTANT: set lastStartEpochMs to now so next tick uses delta since this tick (avoid double counting)
+            m['lastStartEpochMs'] = now;
           }
+          shouldUpdate = true;
         }
-
-        shouldUpdate = true;
       }
 
       if (shouldUpdate) {
@@ -116,13 +118,10 @@ class MyTaskHandler extends TaskHandler {
         changedTimers.add(m);
       }
     }
+
+    // Build notification text/title as before, using the (potentially) updated data list
     final runningTimers = data
         .where((e) => e['isRunning'] == true)
-        .toList(growable: false);
-    final pausedTimers = data
-        .where(
-          (e) => e['isRunning'] == false && (e['remainingSeconds'] ?? 0) > 0,
-        )
         .toList(growable: false);
 
     final t = _selectNotificationTimer(
@@ -160,9 +159,12 @@ class MyTaskHandler extends TaskHandler {
     );
 
     if (changed) {
+      // persist full array
       await prefs.setString(prefKey, jsonEncode(data));
+      // send the full timers array so the UI can fully sync
       FlutterForegroundTask.sendDataToMain({
         'type': 'timers_tick',
+        'timers': data,
         'changedTimers': changedTimers,
       });
     }
@@ -257,7 +259,9 @@ class MyTaskHandler extends TaskHandler {
               99999999,
             );
             m['isRunning'] = false;
+            m['currentDuration'] = m['remainingSeconds'];
             m['lastStartEpochMs'] = null;
+
             alarmRingtone.stop();
           } else {
             m['lastStartEpochMs'] = DateTime.now().millisecondsSinceEpoch;
@@ -324,14 +328,17 @@ class MyTaskHandler extends TaskHandler {
     }
 
     await prefs.setString(prefKey, jsonEncode(data));
-
     FlutterForegroundTask.sendDataToMain({
       'type': 'notified_btn_pressed',
       'id': id,
       'timers': data,
     });
 
-    FlutterForegroundTask.sendDataToMain({'type': 'timers_updated'});
+    // send timers_updated with timers payload (previously you sent it without timers)
+    FlutterForegroundTask.sendDataToMain({
+      'type': 'timers_updated',
+      'timers': data,
+    });
 
     final anyRunning = data.any((t) => t['isRunning'] == true);
     final anyPending = data.any((t) => (t['remainingSeconds'] ?? 0) > 0);
