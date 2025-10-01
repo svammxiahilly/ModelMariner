@@ -1,5 +1,6 @@
 package com.pranshulgg.clockmaster
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,18 +17,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
+import com.pranshulgg.clockmaster.models.AlarmViewModel
+import com.pranshulgg.clockmaster.models.TimezoneViewModel
+import com.pranshulgg.clockmaster.models.TimezoneViewModelFactory
+import com.pranshulgg.clockmaster.repository.AlarmRepository
+import com.pranshulgg.clockmaster.repository.TimezoneRepository
+import com.pranshulgg.clockmaster.roomDB.AppDatabase
 import com.pranshulgg.clockmaster.screens.HomeScreen
 import com.pranshulgg.clockmaster.screens.SettingsPage
+import com.pranshulgg.clockmaster.screens.TimezoneSearchPage
 import com.pranshulgg.clockmaster.screens.setting_screens.AppearanceScreen
 import com.pranshulgg.clockmaster.ui.theme.ClockMasterTheme
 import com.pranshulgg.clockmaster.utils.NavTransitions
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
+
     @OptIn(
         ExperimentalMaterial3Api::class,
         ExperimentalMaterial3ExpressiveApi::class,
@@ -45,6 +55,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+
+            val database = AppDatabase.getDatabase(applicationContext)
+            val repository = TimezoneRepository(database.timezoneDao())
+            val repositoryAlarm = AlarmRepository(database.alarmDao())
+
+            val timezoneviewModel: TimezoneViewModel = viewModel(
+                factory = TimezoneViewModelFactory(repository)
+            )
+
 
             val navController = rememberNavController()
             val motionScheme = motionScheme
@@ -84,15 +104,9 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "main") {
                     composable(
                         "main",
-                        popEnterTransition = {
-                            NavTransitions.popEnter(motionScheme)
 
-                        },
-                        popExitTransition = {
-                            NavTransitions.popExit(motionScheme)
-                        }
-                    ) {
-                        HomeScreen(navController)
+                        ) {
+                        HomeScreen(navController, viewModelTimezone = timezoneviewModel)
                     }
                     composable(
                         "OpenSettings",
@@ -147,6 +161,17 @@ class MainActivity : ComponentActivity() {
                             },
                         )
                     }
+
+                    composable(
+                        "OpenTimezoneSearch",
+                    ) {
+                        TimezoneSearchPage(
+                            navController = navController,
+                            viewModel = timezoneviewModel
+                        )
+                    }
+
+
                 }
             }
         }

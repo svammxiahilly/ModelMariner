@@ -14,22 +14,32 @@ import com.pranshulgg.clockmaster.R
 @Composable
 fun BottomNav(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val labelList = listOf("Alarm", "Clock", "Stopwatch", "Timer")
-    val unSelectedIcons = listOf(R.drawable.alarm_outlined, R.drawable.schedule_outlined, R.drawable.hourglass_empty, R.drawable.timer_outlined)
-    val selectedIcons = listOf(R.drawable.alarm_filled, R.drawable.schedule_filled, R.drawable.hourglass_top, R.drawable.timer_filled)
+    val unSelectedIcons = listOf(
+        R.drawable.alarm_outlined,
+        R.drawable.schedule_outlined,
+        R.drawable.timer_outlined,
+        R.drawable.hourglass_empty
+    )
+    val selectedIcons = listOf(
+        R.drawable.alarm_filled,
+        R.drawable.schedule_filled,
+        R.drawable.timer_filled,
+        R.drawable.hourglass_top
+    )
 
 
     NavigationBar(
     ) {
-        labelList.forEachIndexed{ index, labelList ->
+        labelList.forEachIndexed { index, labelList ->
             NavigationBarItem(
                 onClick = {
                     onItemSelected(index)
                 },
                 selected = selectedItem == index,
-                label = { Text(labelList, fontSize= 14.sp) },
+                label = { Text(labelList, fontSize = 14.sp) },
                 icon = {
                     Icon(
-                        painter = painterResource( if (selectedItem == index) selectedIcons[index] else unSelectedIcons[index]),
+                        painter = painterResource(if (selectedItem == index) selectedIcons[index] else unSelectedIcons[index]),
                         contentDescription = null
                     )
                 },

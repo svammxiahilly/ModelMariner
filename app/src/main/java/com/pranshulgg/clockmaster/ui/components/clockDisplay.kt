@@ -32,7 +32,7 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     )
-{
+    {
 
         var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
@@ -46,13 +46,14 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
             }
         }
 
-        val pattern = if (use24hr) "HH:mm${if (showSeconds) "ss" else ""}" else  "hh:mm${if (showSeconds) "ss" else ""}"
+        val pattern =
+            if (use24hr) "HH:mm${if (showSeconds) "ss" else ""}" else "hh:mm${if (showSeconds) "ss" else ""}"
 
         val currentLocalTime = remember {
             SimpleDateFormat(pattern, Locale.getDefault())
         }
 
-         val currentAmPm = remember {
+        val currentAmPm = remember {
             SimpleDateFormat("a", Locale.getDefault())
         }
 
@@ -64,27 +65,28 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
         val formattedDate = currentLocalDate.format(Date(currentTime))
         val separateAmPm = currentAmPm.format(Date(currentTime))
 
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = formattedTime,
-            fontSize = 65.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.alignByBaseline()
-        )
-
-        if(!use24hr)
-        Spacer(modifier = Modifier.width(3.dp))
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = separateAmPm,
-                fontSize = 30.sp,
+                text = formattedTime,
+                fontSize = 65.sp,
                 color = MaterialTheme.colorScheme.onSurface,
-
                 modifier = Modifier.alignByBaseline()
             )
-    }
+
+            if (!use24hr) {
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                    text = separateAmPm,
+                    fontSize = 30.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+
+                    modifier = Modifier.alignByBaseline()
+                )
+            }
+        }
 
 
         Text(

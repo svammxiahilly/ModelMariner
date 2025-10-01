@@ -78,7 +78,6 @@ fun ClockMasterTheme(
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography = Typography,
-
         motionScheme = MotionScheme.expressive(),
         content = content
     )

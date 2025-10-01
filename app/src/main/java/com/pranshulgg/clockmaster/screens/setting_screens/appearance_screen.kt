@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +46,7 @@ import androidx.navigation.NavController
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.ColorPickerController
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.drawColorIndicator
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.ui.components.SettingSection
@@ -53,7 +56,10 @@ import com.pranshulgg.clockmaster.ui.components.Symbol
 import com.pranshulgg.clockmaster.utils.bottomPadding
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
+    ExperimentalMaterial3ExpressiveApi::class
+)
 @Composable
 fun AppearanceScreen(
     navController: NavController,
@@ -137,6 +143,7 @@ fun AppearanceScreen(
 
 
     Scaffold(
+//        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         topBar = {
             LargeTopAppBar(
                 title = { Text("Appearance") },
@@ -150,6 +157,9 @@ fun AppearanceScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
+//                colors = TopAppBarDefaults.topAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+//                )
             )
         }
     ) { innerPadding ->
@@ -177,6 +187,7 @@ fun AppearanceScreen(
                                     else -> false
                                 }
                                 PreferencesHelper.setBool("dark_theme", isDark)
+                                PreferencesHelper.setString("AppTheme", selectedOption)
 
                                 onThemeChanged(isDark)
 
@@ -234,6 +245,7 @@ fun AppearanceScreen(
 
         }
 
+
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -270,6 +282,12 @@ fun AppearanceScreen(
                             .padding(vertical = 10.dp),
                         initialColor = initialColorInt,
                         controller = controller,
+                        drawOnPosSelected = {
+                            drawColorIndicator(
+                                controller.selectedPoint.value,
+                                controller.selectedColor.value,
+                            )
+                        },
                         onColorChanged = { colorEnvelope: ColorEnvelope ->
                             val hexColor = colorEnvelope.hexCode
 
@@ -308,7 +326,8 @@ fun AppearanceScreen(
                     ) {
                         OutlinedButton(onClick = {
                             hideColorSheet()
-                        }) {
+
+                        }, shapes = ButtonDefaults.shapes()) {
                             Text("Cancel")
                         }
                         Button(onClick = {
@@ -316,7 +335,7 @@ fun AppearanceScreen(
                             onSeedChanged(pickedColor)
                             hideColorSheet()
 
-                        }) {
+                        }, shapes = ButtonDefaults.shapes()) {
                             Text("Save")
                         }
                     }

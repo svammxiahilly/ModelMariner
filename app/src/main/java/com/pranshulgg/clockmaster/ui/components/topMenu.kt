@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,20 +23,21 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownMenu(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
 
-
-    IconButton(
-        onClick = { expanded = !expanded }, shapes = IconButtonDefaults.shapes()
-    ) {
-        Symbol(
-            R.drawable.more_vert,
-            desc = "More options",
-            color = MaterialTheme.colorScheme.onSurface
-        )
+    Tooltip("More options", preferredPosition = TooltipAnchorPosition.Left, spacing = 20.dp) {
+        IconButton(
+            onClick = { expanded = !expanded }, shapes = IconButtonDefaults.shapes()
+        ) {
+            Symbol(
+                R.drawable.more_vert,
+                desc = "More options",
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
     DropdownMenu(
         expanded = expanded,

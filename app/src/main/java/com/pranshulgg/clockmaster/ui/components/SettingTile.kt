@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.pranshulgg.clockmaster.ui.components.tiles.ActionTile
 import com.pranshulgg.clockmaster.ui.components.tiles.CategoryTile
 import com.pranshulgg.clockmaster.ui.components.tiles.DialogOptionTile
+import com.pranshulgg.clockmaster.ui.components.tiles.DialogSliderTile
+import com.pranshulgg.clockmaster.ui.components.tiles.DialogTextFieldTile
 import com.pranshulgg.clockmaster.ui.components.tiles.SingleSwitchTile
 import com.pranshulgg.clockmaster.ui.components.tiles.SwitchTile
 import com.pranshulgg.clockmaster.ui.components.tiles.TextTile
@@ -72,8 +74,35 @@ sealed class SettingTile {
         override val title: String,
         override val description: String? = null,
         val leading: (@Composable (() -> Unit))? = null,
-        val onClick: () -> Unit
+        val onClick: () -> Unit,
+        val colorDesc: Color = Color.Unspecified,
     ) : SettingTile()
+
+
+    data class DialogTextFieldTile(
+        override val title: String,
+        override val description: String? = null,
+        val leading: (@Composable (() -> Unit))? = null,
+        val onTextSubmitted: (String) -> Unit,
+        val placeholder: String,
+        val placeholderTextField: String,
+        val initialText: String = ""
+    ) : SettingTile()
+
+    data class DialogSliderTile(
+        override val title: String,
+        override val description: String? = null,
+        val leading: (@Composable (() -> Unit))? = null,
+        val onValueSubmitted: (Float) -> Unit,
+        val initialValue: Float = 0.5f,
+        val valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+        val steps: Int = 0,
+        val labelFormatter: (Float) -> String = { it.toString() },
+        val dialogTitle: String
+
+
+    ) : SettingTile()
+
 }
 
 
@@ -82,11 +111,12 @@ fun SettingSection(
     tiles: List<SettingTile>,
     title: String? = null,
     primarySwitch: Boolean = false,
+    noPadding: Boolean = false,
     errorTile: Boolean = false
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = if (noPadding) 0.dp else 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         title?.let {
@@ -163,7 +193,8 @@ fun SettingSection(
                     description = tile.description,
                     leading = tile.leading,
                     shapes = shape,
-                    onClick = tile.onClick
+                    onClick = tile.onClick,
+                    colorDesc = tile.colorDesc
                 )
 
                 is SettingTile.SwitchTile -> SwitchTile(
@@ -183,6 +214,32 @@ fun SettingSection(
                     checked = tile.checked,
                     onCheckedChange = tile.onCheckedChange,
                     switchEnabled = tile.enabled
+                )
+
+                is SettingTile.DialogTextFieldTile -> DialogTextFieldTile(
+                    headline = tile.title,
+                    description = tile.description,
+                    leading = tile.leading,
+                    shapes = shape,
+                    onTextSubmitted = tile.onTextSubmitted,
+                    placeholder = tile.placeholder,
+                    placeholderTextField = tile.placeholderTextField,
+                    initialText = tile.initialText
+
+                )
+
+                is SettingTile.DialogSliderTile -> DialogSliderTile(
+                    headline = tile.title,
+                    description = tile.description,
+                    leading = tile.leading,
+                    shapes = shape,
+                    onValueSubmitted = tile.onValueSubmitted,
+                    initialValue = tile.initialValue,
+                    valueRange = tile.valueRange,
+                    steps = tile.steps,
+                    labelFormatter = tile.labelFormatter,
+                    dialogTitle = tile.dialogTitle
+
                 )
             }
         }

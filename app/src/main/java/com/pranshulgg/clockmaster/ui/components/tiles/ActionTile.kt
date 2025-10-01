@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ActionTile(
@@ -17,7 +18,8 @@ fun ActionTile(
     description: String? = null,
     leading: @Composable (() -> Unit)? = null,
     shapes: RoundedCornerShape,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    colorDesc: Color = Color.Unspecified,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -33,8 +35,9 @@ fun ActionTile(
             ),
             headlineContent = { Text(headline) },
             supportingContent = {
+
                 if (description != null) {
-                    Text(description)
+                    Text(description, color = colorDesc)
                 }
             }
         )

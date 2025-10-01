@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.2.10-2.0.2"
 }
 
 android {
@@ -37,6 +38,21 @@ android {
     buildFeatures {
         compose = true
     }
+
+    configurations.all {
+        resolutionStrategy {
+            // Force Gradle to always use the latest org.jetbrains annotations
+            force("org.jetbrains:annotations:23.0.0")
+
+            // Replace any com.intellij:annotations with org.jetbrains:annotations
+            eachDependency {
+                if (requested.group == "com.intellij" && requested.name == "annotations") {
+                    useTarget("org.jetbrains:annotations:23.0.0")
+                }
+            }
+        }
+    }
+
 }
 
 dependencies {
@@ -50,7 +66,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.material3)
+    implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -62,4 +78,7 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.materialKolor)
     implementation(libs.colorpicker)
+    ksp(libs.android.room.compiler)
+    implementation(libs.android.room.runtime)
+
 }
