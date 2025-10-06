@@ -6,5 +6,5 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 class HomeViewModel : ViewModel() {
-    var selectedItem by mutableIntStateOf(2)
+    var selectedItem by mutableIntStateOf(3)
 }
