@@ -54,6 +54,11 @@
         <receiver
             android:name=".receiver.NotificationActionReceiver"
             android:exported="true" />
+
+        <service
+            android:name=".services.TimerForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback|dataSync" />
     </application>
 
 </manifest>
