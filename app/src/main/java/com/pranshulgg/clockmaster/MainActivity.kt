@@ -26,8 +26,11 @@ import com.pranshulgg.clockmaster.models.AlarmViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModelFactory
 import com.pranshulgg.clockmaster.repository.AlarmRepository
+import com.pranshulgg.clockmaster.repository.TimerRepository
+import com.pranshulgg.clockmaster.repository.TimersRepository
 import com.pranshulgg.clockmaster.repository.TimezoneRepository
 import com.pranshulgg.clockmaster.roomDB.AppDatabase
+import com.pranshulgg.clockmaster.screens.FullscreenTimerScreen
 import com.pranshulgg.clockmaster.screens.HomeScreen
 import com.pranshulgg.clockmaster.screens.SettingsPage
 import com.pranshulgg.clockmaster.screens.TimezoneSearchPage
@@ -60,6 +63,7 @@ class MainActivity : ComponentActivity() {
             val database = AppDatabase.getDatabase(applicationContext)
             val repository = TimezoneRepository(database.timezoneDao())
             val repositoryAlarm = AlarmRepository(database.alarmDao())
+            val repositoryTimers = TimersRepository(database.timerDao())
 
             val timezoneviewModel: TimezoneViewModel = viewModel(
                 factory = TimezoneViewModelFactory(repository)
@@ -170,7 +174,14 @@ class MainActivity : ComponentActivity() {
                             viewModel = timezoneviewModel
                         )
                     }
-
+                    composable("fullscreen/{timerId}") { backStackEntry ->
+                        val timerId =
+                            backStackEntry.arguments?.getString("timerId") ?: return@composable
+                        FullscreenTimerScreen(
+                            timerId = timerId,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
 
                 }
             }

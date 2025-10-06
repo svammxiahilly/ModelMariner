@@ -50,7 +50,9 @@ fun SettingsPage(navController: NavController) {
             LargeTopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
+                    ) {
                         Symbol(
                             R.drawable.arrow_back,
                             desc = "Back",

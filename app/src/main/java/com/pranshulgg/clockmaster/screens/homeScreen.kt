@@ -25,21 +25,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.models.HomeViewModel
+import com.pranshulgg.clockmaster.models.TimersViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
+import com.pranshulgg.clockmaster.services.TimerForegroundService
+import com.pranshulgg.clockmaster.ui.components.AddTimerSheet
 import com.pranshulgg.clockmaster.ui.components.AlarmBottomSheet
 import com.pranshulgg.clockmaster.ui.components.BottomNav
 import com.pranshulgg.clockmaster.ui.components.DropdownMenu
 import com.pranshulgg.clockmaster.ui.components.Symbol
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -52,7 +59,10 @@ fun HomeScreen(
     val selectedItem = viewModel.selectedItem
     val appBarTitles = listOf("Alarm", "World clock", "Stopwatch", "Timer")
     var showSheetAlarm by remember { mutableStateOf(false) }
-
+    var showingAddTimer by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val viewModelTimers: TimersViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,13 +91,14 @@ fun HomeScreen(
                     modifier = Modifier.size(80.dp),
                     shape = RoundedCornerShape(20.dp),
                     elevation = FloatingActionButtonDefaults.elevation(
-                        2.dp,
+                        0.dp,
                         pressedElevation = 0.dp,
                     ),
                     onClick = {
                         when (selectedItem) {
                             0 -> showSheetAlarm = true
                             1 -> navController.navigate("OpenTimezoneSearch")
+                            3 -> showingAddTimer = true
                         }
                     },
                 ) {
@@ -114,11 +125,21 @@ fun HomeScreen(
                 0 -> AlarmScreen()
                 1 -> WorldClockScreen(viewModel = viewModelTimezone)
                 2 -> StopwatchScreen()
+                3 -> TimersScreen(navController = navController)
             }
             if (showSheetAlarm) {
                 AlarmBottomSheet(
                     onDismiss = { showSheetAlarm = false }
                 )
+            }
+
+            if (showingAddTimer) {
+                AddTimerSheet(onAdd = { timer ->
+                    scope.launch {
+                        viewModelTimers.addTimer(timer)
+                        TimerForegroundService.startServiceIfTimersExist(context)
+                    }
+                }, onDismiss = { showingAddTimer = false })
             }
         }
     }
