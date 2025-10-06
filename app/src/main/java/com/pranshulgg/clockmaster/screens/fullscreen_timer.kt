@@ -1,5 +1,6 @@
 package com.pranshulgg.clockmaster.screens
 
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -233,6 +234,8 @@ fun FullscreenTimerScreen(
 
                                 shapes = ButtonDefaults.shapes(),
                                 onClick = {
+                                    viewModel.updateInitial(timer.id, timer.originalMillis)
+
                                     viewModel.resetTimer(timer.id)
                                 }
                             ) {
@@ -264,7 +267,10 @@ fun FullscreenTimerScreen(
                                 shapes = ButtonDefaults.shapes(),
                                 onClick = {
                                     val newRemaining = timer.remainingMillis + 60_000L
+                                    val newInitial = timer.initialMillis + 60_000L
+
                                     viewModel.updateRemaining(timer.id, newRemaining)
+                                    viewModel.updateInitial(timer.id, newInitial)
                                 }
 
                             ) {

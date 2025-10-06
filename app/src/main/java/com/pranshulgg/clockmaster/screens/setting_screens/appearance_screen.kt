@@ -143,7 +143,6 @@ fun AppearanceScreen(
 
 
     Scaffold(
-//        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         topBar = {
             LargeTopAppBar(
                 title = { Text("Appearance") },
@@ -157,10 +156,8 @@ fun AppearanceScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-//                )
-            )
+
+                )
         }
     ) { innerPadding ->
         LazyColumn(

@@ -13,7 +13,8 @@ data class TimerItem(
     val initialMillis: Long,
     val remainingMillis: Long,
     val state: TimerState = TimerState.Paused,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val originalMillis: Long
 ) {
     fun copyRunning(newRemaining: Long) =
         copy(remainingMillis = newRemaining, state = TimerState.Running)

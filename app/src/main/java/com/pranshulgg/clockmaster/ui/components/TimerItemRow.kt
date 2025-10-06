@@ -1,6 +1,7 @@
 package com.pranshulgg.clockmaster.ui.components
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,6 +28,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -78,6 +80,13 @@ fun TimerItemRow(
     val thickStrokeWidth = with(LocalDensity.current) { 8.dp.toPx() }
     val thickStroke =
         remember(thickStrokeWidth) { Stroke(width = thickStrokeWidth, cap = StrokeCap.Round) }
+
+    val animatedProgress by
+    animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+
+        )
     Surface(
         color =
             MaterialTheme.colorScheme.surfaceContainerLow,
@@ -103,7 +112,7 @@ fun TimerItemRow(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularWavyProgressIndicator(
-                        progress = { progress.coerceIn(0f, 1f) },
+                        progress = { animatedProgress },
                         modifier = Modifier.size(80.dp),
                         stroke = thickStroke,
                         amplitude = { 2.0f },
@@ -171,7 +180,9 @@ fun TimerItemRow(
                     }
                     IconButton(
                         modifier = Modifier.size(42.dp, 35.dp),
-                        onClick = { onReset(timer.id) },
+                        onClick = {
+                            onReset(timer.id)
+                        },
                         shapes = IconButtonDefaults.shapes(),
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
                     ) {

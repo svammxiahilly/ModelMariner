@@ -79,7 +79,6 @@ fun <T> DialogOptionTile(
             title = { Text(headline) },
             text = {
                 Column(
-                    modifier = Modifier.widthIn(max = 240.dp)
                 ) {
                     options.forEach { option ->
                         Row(

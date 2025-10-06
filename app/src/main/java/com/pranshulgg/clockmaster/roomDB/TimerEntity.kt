@@ -10,5 +10,6 @@ data class TimerEntity(
     val initialMillis: Long,
     val remainingMillis: Long,
     val state: String,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val originalMillis: Long
 )

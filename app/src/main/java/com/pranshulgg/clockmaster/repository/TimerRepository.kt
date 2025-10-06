@@ -29,12 +29,12 @@ object TimerRepository {
 
     suspend fun resetTimer(id: String) = mutex.withLock {
         _timers.value = _timers.value.map {
-            if (it.id == id) it.copyPaused(it.initialMillis) else it
+            if (it.id == id) it.copyPaused(it.originalMillis) else it
         }
     }
 
     suspend fun resetAll() = mutex.withLock {
-        _timers.value = _timers.value.map { it.copyPaused(it.initialMillis) }
+        _timers.value = _timers.value.map { it.copyPaused(it.originalMillis) }
     }
 
     suspend fun pauseTimer(id: String) = mutex.withLock {
@@ -74,6 +74,12 @@ object TimerRepository {
     suspend fun updateRemaining(id: String, newRemainingMillis: Long) = mutex.withLock {
         _timers.value = _timers.value.map {
             if (it.id == id) it.copy(remainingMillis = newRemainingMillis) else it
+        }
+    }
+
+    suspend fun updateInitialMillis(id: String, newInitial: Long) = mutex.withLock {
+        _timers.value = _timers.value.map {
+            if (it.id == id) it.copy(initialMillis = newInitial) else it
         }
     }
 }

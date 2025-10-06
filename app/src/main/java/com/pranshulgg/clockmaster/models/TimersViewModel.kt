@@ -67,6 +67,11 @@ class TimersViewModel(application: Application) : AndroidViewModel(application) 
         persistTimerById(id)
     }
 
+    fun updateInitial(id: String, newInitial: Long) = viewModelScope.launch {
+        TimerRepository.updateInitialMillis(id, newInitial)
+        persistTimerById(id)
+    }
+
     private suspend fun persistTimerById(id: String) {
         val item = TimerRepository.timers.value.firstOrNull { it.id == id } ?: return
         timersRepo.insert(item.toEntity())

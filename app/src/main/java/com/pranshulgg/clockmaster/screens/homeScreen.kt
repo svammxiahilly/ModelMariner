@@ -77,16 +77,17 @@ fun HomeScreen(
         floatingActionButton = {
             AnimatedVisibility(
                 visible = selectedItem != 2,
-                enter = slideInHorizontally(
-                    initialOffsetX = { it },
+                enter = scaleIn(
+                    initialScale = 0.8f,
                     animationSpec = motionScheme.defaultSpatialSpec()
                 ) + fadeIn(),
-                exit = slideOutHorizontally(
-                    targetOffsetX = { it },
+                exit = scaleOut(
+                    targetScale = 0.8f,
                     animationSpec = motionScheme.defaultSpatialSpec()
                 ) + fadeOut(),
             ) {
                 FloatingActionButton(
+
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     modifier = Modifier.size(80.dp),
                     shape = RoundedCornerShape(20.dp),

@@ -35,6 +35,7 @@ import com.pranshulgg.clockmaster.screens.HomeScreen
 import com.pranshulgg.clockmaster.screens.SettingsPage
 import com.pranshulgg.clockmaster.screens.TimezoneSearchPage
 import com.pranshulgg.clockmaster.screens.setting_screens.AppearanceScreen
+import com.pranshulgg.clockmaster.screens.setting_screens.ClockSettings
 import com.pranshulgg.clockmaster.ui.theme.ClockMasterTheme
 import com.pranshulgg.clockmaster.utils.NavTransitions
 
@@ -165,7 +166,27 @@ class MainActivity : ComponentActivity() {
                             },
                         )
                     }
+                    composable(
+                        "OpenClockSettingScreen",
+                        enterTransition = {
+                            NavTransitions.enter(motionScheme)
+                        },
+                        exitTransition = {
+                            NavTransitions.exit(motionScheme)
 
+                        },
+                        popEnterTransition = {
+                            NavTransitions.popEnter(motionScheme)
+
+                        },
+                        popExitTransition = {
+                            NavTransitions.popExit(motionScheme)
+                        }
+                    ) {
+                        ClockSettings(
+                            navController,
+                        )
+                    }
                     composable(
                         "OpenTimezoneSearch",
                     ) {

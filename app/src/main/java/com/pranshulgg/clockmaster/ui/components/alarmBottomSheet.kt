@@ -1,8 +1,12 @@
 package com.pranshulgg.clockmaster.ui.components
 
+import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -94,6 +98,19 @@ fun AlarmBottomSheet(
     val daysOfWeekShort = listOf("S", "M", "T", "W", "T", "F", "S")
 
     val context = LocalContext.current
+
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    if (showPermissionDialog) {
+        ExactAlarmPermissionDialog(
+            onDismiss = { showPermissionDialog = false },
+            onGoToSettings = {
+                openExactAlarmSettings(context)
+                showPermissionDialog = false
+            }
+        )
+    }
+
 
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -319,24 +336,29 @@ fun AlarmBottomSheet(
                 }
                 Button(
                     onClick = {
-                        alarmViewModel.addAlarm(
-                            context,
-                            AlarmEntity(
-                                hour = hour,
-                                minute = minute,
-                                repeatDays = repeatDays,
-                                label = label,
-                                sound = soundUri
+                        if (canScheduleExactAlarms(context)) {
+                            alarmViewModel.addAlarm(
+                                context,
+                                AlarmEntity(
+                                    hour = hour,
+                                    minute = minute,
+                                    repeatDays = repeatDays,
+                                    label = label,
+                                    sound = soundUri
+                                )
                             )
-                        )
-                        scope.launch {
-                            sheetState.hide()
-                        }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                onDismiss()
+                            scope.launch {
+                                sheetState.hide()
+                            }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    onDismiss()
+                                }
                             }
+                        } else {
+                            showPermissionDialog = true
                         }
                     },
+
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.defaultMinSize(minWidth = 90.dp, minHeight = 45.dp),
                 ) {
@@ -346,4 +368,45 @@ fun AlarmBottomSheet(
         }
     }
 
+}
+
+fun canScheduleExactAlarms(context: Context): Boolean {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        alarmManager.canScheduleExactAlarms()
+    } else {
+        true
+    }
+}
+
+fun openExactAlarmSettings(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+            data = Uri.parse("package:${context.packageName}")
+        }
+        context.startActivity(intent)
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ExactAlarmPermissionDialog(
+    onDismiss: () -> Unit,
+    onGoToSettings: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Permission required") },
+        text = { Text("To schedule exact alarms, please grant permission in system settings.") },
+        confirmButton = {
+            TextButton(onClick = onGoToSettings, shapes = ButtonDefaults.shapes()) {
+                Text("Go to settings", fontWeight = FontWeight.W600, fontSize = 16.sp)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
+                Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+            }
+        }
+    )
 }

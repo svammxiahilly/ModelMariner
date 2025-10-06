@@ -9,7 +9,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [Timezone::class, AlarmEntity::class, TimerEntity::class],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(ZoneIdConverter::class, AlarmConverters::class)

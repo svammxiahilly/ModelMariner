@@ -40,13 +40,13 @@ fun EmptyContainerPlaceholder(icon: Int, text: String) {
             shape = MaterialShapes.Cookie6Sided.toShape(),
             modifier = Modifier
                 .height(200.dp)
-                .width(200.dp)
-                .alpha(0.5f),
+                .width(200.dp),
             color = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.alpha(0.5f),
             ) {
                 Symbol(icon, size = 46.dp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))

@@ -16,7 +16,8 @@ fun TimerEntity.toTimerItem(): TimerItem {
         initialMillis = initialMillis,
         remainingMillis = remainingMillis,
         state = state,
-        createdAt = createdAt
+        createdAt = createdAt,
+        originalMillis = originalMillis
     )
 }
 
@@ -27,6 +28,7 @@ fun TimerItem.toEntity(): TimerEntity {
         initialMillis = initialMillis,
         remainingMillis = remainingMillis,
         state = state.name,
-        createdAt = createdAt
+        createdAt = createdAt,
+        originalMillis = originalMillis
     )
 }

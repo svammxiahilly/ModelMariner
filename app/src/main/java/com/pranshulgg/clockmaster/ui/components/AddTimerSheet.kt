@@ -162,7 +162,8 @@ fun AddTimerSheet(
                                 label = label,
                                 initialMillis = millis,
                                 remainingMillis = millis,
-                                state = TimerState.Paused
+                                state = TimerState.Paused,
+                                originalMillis = millis
                             )
                             onAdd(item)
                         }
