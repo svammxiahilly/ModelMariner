@@ -1,0 +1,304 @@
+package com.pranshulgg.clockmaster.screens
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.WavyProgressIndicatorDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.models.TimerState
+import com.pranshulgg.clockmaster.models.TimersViewModel
+import com.pranshulgg.clockmaster.services.TimerForegroundService
+import com.pranshulgg.clockmaster.ui.components.Symbol
+import com.pranshulgg.clockmaster.ui.components.Tooltip
+import com.pranshulgg.clockmaster.utils.bottomPadding
+import java.util.Locale
+import java.util.concurrent.TimeUnit
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun FullscreenTimerScreen(
+    timerId: String,
+    onBack: () -> Unit,
+    viewModel: TimersViewModel = viewModel()
+) {
+    val timer = viewModel.timers.collectAsState().value.find { it.id == timerId }
+        ?: return
+
+    val context = LocalContext.current
+
+    val progress = if (timer.initialMillis > 0) {
+        val raw = 1f - (timer.remainingMillis.toFloat() / timer.initialMillis.toFloat())
+        raw.coerceIn(0f, 1f)
+    } else 0f
+
+
+    val thickStrokeWidth = with(LocalDensity.current) { 14.dp.toPx() }
+    val thickStroke =
+        remember(thickStrokeWidth) { Stroke(width = thickStrokeWidth, cap = StrokeCap.Round) }
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(timer.label) },
+                actions = {
+                    Tooltip(
+                        "Exit fullscreen",
+                        preferredPosition = TooltipAnchorPosition.Below,
+                        spacing = 10.dp
+                    ) {
+
+                        IconButton(
+                            onClick = { onBack() },
+                            shapes = IconButtonDefaults.shapes()
+                        ) {
+                            Symbol(
+                                R.drawable.close_fullscreen,
+                                desc = "close full screen",
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Spacer(Modifier.height(26.dp))
+
+            BoxWithConstraints(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(screenWidth.value.dp / 1.08f)
+            ) {
+                val circleSize = maxWidth
+                val text = formatMillis(timer.remainingMillis)
+
+                val factor = when {
+                    timer.remainingMillis >= 3600_000 -> 0.7f
+                    timer.remainingMillis < 60_000 -> 1.5f
+                    else -> 0.8f
+                }
+
+                val fontSize = circleSize.value / (text.length * factor)
+
+                val animatedProgress by
+                animateFloatAsState(
+                    targetValue = progress.coerceIn(0f, 1f),
+                    animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+
+                    )
+
+                CircularWavyProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.fillMaxSize(),
+                    stroke = thickStroke,
+                    trackStroke = thickStroke,
+                    wavelength = 60.dp,
+                    waveSpeed = 40.dp,
+                    amplitude = { _ -> (progress.coerceIn(0f, 1f) * 1.2f).coerceAtMost(1f) }
+
+                )
+
+                Text(
+                    text = text,
+                    fontSize = fontSize.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(Modifier.weight(1f))
+            Column(
+                Modifier.padding(end = 18.dp, start = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ToggleButton(
+                    modifier = Modifier
+                        .height(ButtonDefaults.LargeContainerHeight - 5.dp)
+                        .fillMaxWidth(),
+                    colors = ToggleButtonDefaults.toggleButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        checkedContainerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shapes = ToggleButtonDefaults.shapes(),
+                    checked = timer.state == TimerState.Running,
+                    onCheckedChange = { checked ->
+                        if (timer.state == TimerState.Running) {
+                            viewModel.pauseTimer(timer.id)
+                        } else {
+                            viewModel.resumeTimer(timer.id)
+                        }
+                        TimerForegroundService.startServiceIfTimersExist(context)
+
+                    }
+
+                ) {
+
+                    Text(
+                        text = if (timer.state == TimerState.Paused) "Start" else "Pause",
+                        fontSize = 26.sp,
+                        color = if (timer.state == TimerState.Paused) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onErrorContainer
+                    )
+
+                }
+
+                val interactionSources = remember { List(2) { MutableInteractionSource() } }
+
+
+                ButtonGroup(
+
+                    overflowIndicator = { menuState ->
+                        FilledIconButton(
+                            onClick = {
+                                if (menuState.isExpanded) {
+                                    menuState.dismiss()
+                                } else {
+                                    menuState.show()
+                                }
+                            }
+                        ) {
+
+                        }
+                    }
+                ) {
+                    customItem(
+                        {
+                            Button(
+                                interactionSource = interactionSources[0],
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(ButtonDefaults.LargeContainerHeight - 5.dp)
+                                    .animateWidth(interactionSources[0]),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                ),
+
+                                shapes = ButtonDefaults.shapes(),
+                                onClick = {
+                                    viewModel.resetTimer(timer.id)
+                                }
+                            ) {
+
+                                Text(
+                                    text = "Reset",
+                                    fontSize = 26.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+
+                            }
+                        },
+                        { state ->
+
+                        }
+                    )
+
+                    customItem(
+                        {
+                            Button(
+                                interactionSource = interactionSources[1],
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(ButtonDefaults.LargeContainerHeight - 5.dp)
+                                    .animateWidth(interactionSources[1]),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                ),
+                                shapes = ButtonDefaults.shapes(),
+                                onClick = {
+                                    val newRemaining = timer.remainingMillis + 60_000L
+                                    viewModel.updateRemaining(timer.id, newRemaining)
+                                }
+
+                            ) {
+
+                                Text(
+                                    text = "+1:00",
+                                    fontSize = 26.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+
+                            }
+                        },
+                        { state ->
+
+                        }
+                    )
+
+                }
+
+                Spacer(Modifier.height(bottomPadding() + 12.dp))
+            }
+        }
+    }
+
+}
+
+private fun formatMillis(ms: Long): String {
+    val s = TimeUnit.MILLISECONDS.toSeconds(ms) % 60
+    val m = TimeUnit.MILLISECONDS.toMinutes(ms) % 60
+    val h = TimeUnit.MILLISECONDS.toHours(ms)
+
+    return when {
+        h > 0 -> String.format(Locale.US, "%d:%02d:%02d", h, m, s)
+        m > 0 -> String.format(Locale.US, "%d:%02d", m, s)
+        else -> String.format(Locale.US, "%02d", s)
+    }
+}
