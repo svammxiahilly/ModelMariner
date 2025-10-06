@@ -16,6 +16,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.receiver.NotificationActionReceiver
@@ -89,6 +90,7 @@ class StopwatchForegroundService : Service() {
                 StopwatchRepository.pause()
                 StopwatchRepository.reset()
                 stopForeground(STOP_FOREGROUND_REMOVE)
+                scope.cancel()
                 isForegroundStarted = false
                 stopSelf()
             }
@@ -129,6 +131,7 @@ class StopwatchForegroundService : Service() {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun updateNotification(elapsedMs: Long, isRunning: Boolean) {
+        if (!isForegroundStarted) return
         val notif = buildNotification(elapsedMs, isRunning)
 
         if (isForegroundStarted) {
@@ -162,14 +165,16 @@ class StopwatchForegroundService : Service() {
         val lapAction =
             NotificationCompat.Action.Builder(0, "Lap", actionPendingIntent(ACTION_LAP)).build()
         val stopAction =
-            NotificationCompat.Action.Builder(0, "Stop", actionPendingIntent(ACTION_STOP)).build()
+            NotificationCompat.Action.Builder(0, "Reset", actionPendingIntent(ACTION_RESET)).build()
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Stopwatch")
-            .setContentText(format)
+            .setContentTitle(format)
+            .setContentText("Stopwatch")
             .setSmallIcon(R.drawable.timer_outlined)
             .setOnlyAlertOnce(true)
             .setOngoing(isRunning)
+            .setColor(ContextCompat.getColor(this, R.color.notification_primary))
+
             .addAction(pauseResumeAction)
             .addAction(lapAction)
             .addAction(stopAction)
