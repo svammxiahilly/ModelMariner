@@ -39,12 +39,15 @@ android {
         compose = true
     }
 
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+    
     configurations.all {
         resolutionStrategy {
-            // Force Gradle to always use the latest org.jetbrains annotations
             force("org.jetbrains:annotations:23.0.0")
 
-            // Replace any com.intellij:annotations with org.jetbrains:annotations
             eachDependency {
                 if (requested.group == "com.intellij" && requested.name == "annotations") {
                     useTarget("org.jetbrains:annotations:23.0.0")
