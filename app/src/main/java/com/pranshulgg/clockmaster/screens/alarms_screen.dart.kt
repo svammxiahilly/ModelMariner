@@ -22,8 +22,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pranshulgg.clockmaster.helpers.AlarmScheduler
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.models.AlarmViewModel
+import com.pranshulgg.clockmaster.ui.components.EmptyContainerPlaceholder
 import com.pranshulgg.clockmaster.ui.components.Symbol
+import com.pranshulgg.clockmaster.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -43,6 +46,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     var repeatDays by remember { mutableStateOf(listOf<Int>()) }
     var showTimePicker by remember { mutableStateOf(false) }
     var useInputMode by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     var useExpressiveColor by remember {
         mutableStateOf(
             PreferencesHelper.getBool("useExpressiveColor") ?: true
@@ -71,6 +75,13 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     ) {
 
         val alarms by alarmViewModel.alarms.collectAsState(initial = emptyList())
+
+        if (alarms.isEmpty()) {
+            EmptyContainerPlaceholder(
+                icon = R.drawable.alarm_filled,
+                text = "No alarms"
+            )
+        }
 
         alarms.forEach { alarm ->
             val hourMinute: String
@@ -117,6 +128,15 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
                     enableDismissFromEndToStart = true,
+                    onDismiss = { direction ->
+                        if (direction == SwipeToDismissBoxValue.EndToStart) {
+                            visible = false
+                            scope.launch {
+                                delay(300)
+                                alarmViewModel.removeAlarm(context, alarm)
+                            }
+                        }
+                    },
                     backgroundContent = {
                         val color = when (dismissState.dismissDirection) {
                             SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
@@ -244,13 +264,6 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                         }
                     }
                 )
-                LaunchedEffect(dismissState.currentValue) {
-                    if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-                        visible = false
-                        delay(300)
-                        alarmViewModel.removeAlarm(context, alarm)
-                    }
-                }
             }
         }
     }
