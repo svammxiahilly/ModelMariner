@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -50,6 +51,7 @@ import com.pranshulgg.clockmaster.roomDB.Timezone
 import com.pranshulgg.clockmaster.ui.components.ClockDisplayText
 import com.pranshulgg.clockmaster.ui.components.Symbol
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -150,6 +152,7 @@ fun DismissibleTimezoneRow(
         initialValue = SwipeToDismissBoxValue.Settled,
         positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
     )
+    val scope = rememberCoroutineScope()
 
     AnimatedVisibility(
         visible = visible,
@@ -159,6 +162,15 @@ fun DismissibleTimezoneRow(
             state = dismissState,
             enableDismissFromStartToEnd = false,
             enableDismissFromEndToStart = true,
+            onDismiss = { direction ->
+                if (direction == SwipeToDismissBoxValue.EndToStart) {
+                    visible = false
+                    scope.launch {
+                        delay(300)
+                        onDelete(timezone)
+                    }
+                }
+            },
             backgroundContent = {
                 val color = when (dismissState.dismissDirection) {
                     SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
@@ -189,13 +201,7 @@ fun DismissibleTimezoneRow(
             }
 
         )
-        LaunchedEffect(dismissState.currentValue) {
-            if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-                visible = false
-                delay(300)
-                onDelete(timezone)
-            }
-        }
+
     }
 
 }
