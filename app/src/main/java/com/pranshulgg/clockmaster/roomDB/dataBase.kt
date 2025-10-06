@@ -7,11 +7,16 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 
-@Database(entities = [Timezone::class, AlarmEntity::class], version = 5, exportSchema = false)
+@Database(
+    entities = [Timezone::class, AlarmEntity::class, TimerEntity::class],
+    version = 7,
+    exportSchema = false
+)
 @TypeConverters(ZoneIdConverter::class, AlarmConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun timezoneDao(): TimezoneDAO
     abstract fun alarmDao(): AlarmDAO
+    abstract fun timerDao(): TimerDao
 
     companion object {
         @Volatile
