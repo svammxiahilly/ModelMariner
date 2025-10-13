@@ -28,7 +28,7 @@ import com.pranshulgg.clockmaster.R
 fun DropdownMenu(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
 
-    Tooltip("More options", preferredPosition = TooltipAnchorPosition.Left, spacing = 20.dp) {
+    Tooltip("More options", preferredPosition = TooltipAnchorPosition.Below, spacing = 10.dp) {
         IconButton(
             onClick = { expanded = !expanded }, shapes = IconButtonDefaults.shapes()
         ) {
@@ -62,7 +62,10 @@ fun DropdownMenu(navController: NavController) {
         )
         DropdownMenuItem(
             text = { DropDownMenuText("About") },
-            onClick = {},
+            onClick = {
+                expanded = false
+                navController.navigate("OpenAboutScreen")
+            },
             leadingIcon = { DropDownMenuIcon(R.drawable.info_filled) }
         )
         DropdownMenuItem(

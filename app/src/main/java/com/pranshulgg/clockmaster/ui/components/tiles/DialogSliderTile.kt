@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,12 +15,15 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.motionScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -29,6 +33,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import com.pranshulgg.clockmaster.ui.components.Symbol
 import java.time.temporal.TemporalQueries.offset
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -43,7 +48,8 @@ fun DialogSliderTile(
     leading: @Composable (() -> Unit)? = null,
     shapes: RoundedCornerShape,
     labelFormatter: (Float) -> String = { it.toString() },
-    dialogTitle: String
+    dialogTitle: String,
+    isDescriptionAsValue: Boolean = false
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var sliderValue by remember { mutableStateOf(initialValue) }
@@ -61,7 +67,10 @@ fun DialogSliderTile(
             headlineContent = { Text(headline) },
             supportingContent = {
                 if (description != null) {
-                    Text(description)
+                    Text(
+                        description,
+                        color = if (isDescriptionAsValue) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 } else {
                     Text(
                         text = labelFormatter(sliderValue),
@@ -90,6 +99,7 @@ fun DialogSliderTile(
                 }
             },
             confirmButton = {
+
                 TextButton(
                     onClick = {
                         onValueSubmitted(sliderValue)
@@ -107,6 +117,7 @@ fun DialogSliderTile(
                 ) {
                     Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
                 }
+
             }
         )
     }
@@ -127,37 +138,39 @@ fun LabeledSlider(
         contentAlignment = Alignment.Center
     ) {
         var sliderWidth by remember { mutableIntStateOf(0) }
-        val interactionSource = remember { MutableInteractionSource() }
-        val isDragged by interactionSource.collectIsDraggedAsState()
+        var showLabel by remember { mutableStateOf(false) }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .onSizeChanged { sliderWidth = it.width }
-               
         ) {
+            val interactionSource = remember { MutableInteractionSource() }
 
             Slider(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = {
+                    onValueChange(it)
+                    showLabel = true
+                },
                 valueRange = valueRange,
                 steps = steps,
                 interactionSource = interactionSource,
                 modifier = Modifier.fillMaxWidth()
             )
+
             val fraction =
                 (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
             val thumbOffsetPx = (fraction * sliderWidth).coerceIn(0f, sliderWidth.toFloat())
 
-            val scale by animateFloatAsState(
-                targetValue = if (isDragged) 1f else 0.8f,
-                animationSpec = motionScheme.defaultSpatialSpec()
-            )
+            val scale by animateFloatAsState(targetValue = if (showLabel) 1f else 0.8f)
+            val alpha by animateFloatAsState(targetValue = if (showLabel) 1f else 0f)
 
-            val alpha by animateFloatAsState(
-                targetValue = if (isDragged) 1f else 0f,
-                animationSpec = motionScheme.defaultEffectsSpec()
-            )
+            LaunchedEffect(value) {
+                showLabel = true
+                kotlinx.coroutines.delay(1000)
+                showLabel = false
+            }
 
             Popup(
                 offset = IntOffset((thumbOffsetPx - 48).toInt(), -90)
@@ -181,6 +194,5 @@ fun LabeledSlider(
                 }
             }
         }
-
     }
 }

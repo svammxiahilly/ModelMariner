@@ -17,8 +17,9 @@ data class AlarmEntity(
     val enabled: Boolean = true,
     val sound: String? = null,
     val vibrate: Boolean = false,
+    val snoozeTime: Int? = null
 
-    )
+)
 
 
 class AlarmConverters {

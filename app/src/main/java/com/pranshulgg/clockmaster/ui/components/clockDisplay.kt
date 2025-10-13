@@ -47,7 +47,7 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
         }
 
         val pattern =
-            if (use24hr) "HH:mm${if (showSeconds) "ss" else ""}" else "hh:mm${if (showSeconds) "ss" else ""}"
+            if (use24hr) "HH:mm${if (showSeconds) ":ss" else ""}" else "hh:mm${if (showSeconds) ":ss" else ""}"
 
         val currentLocalTime = remember {
             SimpleDateFormat(pattern, Locale.getDefault())

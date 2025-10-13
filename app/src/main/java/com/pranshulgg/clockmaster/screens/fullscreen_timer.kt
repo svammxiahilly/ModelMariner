@@ -67,7 +67,7 @@ import java.util.concurrent.TimeUnit
 fun FullscreenTimerScreen(
     timerId: String,
     onBack: () -> Unit,
-    viewModel: TimersViewModel = viewModel()
+    viewModel: TimersViewModel
 ) {
     val timer = viewModel.timers.collectAsState().value.find { it.id == timerId }
         ?: return

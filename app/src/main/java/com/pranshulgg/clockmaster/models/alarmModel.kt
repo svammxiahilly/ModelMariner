@@ -9,4 +9,5 @@ data class Alarm(
     val label: String = "",
     val enabled: Boolean = true,
     val vibrate: Boolean = false,
+    val snoozeTime: Int? = null
 )

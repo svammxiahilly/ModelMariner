@@ -40,7 +40,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 minute = alarm.minute,
                 label = alarm.label,
                 soundUri = alarm.sound,
-                vibrate = alarm.vibrate
+                vibrate = alarm.vibrate,
+                snoozeTime = alarm.snoozeTime
             )
 
         } catch (e: SecurityException) {

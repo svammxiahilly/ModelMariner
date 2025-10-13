@@ -22,9 +22,12 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.motionScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +40,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.helpers.PreferencesHelper
+import com.pranshulgg.clockmaster.helpers.SnackbarManager
 import com.pranshulgg.clockmaster.models.HomeViewModel
 import com.pranshulgg.clockmaster.models.TimersViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
@@ -56,6 +61,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     viewModelTimezone: TimezoneViewModel,
 ) {
+
     val selectedItem = viewModel.selectedItem
     val appBarTitles = listOf("Alarm", "World clock", "Stopwatch", "Timer")
     var showSheetAlarm by remember { mutableStateOf(false) }
@@ -63,6 +69,8 @@ fun HomeScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val viewModelTimers: TimersViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -130,7 +138,8 @@ fun HomeScreen(
             }
             if (showSheetAlarm) {
                 AlarmBottomSheet(
-                    onDismiss = { showSheetAlarm = false }
+                    onDismiss = { showSheetAlarm = false },
+                    use24hr = PreferencesHelper.getBool("is24hr") ?: false
                 )
             }
 

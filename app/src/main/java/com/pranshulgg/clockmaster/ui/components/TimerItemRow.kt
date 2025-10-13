@@ -22,6 +22,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -32,6 +33,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -58,7 +60,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TimerItemRow(
     timer: TimerItem,
@@ -115,7 +117,8 @@ fun TimerItemRow(
                         progress = { animatedProgress },
                         modifier = Modifier.size(80.dp),
                         stroke = thickStroke,
-                        amplitude = { 2.0f },
+                        amplitude = { _ -> (progress.coerceIn(0f, 1f) * 1.2f).coerceAtMost(1f) },
+
                         trackStroke = thickStroke,
                     )
                     IconButton(
@@ -166,32 +169,46 @@ fun TimerItemRow(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    IconButton(
-                        modifier = Modifier.size(42.dp, 35.dp),
-                        onClick = { showEdit = true },
-                        shapes = IconButtonDefaults.shapes(),
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+                    Tooltip(
+                        "Edit label",
+                        preferredPosition = TooltipAnchorPosition.Below,
+                        spacing = 10.dp
                     ) {
-                        Symbol(
-                            R.drawable.edit, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 18.dp
+                        IconButton(
+                            modifier = Modifier.size(42.dp, 35.dp),
+                            onClick = { showEdit = true },
+                            shapes = IconButtonDefaults.shapes(),
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+                        ) {
+                            Symbol(
+                                R.drawable.edit, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 18.dp
 
-                        )
+                            )
+                        }
                     }
-                    IconButton(
-                        modifier = Modifier.size(42.dp, 35.dp),
-                        onClick = {
-                            onReset(timer.id)
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+
+                    Tooltip(
+                        "Reset",
+                        preferredPosition = TooltipAnchorPosition.Below,
+                        spacing = 10.dp
                     ) {
-                        Symbol(
-                            R.drawable.refresh,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 18.dp
-                        )
+                        IconButton(
+                            modifier = Modifier.size(42.dp, 35.dp),
+                            onClick = {
+                                onReset(timer.id)
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+                        ) {
+                            Symbol(
+                                R.drawable.refresh,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 18.dp
+                            )
+                        }
                     }
+
                 }
             }
 

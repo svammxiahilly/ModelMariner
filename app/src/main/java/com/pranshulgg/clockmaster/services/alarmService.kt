@@ -22,6 +22,7 @@ import com.pranshulgg.clockmaster.R
 import android.os.Vibrator
 import android.provider.Settings
 import android.text.format.DateFormat
+import android.widget.Toast
 import androidx.compose.ui.graphics.Color
 import com.pranshulgg.clockmaster.MainActivity
 import java.util.Date
@@ -48,7 +49,7 @@ class AlarmServiceForeground : Service() {
         vibrator = getSystemService(Vibrator::class.java)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         createNotificationChannel()
 
         val label = intent?.getStringExtra("label") ?: "Alarm"
@@ -57,6 +58,7 @@ class AlarmServiceForeground : Service() {
         val soundUriString = intent?.getStringExtra("sound")
         val soundUri =
             soundUriString?.let { Uri.parse(it) } ?: Settings.System.DEFAULT_ALARM_ALERT_URI
+        val snoozeTime = intent.getIntExtra("snoozeTime", 10)
 
         if (intent?.action == ACTION_STOP) {
             stopSelf()
@@ -71,8 +73,9 @@ class AlarmServiceForeground : Service() {
 
             ACTION_SNOOZE -> {
                 stopSelf()
-//                val snoozeTime = System.currentTimeMillis() + 10 * 60 * 1000
-                val snoozeTime = System.currentTimeMillis() + 10_000
+                val snoozeTime = System.currentTimeMillis() + snoozeTime * 60 * 1000 // 10 mins
+//                val snoozeTime = System.currentTimeMillis() + 10_000 // 10 sec
+
                 val alarmManager =
                     getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
 
@@ -90,13 +93,16 @@ class AlarmServiceForeground : Service() {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
-                alarmManager.setExactAndAllowWhileIdle(
-                    android.app.AlarmManager.RTC_WAKEUP,
-                    snoozeTime,
-                    snoozePendingIntent
-                )
+                try {
 
+                    alarmManager.setExactAndAllowWhileIdle(
+                        android.app.AlarmManager.RTC_WAKEUP,
+                        snoozeTime,
+                        snoozePendingIntent
+                    )
 
+                } catch (e: SecurityException) {
+                }
                 return START_NOT_STICKY
             }
         }

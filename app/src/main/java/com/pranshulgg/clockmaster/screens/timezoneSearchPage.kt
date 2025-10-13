@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
 import com.pranshulgg.clockmaster.roomDB.Timezone
 import com.pranshulgg.clockmaster.ui.components.SettingSection
@@ -173,6 +174,8 @@ fun FullScreenSearchPage(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimezoneList(query: String, viewModel: TimezoneViewModel, navController: NavController) {
+    var use24HourFormat by remember { mutableStateOf(PreferencesHelper.getBool("is24hr") ?: false) }
+
     val zones = remember {
         ZoneId.getAvailableZoneIds()
             .map { ZoneId.of(it) }
@@ -184,9 +187,11 @@ fun TimezoneList(query: String, viewModel: TimezoneViewModel, navController: Nav
         it.id.contains(query, ignoreCase = true)
     }
 
-    val formatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
+    val formatter =
+        remember { DateTimeFormatter.ofPattern(if (use24HourFormat) "HH:mm" else "hh:mm a") }
     var currentTime by remember { mutableStateOf(ZonedDateTime.now(ZoneId.systemDefault())) }
 
+    val clickGuard = remember { mutableStateOf(false) }
 
     LazyColumn(
     ) {
@@ -208,24 +213,20 @@ fun TimezoneList(query: String, viewModel: TimezoneViewModel, navController: Nav
 
             val city = zone.id.split("/").last().replace("_", " ")
 
-
-
             ListItem(
-                modifier = Modifier.clickable(
-                    onClick = {
-
-                        viewModel.addTimezone(
-                            Timezone(
-                                zoneId = city,
-                                displayName = displayName,
-                                offset = offsetText,
-                                zone = zone
-                            )
+                modifier = Modifier.clickable {
+                    if (clickGuard.value) return@clickable
+                    clickGuard.value = true
+                    viewModel.addTimezone(
+                        Timezone(
+                            zoneId = city,
+                            displayName = displayName,
+                            offset = offsetText,
+                            zone = zone
                         )
-
-                        navController.popBackStack()
-                    }
-                ),
+                    )
+                    navController.popBackStack()
+                },
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                 headlineContent = { Text(displayName) },
                 supportingContent = { Text("$city, $offset") },

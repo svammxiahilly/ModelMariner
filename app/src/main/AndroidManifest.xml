@@ -36,6 +36,16 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".AlarmActivity"
+            android:excludeFromRecents="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:showWhenLocked="true"
+            android:theme="@style/alarmActivityTheme"
+            android:turnScreenOn="true" />
+
+
         <receiver
             android:name=".receiver.AlarmReceiver"
             android:exported="true" />
@@ -60,5 +70,6 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback|dataSync" />
     </application>
+
 
 </manifest>

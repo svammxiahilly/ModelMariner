@@ -18,7 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
@@ -28,6 +31,7 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +50,7 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
 import com.pranshulgg.clockmaster.roomDB.Timezone
 import com.pranshulgg.clockmaster.ui.components.ClockDisplayText
@@ -61,6 +66,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun WorldClockScreen(viewModel: TimezoneViewModel) {
     val timezoneList by viewModel.timezones.collectAsState()
+    var use24HourFormat by remember { mutableStateOf(PreferencesHelper.getBool("is24hr") ?: false) }
 
 
     val currentTime by produceState(initialValue = System.currentTimeMillis()) {
@@ -71,11 +77,14 @@ fun WorldClockScreen(viewModel: TimezoneViewModel) {
         }
     }
 
-    val formatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
-
+    val formatter =
+        remember { DateTimeFormatter.ofPattern(if (use24HourFormat) "HH:mm" else "hh:mm a") }
     Column {
 
-        ClockDisplayText()
+        ClockDisplayText(
+            use24hr = PreferencesHelper.getBool("is24hr") ?: false,
+            showSeconds = PreferencesHelper.getBool("showClockSeconds") ?: false
+        )
 
         if (timezoneList.isNotEmpty()) {
             Text(
@@ -105,6 +114,9 @@ fun WorldClockScreen(viewModel: TimezoneViewModel) {
                     )
                     Spacer(Modifier.height(4.dp))
                 }
+                item {
+                    Spacer(Modifier.height(130.dp))
+                }
             }
         }
 
@@ -130,7 +142,7 @@ fun TimezoneRow(timezone: Timezone, time: String) {
             trailingContent = {
                 Text(
                     time,
-                    fontSize = 38.sp,
+                    fontSize = 34.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -139,7 +151,7 @@ fun TimezoneRow(timezone: Timezone, time: String) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DismissibleTimezoneRow(
     timezone: Timezone,
@@ -148,11 +160,48 @@ fun DismissibleTimezoneRow(
 ) {
     var visible by remember { mutableStateOf(true) }
 
+    val confirm = PreferencesHelper.getBool("confirmDeletingClockItem") ?: false
+
     val dismissState = rememberSwipeToDismissBoxState(
         initialValue = SwipeToDismissBoxValue.Settled,
         positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
     )
     val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+                scope.launch { dismissState.reset() }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        visible = false
+                        scope.launch {
+                            delay(300)
+                            onDelete(timezone)
+                        }
+                    }, shapes = ButtonDefaults.shapes()
+                ) {
+                    Text("Delete", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    scope.launch { dismissState.reset() }
+                }, shapes = ButtonDefaults.shapes()) {
+                    Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                }
+            },
+            title = { Text("Delete Timezone") },
+            text = { Text("Are you sure you want to delete this timezone?") }
+        )
+    }
+
 
     AnimatedVisibility(
         visible = visible,
@@ -164,11 +213,16 @@ fun DismissibleTimezoneRow(
             enableDismissFromEndToStart = true,
             onDismiss = { direction ->
                 if (direction == SwipeToDismissBoxValue.EndToStart) {
-                    visible = false
-                    scope.launch {
-                        delay(300)
-                        onDelete(timezone)
+                    if (confirm) {
+                        showDialog = true
+                    } else {
+                        visible = false
+                        scope.launch {
+                            delay(300)
+                            onDelete(timezone)
+                        }
                     }
+
                 }
             },
             backgroundContent = {

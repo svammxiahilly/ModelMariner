@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
@@ -85,6 +86,9 @@ fun SettingsPage(navController: NavController) {
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
             item {
+                Text("CLEAN UP COMMENTS", fontSize = 24.sp)
+            }
+            item {
                 SettingSection(
                     tiles = listOf(
                         SettingTile.CategoryTile(
@@ -120,7 +124,9 @@ fun SettingsPage(navController: NavController) {
                             color = colors.alarmTile,
                             leading = R.drawable.alarm_filled,
                             onColor = colors.OnAlarmTile,
-                            onClick = {}
+                            onClick = {
+                                navController.navigate("OpenAlarmSettingScreen")
+                            }
                         ),
                         SettingTile.CategoryTile(
                             title = "Screen saver",

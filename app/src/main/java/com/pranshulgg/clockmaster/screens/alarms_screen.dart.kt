@@ -14,6 +14,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,7 +44,7 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
-    var use24HourFormat by remember { mutableStateOf(false) }
+    var use24HourFormat by remember { mutableStateOf(PreferencesHelper.getBool("is24hr") ?: false) }
     var hour by remember { mutableIntStateOf(7) }
     var minute by remember { mutableIntStateOf(0) }
     var label by remember { mutableStateOf("") }
@@ -74,21 +76,23 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
         return days.sorted().joinToString(", ") { daysOfWeek[it] }
     }
 
-    Column(
+    val alarms by alarmViewModel.alarms.collectAsState(initial = emptyList())
+
+    if (alarms.isEmpty()) {
+        EmptyContainerPlaceholder(
+            icon = R.drawable.alarm_filled,
+            text = "No alarms"
+        )
+    }
+
+    LazyColumn(
         modifier = Modifier.padding(end = 12.dp, start = 12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
-        val alarms by alarmViewModel.alarms.collectAsState(initial = emptyList())
+        items(alarms, key = { it.id }) { alarm ->
 
-        if (alarms.isEmpty()) {
-            EmptyContainerPlaceholder(
-                icon = R.drawable.alarm_filled,
-                text = "No alarms"
-            )
-        }
-
-        alarms.forEach { alarm ->
+//        alarms.forEach { alarm ->
             val hourMinute: String
             var amPm: String? = null
             var isEnabled by remember { mutableStateOf(alarm.enabled) }
@@ -266,10 +270,22 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                     )
 
                             }
+
+
                         }
+
+
                     }
+
+
                 )
+
+
             }
+
+        }
+        item {
+            Spacer(Modifier.height(130.dp))
         }
     }
 

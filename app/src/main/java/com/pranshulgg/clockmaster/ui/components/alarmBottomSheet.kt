@@ -7,6 +7,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -85,7 +86,7 @@ fun AlarmBottomSheet(
     var repeatDays by remember { mutableStateOf(listOf<Int>()) }
     var showTimePicker by remember { mutableStateOf(false) }
     var useInputMode by remember { mutableStateOf(false) }
-    var selectedValue by remember { mutableStateOf(10f) }
+    var selectedValueSnooze by remember { mutableStateOf(10f) }
     var vibrate by remember { mutableStateOf(false) }
 
     val launchSoundPicker = rememberAlarmSoundPickerLauncher { uri, title ->
@@ -131,7 +132,7 @@ fun AlarmBottomSheet(
         val timeFormatter24 = DateTimeFormatter.ofPattern("HH:mm")
         val timeFormatter12 = DateTimeFormatter.ofPattern("hh:mm")
         val timeFormatter12AmPm = DateTimeFormatter.ofPattern("a")
-        val currentTime = LocalTime.now()
+        val currentTime = LocalTime.of(hour, minute)
         Column(
             modifier = Modifier.padding(
                 end = 16.dp,
@@ -285,13 +286,14 @@ fun AlarmBottomSheet(
 
                     SettingTile.DialogSliderTile(
                         title = "Snooze time",
-                        initialValue = selectedValue,
-                        description = "${selectedValue.roundToInt()} ${if (selectedValue.roundToInt() < 2) "minute" else "minutes"}",
+                        initialValue = selectedValueSnooze,
+                        description = "${selectedValueSnooze.roundToInt()} ${if (selectedValueSnooze.roundToInt() < 2) "minute" else "minutes"}",
+                        isDescriptionAsValue = true,
                         valueRange = 1f..30f,
                         steps = 15,
                         labelFormatter = { "${it.roundToInt()}m" },
                         onValueSubmitted = { newValue ->
-                            selectedValue = newValue
+                            selectedValueSnooze = newValue
                         },
                         dialogTitle = "Snooze"
                     ),
@@ -319,6 +321,7 @@ fun AlarmBottomSheet(
                     modifier = Modifier.defaultMinSize(minWidth = 90.dp, minHeight = 45.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     onClick = {
+
                         scope.launch {
                             sheetState.hide()
                         }.invokeOnCompletion {
@@ -344,7 +347,8 @@ fun AlarmBottomSheet(
                                     minute = minute,
                                     repeatDays = repeatDays,
                                     label = label,
-                                    sound = soundUri
+                                    sound = soundUri,
+                                    snoozeTime = selectedValueSnooze.toInt()
                                 )
                             )
                             scope.launch {

@@ -130,10 +130,11 @@ fun TimersScreen(
                                 TimerForegroundService.startServiceIfTimersExist(context)
                             },
                             onReset = { id ->
-                                viewModel.updateInitial(
-                                    timer.id,
-                                    timer.originalMillis
-                                ); viewModel.resetTimer(id)
+                                val t = timers.firstOrNull { it.id == id }
+                                if (t != null) {
+                                    viewModel.updateInitial(id, t.originalMillis)
+                                    viewModel.resetTimer(id)
+                                }
                             },
                             onDelete = { id -> viewModel.removeTimer(id) },
                             onEditLabel = { id, newLabel ->

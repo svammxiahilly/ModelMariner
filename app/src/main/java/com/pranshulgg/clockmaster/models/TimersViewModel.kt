@@ -9,6 +9,7 @@ import com.pranshulgg.clockmaster.helpers.toEntity
 import com.pranshulgg.clockmaster.helpers.toTimerItem
 import com.pranshulgg.clockmaster.repository.TimersRepository
 import com.pranshulgg.clockmaster.roomDB.AppDatabase
+import kotlinx.coroutines.flow.first
 
 class TimersViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -17,14 +18,15 @@ class TimersViewModel(application: Application) : AndroidViewModel(application) 
 
     val timers = TimerRepository.timers
 
+
     init {
         viewModelScope.launch {
-            timersRepo.getAllTimers().collect { entities ->
-                val items = entities.map { it.toTimerItem() }
-                TimerRepository.setAll(items)
-            }
+            val entities = timersRepo.getAllTimers().first()
+            val items = entities.map { it.toTimerItem() }
+            TimerRepository.setAll(items)
         }
     }
+
 
     fun addTimer(timer: TimerItem) = viewModelScope.launch {
         TimerRepository.addTimer(timer)
@@ -46,6 +48,7 @@ class TimersViewModel(application: Application) : AndroidViewModel(application) 
         TimerRepository.resumeTimer(id)
         persistTimerById(id)
     }
+
 
     fun resetTimer(id: String) = viewModelScope.launch {
         TimerRepository.resetTimer(id)

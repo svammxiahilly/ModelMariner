@@ -11,9 +11,12 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme.motionScheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +25,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
+import com.pranshulgg.clockmaster.helpers.SnackbarManager
 import com.pranshulgg.clockmaster.models.AlarmViewModel
+import com.pranshulgg.clockmaster.models.TimersViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModelFactory
 import com.pranshulgg.clockmaster.repository.AlarmRepository
@@ -30,10 +35,15 @@ import com.pranshulgg.clockmaster.repository.TimerRepository
 import com.pranshulgg.clockmaster.repository.TimersRepository
 import com.pranshulgg.clockmaster.repository.TimezoneRepository
 import com.pranshulgg.clockmaster.roomDB.AppDatabase
+import com.pranshulgg.clockmaster.screens.AboutLibrariesScreen
+import com.pranshulgg.clockmaster.screens.AboutScreen
 import com.pranshulgg.clockmaster.screens.FullscreenTimerScreen
 import com.pranshulgg.clockmaster.screens.HomeScreen
+import com.pranshulgg.clockmaster.screens.PolicyPage
 import com.pranshulgg.clockmaster.screens.SettingsPage
+import com.pranshulgg.clockmaster.screens.TermsPage
 import com.pranshulgg.clockmaster.screens.TimezoneSearchPage
+import com.pranshulgg.clockmaster.screens.setting_screens.AlarmSettings
 import com.pranshulgg.clockmaster.screens.setting_screens.AppearanceScreen
 import com.pranshulgg.clockmaster.screens.setting_screens.ClockSettings
 import com.pranshulgg.clockmaster.ui.theme.ClockMasterTheme
@@ -60,19 +70,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
-
+            val snackbarHostState = remember { SnackbarHostState() }
             val database = AppDatabase.getDatabase(applicationContext)
             val repository = TimezoneRepository(database.timezoneDao())
             val repositoryAlarm = AlarmRepository(database.alarmDao())
             val repositoryTimers = TimersRepository(database.timerDao())
-
+            val scope = rememberCoroutineScope()
             val timezoneviewModel: TimezoneViewModel = viewModel(
                 factory = TimezoneViewModelFactory(repository)
             )
 
-
+            LaunchedEffect(Unit) {
+                SnackbarManager.init(snackbarHostState, scope)
+            }
             val navController = rememberNavController()
-            val motionScheme = motionScheme
+            val currentMotionScheme = motionScheme
+            val motionScheme = remember(currentMotionScheme) { currentMotionScheme }
+
             var darkTheme by remember {
                 mutableStateOf(
                     PreferencesHelper.getBool("dark_theme") ?: false
@@ -83,13 +97,11 @@ class MainActivity : ComponentActivity() {
                     PreferencesHelper.getString("seedColor") ?: "0xff0000FF"
                 )
             }
-
             var useDynamicColor by remember {
                 mutableStateOf(
                     PreferencesHelper.getBool("useDynamicColors") ?: false
                 )
             }
-
             var useExpressiveColor by remember {
                 mutableStateOf(
                     PreferencesHelper.getBool("useExpressiveColor") ?: true
@@ -106,7 +118,23 @@ class MainActivity : ComponentActivity() {
                 window.setBackgroundDrawableResource(
                     if (darkTheme) R.color.black else R.color.white
                 )
-                NavHost(navController = navController, startDestination = "main") {
+                NavHost(
+                    navController = navController, startDestination = "main",
+                    enterTransition = {
+                        NavTransitions.enter(motionScheme)
+                    },
+                    exitTransition = {
+                        NavTransitions.exit(motionScheme)
+
+                    },
+                    popEnterTransition = {
+                        NavTransitions.popEnter(motionScheme)
+
+                    },
+                    popExitTransition = {
+                        NavTransitions.popExit(motionScheme)
+                    }
+                ) {
                     composable(
                         "main",
 
@@ -115,40 +143,14 @@ class MainActivity : ComponentActivity() {
                     }
                     composable(
                         "OpenSettings",
-                        enterTransition = {
-                            NavTransitions.enter(motionScheme)
-                        },
-                        exitTransition = {
-                            NavTransitions.exit(motionScheme)
 
-                        },
-                        popEnterTransition = {
-                            NavTransitions.popEnter(motionScheme)
-
-                        },
-                        popExitTransition = {
-                            NavTransitions.popExit(motionScheme)
-                        }
-                    ) {
+                        ) {
                         SettingsPage(navController)
                     }
                     composable(
                         "OpenAppearanceSettingsScreen",
-                        enterTransition = {
-                            NavTransitions.enter(motionScheme)
-                        },
-                        exitTransition = {
-                            NavTransitions.exit(motionScheme)
 
-                        },
-                        popEnterTransition = {
-                            NavTransitions.popEnter(motionScheme)
-
-                        },
-                        popExitTransition = {
-                            NavTransitions.popExit(motionScheme)
-                        }
-                    ) {
+                        ) {
                         AppearanceScreen(
                             navController,
                             context,
@@ -168,22 +170,17 @@ class MainActivity : ComponentActivity() {
                     }
                     composable(
                         "OpenClockSettingScreen",
-                        enterTransition = {
-                            NavTransitions.enter(motionScheme)
-                        },
-                        exitTransition = {
-                            NavTransitions.exit(motionScheme)
 
-                        },
-                        popEnterTransition = {
-                            NavTransitions.popEnter(motionScheme)
-
-                        },
-                        popExitTransition = {
-                            NavTransitions.popExit(motionScheme)
-                        }
-                    ) {
+                        ) {
                         ClockSettings(
+                            navController,
+                        )
+                    }
+                    composable(
+                        "OpenAlarmSettingScreen",
+
+                        ) {
+                        AlarmSettings(
                             navController,
                         )
                     }
@@ -198,12 +195,43 @@ class MainActivity : ComponentActivity() {
                     composable("fullscreen/{timerId}") { backStackEntry ->
                         val timerId =
                             backStackEntry.arguments?.getString("timerId") ?: return@composable
+
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("main")
+                        }
+                        val sharedViewModel: TimersViewModel = viewModel(parentEntry)
+
                         FullscreenTimerScreen(
                             timerId = timerId,
+                            viewModel = sharedViewModel,
                             onBack = { navController.popBackStack() }
                         )
                     }
 
+                    composable(
+                        "OpenAboutScreen",
+
+                        ) {
+                        AboutScreen(
+                            snackbarHostState = snackbarHostState,
+                            navController = navController
+                        )
+                    }
+                    composable(
+                        "OpenAboutLibScreen",
+                    ) {
+                        AboutLibrariesScreen(navController = navController)
+                    }
+                    composable(
+                        "OpenTermsConditionScreen",
+                    ) {
+                        TermsPage(navController = navController)
+                    }
+                    composable(
+                        "OpenPrivacyPolicyScreen",
+                    ) {
+                        PolicyPage(navController = navController)
+                    }
                 }
             }
         }

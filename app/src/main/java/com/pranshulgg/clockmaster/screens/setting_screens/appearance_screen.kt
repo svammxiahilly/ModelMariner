@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.ColorPickerController
@@ -49,10 +51,12 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.drawColorIndicator
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
+import com.pranshulgg.clockmaster.roomDB.AlarmEntity
 import com.pranshulgg.clockmaster.ui.components.SettingSection
 import com.pranshulgg.clockmaster.ui.components.SettingTile
 import com.pranshulgg.clockmaster.ui.components.SettingsTileIcon
 import com.pranshulgg.clockmaster.ui.components.Symbol
+import com.pranshulgg.clockmaster.ui.components.canScheduleExactAlarms
 import com.pranshulgg.clockmaster.utils.bottomPadding
 import kotlinx.coroutines.launch
 
@@ -267,7 +271,9 @@ fun AppearanceScreen(
 
             ) {
 
-                Column {
+                Column(
+                    Modifier.padding(bottom = bottomPadding())
+                ) {
 
                     Spacer(Modifier.height(12.dp))
 
@@ -321,20 +327,32 @@ fun AppearanceScreen(
                             .padding(end = 16.dp, start = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        OutlinedButton(onClick = {
-                            hideColorSheet()
-
-                        }, shapes = ButtonDefaults.shapes()) {
-                            Text("Cancel")
+                        Button(
+                            modifier = Modifier.defaultMinSize(minWidth = 90.dp, minHeight = 45.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                            onClick = {
+                                hideColorSheet()
+                            }, shapes = ButtonDefaults.shapes()
+                        ) {
+                            Text(
+                                "Cancel",
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                fontSize = 16.sp
+                            )
                         }
-                        Button(onClick = {
-                            PreferencesHelper.setString("seedColor", pickedColor)
-                            onSeedChanged(pickedColor)
-                            hideColorSheet()
+                        Button(
+                            onClick = {
+                                PreferencesHelper.setString("seedColor", pickedColor)
+                                onSeedChanged(pickedColor)
+                                hideColorSheet()
+                            },
 
-                        }, shapes = ButtonDefaults.shapes()) {
-                            Text("Save")
+                            shapes = ButtonDefaults.shapes(),
+                            modifier = Modifier.defaultMinSize(minWidth = 90.dp, minHeight = 45.dp),
+                        ) {
+                            Text("Save", fontSize = 16.sp)
                         }
+
                     }
                 }
 

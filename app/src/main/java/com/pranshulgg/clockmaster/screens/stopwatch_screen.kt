@@ -9,6 +9,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -18,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -79,20 +81,28 @@ fun StopwatchScreen() {
             ) {
                 Text(
                     text = formatted,
-                    fontSize = (screenWidth.value / 3).sp,
+                    fontSize = (screenWidth.value / 3.2).sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            HorizontalDivider()
+            if (laps.isEmpty()) {
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    "No laps",
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.alpha(0.5f)
+                )
+            }
 
             LazyRow(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp
@@ -102,14 +112,17 @@ fun StopwatchScreen() {
 
 
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        shape = RoundedCornerShape(50.dp)
+                        border = BorderStroke(
+                            width = 1.5.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        ),
+                        shape = RoundedCornerShape(22.dp)
 
                     ) {
                         Box(
                             modifier = Modifier
                                 .width(80.dp)
-                                .height(96.dp),
+                                .height(100.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(
@@ -139,7 +152,7 @@ fun StopwatchScreen() {
 
             Column(
                 Modifier.padding(end = 18.dp, start = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ToggleButton(
                     modifier = Modifier
@@ -271,7 +284,11 @@ fun StopwatchScreen() {
                                 Text(
                                     text = "Lap",
                                     fontSize = 26.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = if (isRunning) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    }
                                 )
 
                             }
@@ -285,7 +302,7 @@ fun StopwatchScreen() {
 
 
 
-                Spacer(Modifier.height(50.dp))
+                Spacer(Modifier.height(20.dp))
             }
 
         }

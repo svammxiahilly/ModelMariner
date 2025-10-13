@@ -33,7 +33,8 @@ object AlarmScheduler {
         minute: Int,
         label: String,
         soundUri: String? = null,
-        vibrate: Boolean = false
+        vibrate: Boolean = false,
+        snoozeTime: Int? = null
     ) {
 
 
@@ -49,6 +50,8 @@ object AlarmScheduler {
             putExtra("id", id)
             putExtra("sound", soundUri)
             putExtra("vibrate", vibrate)
+            putExtra("snoozeTime", snoozeTime)
+
         }
 
         val pendingIntent = PendingIntent.getBroadcast(

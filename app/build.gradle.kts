@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp") version "2.2.10-2.0.2"
+    alias(libs.plugins.aboutLibraries)
 }
 
 android {
@@ -13,8 +14,8 @@ android {
         applicationId = "com.pranshulgg.clockmaster"
         minSdk = 24
         targetSdk = 36
-        versionCode = 14
-        versionName = "2.0.0-beta.1"
+        versionCode = 16
+        versionName = "2.0.0-beta.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,6 +57,13 @@ android {
         }
     }
 
+    aboutLibraries {
+        export {
+            outputFile = file("src/main/res/raw/aboutlibraries.json")
+        }
+    }
+
+
 }
 
 dependencies {
@@ -70,6 +78,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -83,5 +92,7 @@ dependencies {
     implementation(libs.colorpicker)
     ksp(libs.android.room.compiler)
     implementation(libs.android.room.runtime)
-
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
+    implementation("com.github.jeziellago:compose-markdown:0.5.7")
 }

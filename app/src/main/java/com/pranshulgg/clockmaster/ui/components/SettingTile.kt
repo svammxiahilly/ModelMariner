@@ -98,8 +98,8 @@ sealed class SettingTile {
         val valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
         val steps: Int = 0,
         val labelFormatter: (Float) -> String = { it.toString() },
-        val dialogTitle: String
-
+        val dialogTitle: String,
+        val isDescriptionAsValue: Boolean = false
 
     ) : SettingTile()
 
@@ -238,7 +238,8 @@ fun SettingSection(
                     valueRange = tile.valueRange,
                     steps = tile.steps,
                     labelFormatter = tile.labelFormatter,
-                    dialogTitle = tile.dialogTitle
+                    dialogTitle = tile.dialogTitle,
+                    isDescriptionAsValue = tile.isDescriptionAsValue
 
                 )
             }
