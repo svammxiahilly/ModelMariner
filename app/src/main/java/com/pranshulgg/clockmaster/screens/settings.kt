@@ -86,9 +86,6 @@ fun SettingsPage(navController: NavController) {
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
             item {
-                Text("CLEAN UP COMMENTS", fontSize = 24.sp)
-            }
-            item {
                 SettingSection(
                     tiles = listOf(
                         SettingTile.CategoryTile(
