@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -129,6 +130,43 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                 positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
             )
 
+            val confirm = PreferencesHelper.getBool("confirmDeletingAlarmItem") ?: false
+            var showDialog by remember { mutableStateOf(false) }
+
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showDialog = false
+                        scope.launch { dismissState.reset() }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDialog = false
+                                visible = false
+                                scope.launch {
+                                    delay(300)
+                                    alarmViewModel.removeAlarm(context, alarm)
+                                }
+                            }, shapes = ButtonDefaults.shapes()
+                        ) {
+                            Text("Delete", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showDialog = false
+                            scope.launch { dismissState.reset() }
+                        }, shapes = ButtonDefaults.shapes()) {
+                            Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                        }
+                    },
+                    title = { Text("Delete alarm") },
+                    text = { Text("Are you sure you want to delete this alarm?") }
+                )
+            }
+
             AnimatedVisibility(
                 visible = visible,
                 exit = fadeOut()
@@ -139,10 +177,14 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                     enableDismissFromEndToStart = true,
                     onDismiss = { direction ->
                         if (direction == SwipeToDismissBoxValue.EndToStart) {
-                            visible = false
-                            scope.launch {
-                                delay(300)
-                                alarmViewModel.removeAlarm(context, alarm)
+                            if (confirm) {
+                                showDialog = true
+                            } else {
+                                visible = false
+                                scope.launch {
+                                    delay(300)
+                                    alarmViewModel.removeAlarm(context, alarm)
+                                }
                             }
                         }
                     },

@@ -48,6 +48,12 @@ fun AlarmSettings(
     val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
     val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
     var selectedValueAlarmVol by remember { mutableStateOf((currentVolume.toFloat() / maxVolume * 100f)) }
+
+    var confirmDeletingAlarm by remember {
+        mutableStateOf(
+            PreferencesHelper.getBool("confirmDeletingAlarmItem") ?: false
+        )
+    }
     Scaffold(
         topBar = {
             LargeTopAppBar(
@@ -95,6 +101,23 @@ fun AlarmSettings(
                                 )
                             }
                         )
+                    )
+                )
+
+                Spacer(Modifier.height(10.dp))
+                SettingSection(
+                    title = "Behavior",
+                    tiles = listOf(
+                        SettingTile.SwitchTile(
+                            leading = { SettingsTileIcon(R.drawable.warning) },
+                            title = "Confirm before deleting",
+                            description = "Ask for confirmation before deleting any alarms",
+                            checked = confirmDeletingAlarm,
+                            onCheckedChange = { checked ->
+                                confirmDeletingAlarm = checked
+                                PreferencesHelper.setBool("confirmDeletingAlarmItem", checked)
+                            }
+                        ),
                     )
                 )
             }

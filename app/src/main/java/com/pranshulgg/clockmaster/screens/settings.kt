@@ -85,6 +85,7 @@ fun SettingsPage(navController: NavController) {
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
+
             item {
                 SettingSection(
                     tiles = listOf(
