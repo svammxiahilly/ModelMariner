@@ -34,6 +34,7 @@ import com.pranshulgg.clockmaster.repository.StopwatchRepository
 import com.pranshulgg.clockmaster.services.StopwatchForegroundService
 import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.Symbol
+import java.sql.Date
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -63,6 +64,37 @@ fun StopwatchScreen() {
             }
         }
     )
+
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var pendingId by remember { mutableStateOf<String?>(null) }
+
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Notification Permission Needed") },
+            text = {
+                Text(
+                    "Notification permission is required to run the foreground service, " +
+                            "send alerts when timers finish, and allow the app to continue working " +
+                            "even when it’s in the background."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionDialog = false
+                    permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }) {
+                    Text("Grant", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                }
+            }
+        )
+    }
+
 
     Column(
         modifier = Modifier
@@ -168,13 +200,14 @@ fun StopwatchScreen() {
                         if (checked) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 val permissionCheck = ContextCompat.checkSelfPermission(
-                                    ctx, android.Manifest.permission.POST_NOTIFICATIONS
+                                    context, android.Manifest.permission.POST_NOTIFICATIONS
                                 )
                                 if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-                                    permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                    pendingId = System.currentTimeMillis().toString()
+                                    showPermissionDialog = true
+                                    return@ToggleButton
                                 }
                             }
-
                             val i =
                                 Intent(ctx, StopwatchForegroundService::class.java).apply {
                                     action =

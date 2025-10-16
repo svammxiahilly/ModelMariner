@@ -1,5 +1,11 @@
 package com.pranshulgg.clockmaster.screens
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -32,9 +38,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.models.TimersViewModel
+import com.pranshulgg.clockmaster.services.StopwatchForegroundService
 import com.pranshulgg.clockmaster.services.TimerAlarmService
 import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.AddTimerSheet
@@ -57,9 +65,49 @@ fun TimersScreen(
 
     var showDialog by remember { mutableStateOf(false) }
 
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var pendingId by remember { mutableStateOf<String?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            if (granted) {
+                val i = Intent(context, StopwatchForegroundService::class.java).apply {
+                    action = StopwatchForegroundService.ACTION_START_FOREGROUND
+                }
+                ContextCompat.startForegroundService(context, i)
+            } else {
+                Toast.makeText(context, "Notification permission is required", Toast.LENGTH_LONG)
+                    .show()
+            }
+        }
+    )
 
-
-
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Notification Permission Needed") },
+            text = {
+                Text(
+                    "Notification permission is required to run the foreground service, " +
+                            "send alerts when timers finish, and allow the app to continue working " +
+                            "even when it’s in the background."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionDialog = false
+                    permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }) {
+                    Text("Grant", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                }
+            }
+        )
+    }
 
     if (timers.isEmpty()) {
         Column {
@@ -86,6 +134,8 @@ fun TimersScreen(
                 initialValue = SwipeToDismissBoxValue.Settled,
                 positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
             )
+
+
 
             if (showDialog) {
                 AlertDialog(
@@ -130,11 +180,7 @@ fun TimersScreen(
                     enableDismissFromEndToStart = true,
                     onDismiss = { direction ->
                         if (direction == SwipeToDismissBoxValue.EndToStart) {
-//                            visible = false
-//                            scope.launch {
-//                                delay(300)
-//                                viewModel.removeTimer(timer.id)
-//                            }
+
                             showDialog = true
                         }
                     },
@@ -167,6 +213,17 @@ fun TimersScreen(
                         TimerItemRow(
                             timer,
                             onPauseResume = { id ->
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    val permissionCheck = ContextCompat.checkSelfPermission(
+                                        context, android.Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                                        pendingId = id
+                                        showPermissionDialog = true
+                                        return@TimerItemRow
+                                    }
+                                }
+
                                 if (timers.first { it.id == id }.state.name == "Running") {
                                     viewModel.pauseTimer(id)
                                 } else {
@@ -195,6 +252,17 @@ fun TimersScreen(
                                 )
                             },
                             onOpenFullscreen = { t ->
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    val permissionCheck = ContextCompat.checkSelfPermission(
+                                        context, android.Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                                        pendingId = t.id
+                                        showPermissionDialog = true
+                                        return@TimerItemRow
+                                    }
+                                }
+
                                 navController.navigate("fullscreen/${t.id}")
                             }
                         )
@@ -208,4 +276,6 @@ fun TimersScreen(
             Spacer(Modifier.height(130.dp))
         }
     }
+
+
 }
