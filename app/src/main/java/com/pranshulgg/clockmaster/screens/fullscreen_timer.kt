@@ -35,6 +35,7 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.models.TimerState
 import com.pranshulgg.clockmaster.models.TimersViewModel
+import com.pranshulgg.clockmaster.services.TimerAlarmService
 import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.Symbol
 import com.pranshulgg.clockmaster.ui.components.Tooltip
@@ -87,9 +89,16 @@ fun FullscreenTimerScreen(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
+    val bgcolor =
+        if (timer.remainingMillis.toInt() == 0) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.surface
+
     Scaffold(
+        containerColor = bgcolor,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = bgcolor,
+                ),
                 title = { Text(timer.label) },
                 actions = {
                     Tooltip(
@@ -180,7 +189,7 @@ fun FullscreenTimerScreen(
                         checkedContainerColor = MaterialTheme.colorScheme.errorContainer
                     ),
                     shapes = ToggleButtonDefaults.shapes(),
-                    checked = timer.state == TimerState.Running,
+                    checked = timer.state != TimerState.Paused,
                     onCheckedChange = { checked ->
                         if (timer.state == TimerState.Running) {
                             viewModel.pauseTimer(timer.id)
@@ -188,6 +197,7 @@ fun FullscreenTimerScreen(
                             viewModel.resumeTimer(timer.id)
                         }
                         TimerForegroundService.startServiceIfTimersExist(context)
+                        TimerAlarmService.stopAlarm(context, timer.id)
 
                     }
 
@@ -237,6 +247,7 @@ fun FullscreenTimerScreen(
                                     viewModel.updateInitial(timer.id, timer.originalMillis)
 
                                     viewModel.resetTimer(timer.id)
+                                    TimerAlarmService.stopAlarm(context, timer.id)
                                 }
                             ) {
 
@@ -271,6 +282,7 @@ fun FullscreenTimerScreen(
 
                                     viewModel.updateRemaining(timer.id, newRemaining)
                                     viewModel.updateInitial(timer.id, newInitial)
+                                    TimerAlarmService.stopAlarm(context, timer.id)
                                 }
 
                             ) {

@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -20,16 +22,20 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.models.TimersViewModel
+import com.pranshulgg.clockmaster.services.TimerAlarmService
 import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.AddTimerSheet
 import com.pranshulgg.clockmaster.ui.components.EmptyContainerPlaceholder
@@ -48,6 +54,11 @@ fun TimersScreen(
     val scope = rememberCoroutineScope()
     var showingAdd by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    var showDialog by remember { mutableStateOf(false) }
+
+
+
 
 
     if (timers.isEmpty()) {
@@ -76,6 +87,39 @@ fun TimersScreen(
                 positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
             )
 
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showDialog = false
+                        scope.launch { dismissState.reset() }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDialog = false
+                                visible = false
+                                scope.launch {
+                                    delay(300)
+                                    viewModel.removeTimer(timer.id)
+                                }
+                            }, shapes = ButtonDefaults.shapes()
+                        ) {
+                            Text("Delete", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showDialog = false
+                            scope.launch { dismissState.reset() }
+                        }, shapes = ButtonDefaults.shapes()) {
+                            Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                        }
+                    },
+                    title = { Text("Delete timer") },
+                    text = { Text("Are you sure you want to delete this timer?") }
+                )
+            }
+
             AnimatedVisibility(
                 visible = visible,
                 exit = fadeOut()
@@ -86,11 +130,12 @@ fun TimersScreen(
                     enableDismissFromEndToStart = true,
                     onDismiss = { direction ->
                         if (direction == SwipeToDismissBoxValue.EndToStart) {
-                            visible = false
-                            scope.launch {
-                                delay(300)
-                                viewModel.removeTimer(timer.id)
-                            }
+//                            visible = false
+//                            scope.launch {
+//                                delay(300)
+//                                viewModel.removeTimer(timer.id)
+//                            }
+                            showDialog = true
                         }
                     },
                     backgroundContent = {
@@ -128,6 +173,7 @@ fun TimersScreen(
                                     viewModel.resumeTimer(id)
                                 }
                                 TimerForegroundService.startServiceIfTimersExist(context)
+                                TimerAlarmService.stopAlarm(context, id)
                             },
                             onReset = { id ->
                                 val t = timers.firstOrNull { it.id == id }
@@ -135,8 +181,13 @@ fun TimersScreen(
                                     viewModel.updateInitial(id, t.originalMillis)
                                     viewModel.resetTimer(id)
                                 }
+                                TimerAlarmService.stopAlarm(context, id)
                             },
-                            onDelete = { id -> viewModel.removeTimer(id) },
+                            onDelete = { id ->
+                                viewModel.removeTimer(id)
+                                TimerAlarmService.stopAlarm(context, id)
+
+                            },
                             onEditLabel = { id, newLabel ->
                                 viewModel.updateLabel(
                                     id,

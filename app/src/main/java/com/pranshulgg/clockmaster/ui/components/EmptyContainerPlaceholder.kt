@@ -37,7 +37,7 @@ fun EmptyContainerPlaceholder(icon: Int, text: String) {
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            shape = MaterialShapes.Cookie6Sided.toShape(),
+            shape = MaterialShapes.Cookie12Sided.toShape(),
             modifier = Modifier
                 .height(200.dp)
                 .width(200.dp),

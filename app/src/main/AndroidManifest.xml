@@ -69,6 +69,12 @@
             android:name=".services.TimerForegroundService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback|dataSync" />
+
+        <service
+            android:name=".services.TimerAlarmService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback|dataSync" />
+
     </application>
 
 

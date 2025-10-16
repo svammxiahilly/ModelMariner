@@ -3,11 +3,14 @@ package com.pranshulgg.clockmaster.services
 
 import android.app.*
 import android.content.*
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.pranshulgg.clockmaster.R
@@ -29,6 +32,9 @@ class TimerForegroundService : Service() {
         const val ACTION_RESUME = "com.pranshulgg.clockmaster.ACTION_RESUME"
         const val ACTION_RESET = "com.pranshulgg.clockmaster.ACTION_RESET"
         const val ACTION_RESET_ALL = "com.pranshulgg.clockmaster.ACTION_RESET_ALL"
+
+        const val ACTION_STOP_RINGTONE = "com.pranshulgg.clockmaster.ACTION_STOP_RINGTONE"
+
 
         fun startServiceIfTimersExist(context: Context) {
             CoroutineScope(Dispatchers.Default).launch {
@@ -60,24 +66,24 @@ class TimerForegroundService : Service() {
                     ACTION_PAUSE -> {
                         val id = intent.getStringExtra("id") ?: return@launch
                         TimerRepository.pauseTimer(id)
-                        stopCurrentRingtone()
                     }
 
                     ACTION_RESUME -> {
                         val id = intent.getStringExtra("id") ?: return@launch
                         TimerRepository.resumeTimer(id)
-                        stopCurrentRingtone()
                     }
 
                     ACTION_RESET -> {
                         val id = intent.getStringExtra("id") ?: return@launch
                         TimerRepository.resetTimer(id)
-                        stopCurrentRingtone()
                     }
 
                     ACTION_RESET_ALL -> {
                         TimerRepository.resetAll()
-                        stopCurrentRingtone()
+                    }
+
+                    ACTION_STOP_RINGTONE -> {
+                        stopSelf()
                     }
                 }
             }
@@ -92,6 +98,7 @@ class TimerForegroundService : Service() {
             addAction(ACTION_RESUME)
             addAction(ACTION_RESET)
             addAction(ACTION_RESET_ALL)
+            addAction(ACTION_STOP_RINGTONE)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
@@ -103,7 +110,8 @@ class TimerForegroundService : Service() {
     }
 
     private val finishedTimers = mutableSetOf<String>()
-    private var currentRingtone: Ringtone? = null
+    private var currentMediaPlayer: MediaPlayer? = null
+
     private suspend fun tickerLoop() {
         while (scope.isActive) {
             val now = SystemClock.elapsedRealtime()
@@ -112,17 +120,22 @@ class TimerForegroundService : Service() {
                 lastTickTime = now
                 val finished = TimerRepository.tick(elapsed)
 
-                finished.forEach { timerId ->
-                    if (finishedTimers.add(timerId)) {
-                        triggerTimerFinishedNotification(timerId)
-                    }
-                }
 
                 val timers = TimerRepository.timers.first()
                 val running = timers.filter { it.state == TimerState.Running }
 
+                if (finished.isNotEmpty()) {
+                    finished.forEach { id ->
+                        if (!finishedTimers.contains(id)) {
+                            finishedTimers.add(id)
+                            val t = timers.find { it.id == id }
+                            val label = t?.label ?: ""
+                            TimerAlarmService.startAlarm(applicationContext, id, label)
+                        }
+                    }
+                }
+
                 if (running.isEmpty()) {
-                    stopCurrentRingtone()
                     stopSelf()
                     break
                 }
@@ -133,55 +146,6 @@ class TimerForegroundService : Service() {
         }
     }
 
-    private fun triggerTimerFinishedNotification(timerId: String) {
-        val context = this
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val timer = runBlocking { TimerRepository.timers.first() }.firstOrNull { it.id == timerId }
-        val label = timer?.label ?: "Timer"
-        val intent = Intent()
-        val pendingIntent = PendingIntent.getActivity(
-            context, timerId.hashCode(), intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("Timer Finished")
-            .setContentText("$label has completed!")
-            .setSmallIcon(R.drawable.notifications_active)
-            .setContentIntent(pendingIntent)
-            .setColorized(true)
-            .setColor(ContextCompat.getColor(this, R.color.notification_primary))
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-
-        notificationManager.notify(timerId.hashCode(), notification)
-
-        try {
-            stopCurrentRingtone()
-            val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            currentRingtone = RingtoneManager.getRingtone(context, alarmUri)
-            currentRingtone?.apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    setAudioAttributes(
-                        android.media.AudioAttributes.Builder()
-                            .setUsage(android.media.AudioAttributes.USAGE_ALARM)
-                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build()
-                    )
-                }
-                play()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun stopCurrentRingtone() {
-        currentRingtone?.stop()
-        currentRingtone = null
-    }
 
     private suspend fun updateForegroundNotification() {
         val timers = TimerRepository.timers.first()
@@ -199,6 +163,8 @@ class TimerForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+
         scope.launch {
             updateForegroundNotification()
         }

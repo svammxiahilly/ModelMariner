@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.models.TimerItem
 import com.pranshulgg.clockmaster.models.TimerState
 import java.util.Locale
@@ -83,6 +84,15 @@ fun TimerItemRow(
     val thickStroke =
         remember(thickStrokeWidth) { Stroke(width = thickStrokeWidth, cap = StrokeCap.Round) }
 
+    var useExpressiveColor by remember {
+        mutableStateOf(
+            PreferencesHelper.getBool("useExpressiveColor") ?: true
+        )
+    }
+
+    val tileColor =
+        if (timer.remainingMillis.toInt() == 0) if (useExpressiveColor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
+
     val animatedProgress by
     animateFloatAsState(
         targetValue = progress.coerceIn(0f, 1f),
@@ -90,8 +100,7 @@ fun TimerItemRow(
 
         )
     Surface(
-        color =
-            MaterialTheme.colorScheme.surfaceContainerLow,
+        color = tileColor,
         shape = RoundedCornerShape(22.dp),
         modifier = Modifier
             .fillMaxWidth()
