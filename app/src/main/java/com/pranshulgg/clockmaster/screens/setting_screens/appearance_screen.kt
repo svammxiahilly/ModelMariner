@@ -272,7 +272,7 @@ fun AppearanceScreen(
             ) {
 
                 Column(
-                    Modifier.padding(bottom = bottomPadding())
+                    Modifier.padding(bottom = 16.dp)
                 ) {
 
                     Spacer(Modifier.height(12.dp))
@@ -357,7 +357,6 @@ fun AppearanceScreen(
                 }
 
             }
-            Spacer(Modifier.height(bottomPadding() + 10.dp))
 
         }
 

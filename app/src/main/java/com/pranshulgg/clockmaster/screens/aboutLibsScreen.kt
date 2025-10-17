@@ -48,7 +48,7 @@ fun AboutLibrariesScreen(navController: NavController) {
     var showLoader by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        delay(2000)
+        delay(1000)
         showLoader = false
     }
 
@@ -56,7 +56,7 @@ fun AboutLibrariesScreen(navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                title = { Text("About libraries") },
+                title = { Text("Third party licenses") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Symbol(

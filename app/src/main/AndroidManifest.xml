@@ -75,6 +75,12 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback|dataSync" />
 
+        <service
+            android:name=".services.AlarmAlwaysForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback|dataSync" />
+
+
     </application>
 
 

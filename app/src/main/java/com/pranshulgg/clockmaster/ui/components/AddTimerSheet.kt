@@ -50,7 +50,7 @@ fun AddTimerSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState
     ) {
-        Column(modifier = Modifier.padding(end = 16.dp, start = 16.dp, bottom = bottomPadding())) {
+        Column(modifier = Modifier.padding(end = 16.dp, start = 16.dp, bottom = 16.dp)) {
 
 
             Row(

@@ -1,7 +1,9 @@
 package com.pranshulgg.clockmaster.screens.setting_screens
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
+import android.os.Build
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
+import com.pranshulgg.clockmaster.services.AlarmAlwaysForegroundService
 import com.pranshulgg.clockmaster.ui.components.SettingSection
 import com.pranshulgg.clockmaster.ui.components.SettingTile
 import com.pranshulgg.clockmaster.ui.components.SettingsTileIcon
@@ -54,6 +57,11 @@ fun AlarmSettings(
             PreferencesHelper.getBool("confirmDeletingAlarmItem") ?: false
         )
     }
+
+    var keepServiceRunning by remember {
+        mutableStateOf(PreferencesHelper.getBool("keepServiceRunning") ?: false)
+    }
+
     Scaffold(
         topBar = {
             LargeTopAppBar(
@@ -116,6 +124,35 @@ fun AlarmSettings(
                             onCheckedChange = { checked ->
                                 confirmDeletingAlarm = checked
                                 PreferencesHelper.setBool("confirmDeletingAlarmItem", checked)
+                            }
+                        ),
+                    )
+                )
+
+                Spacer(Modifier.height(10.dp))
+                SettingSection(
+                    title = "Services",
+                    tiles = listOf(
+                        SettingTile.SwitchTile(
+                            leading = { SettingsTileIcon(R.drawable.construction) },
+                            title = "Always run background service",
+                            description = "Use this if alarms aren’t working; it may prevent the app from being killed but uses more battery",
+                            checked = keepServiceRunning,
+                            onCheckedChange = { checked ->
+                                keepServiceRunning = checked
+                                PreferencesHelper.setBool("keepServiceRunning", checked)
+                                val intent =
+                                    Intent(context, AlarmAlwaysForegroundService::class.java)
+
+                                if (checked) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        context.startForegroundService(intent)
+                                    } else {
+                                        context.startService(intent)
+                                    }
+                                } else {
+                                    context.stopService(intent)
+                                }
                             }
                         ),
                     )

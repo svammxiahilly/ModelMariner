@@ -127,7 +127,7 @@ fun AboutScreen(snackbarHostState: SnackbarHostState, navController: NavControll
                         }
                         Image(
                             painter = painterResource(id = R.drawable.app_icon_prev),
-                            contentDescription = "My PNG Image",
+                            contentDescription = "App icon",
                             modifier = Modifier.size(80.dp)
                         )
                     }
@@ -208,7 +208,7 @@ fun AboutScreen(snackbarHostState: SnackbarHostState, navController: NavControll
                             colors = ListItemDefaults.colors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer
                             ),
-                            headlineContent = { Text("About libraries") },
+                            headlineContent = { Text("Third party licenses") },
                             leadingContent = { IconAvatarLeading(R.drawable.copyright) },
                             modifier = Modifier
                                 .clickable(
@@ -272,7 +272,7 @@ fun CheckforupdateBtn() {
 
                 }) {
                 Text(
-                    "v2.0.0-beta.2",
+                    "v2.0.0",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )

@@ -1,12 +1,8 @@
 package com.pranshulgg.clockmaster.screens
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -33,6 +29,7 @@ import com.pranshulgg.clockmaster.models.AlarmViewModel
 import com.pranshulgg.clockmaster.ui.components.EmptyContainerPlaceholder
 import com.pranshulgg.clockmaster.ui.components.Symbol
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.services.AlarmAlwaysForegroundService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -329,6 +326,47 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
         item {
             Spacer(Modifier.height(130.dp))
         }
+
+//        item {
+//
+//
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(horizontal = 16.dp, vertical = 8.dp),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                Column {
+//                    Text("Keep service running", fontWeight = FontWeight.W600)
+//                    Text(
+//                        "Ensures alarms work even if app is closed",
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
+//
+//                Switch(
+//                    checked = keepServiceRunning,
+//                    onCheckedChange = { checked ->
+//                        keepServiceRunning = checked
+//
+//                        val intent = Intent(context, AlarmAlwaysForegroundService::class.java)
+//
+//                        if (checked) {
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                context.startForegroundService(intent)
+//                            } else {
+//                                context.startService(intent)
+//                            }
+//                        } else {
+//                            context.stopService(intent)
+//                        }
+//                    }
+//                )
+//            }
+
+//        }
     }
 
 
