@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.pranshulgg.clockmaster.helpers.KeepScreenOnEffect
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.helpers.SnackbarManager
 import com.pranshulgg.clockmaster.models.AlarmViewModel
@@ -72,6 +73,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            KeepScreenOnEffect(PreferencesHelper.getBool("keepScreenOn") ?: false)
 
             val snackbarHostState = remember { SnackbarHostState() }
             val database = AppDatabase.getDatabase(applicationContext)
@@ -170,6 +172,7 @@ class MainActivity : ComponentActivity() {
                             onExpressiveColorChanged = { useExpressiveColors ->
                                 useExpressiveColor = useExpressiveColors
                             },
+                            snackbarHostState = snackbarHostState,
                         )
                     }
                     composable(

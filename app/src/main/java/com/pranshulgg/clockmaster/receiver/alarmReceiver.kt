@@ -146,7 +146,23 @@ class AlarmReceiver : BroadcastReceiver() {
             }
 
         }
+
+
+        if (alarmId != -1) {
+            val db = AppDatabase.getDatabase(context)
+            val alarmDao = db.alarmDao()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val alarm = alarmDao.getAlarmById(alarmId)
+                if (alarm != null && alarm.repeatDays.isEmpty()) {
+                    alarmDao.update(alarm.copy(enabled = false))
+                }
+            }
+        }
+
     }
+
+
 
 
     fun generateUniqueId(label: String, dayOfWeek: ArrayList<Int?>): Int {
@@ -167,6 +183,7 @@ class AlarmReceiver : BroadcastReceiver() {
             start()
         }
     }
+
 
 
 }

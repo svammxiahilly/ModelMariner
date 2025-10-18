@@ -1,6 +1,9 @@
 package com.pranshulgg.clockmaster.screens.setting_screens
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.view.WindowManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -42,6 +47,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -50,7 +56,9 @@ import com.github.skydoves.colorpicker.compose.ColorPickerController
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.drawColorIndicator
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.helpers.KeepScreenOnEffect
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
+import com.pranshulgg.clockmaster.helpers.SnackbarManager
 import com.pranshulgg.clockmaster.roomDB.AlarmEntity
 import com.pranshulgg.clockmaster.ui.components.SettingSection
 import com.pranshulgg.clockmaster.ui.components.SettingTile
@@ -60,6 +68,7 @@ import com.pranshulgg.clockmaster.ui.components.canScheduleExactAlarms
 import com.pranshulgg.clockmaster.utils.bottomPadding
 import kotlinx.coroutines.launch
 
+@SuppressLint("ContextCastToActivity")
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -71,8 +80,8 @@ fun AppearanceScreen(
     onThemeChanged: (Boolean) -> Unit,
     onSeedChanged: (String) -> Unit,
     onDynamicColorChanged: (Boolean) -> Unit,
-    onExpressiveColorChanged: (Boolean) -> Unit
-
+    onExpressiveColorChanged: (Boolean) -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var currentTheme by remember {
@@ -94,6 +103,9 @@ fun AppearanceScreen(
         Color(defaultPickerColor.removePrefix("0x").toLong(16).toInt())
     }
 
+    val activity = LocalContext.current as? Activity
+
+
     var useCustomColor by remember {
         mutableStateOf(
             PreferencesHelper.getBool("useCustomColor") ?: false
@@ -109,6 +121,12 @@ fun AppearanceScreen(
     var useExpressiveColor by remember {
         mutableStateOf(
             PreferencesHelper.getBool("useExpressiveColor") ?: true
+        )
+    }
+
+    var keepScreenOn by remember {
+        mutableStateOf(
+            PreferencesHelper.getBool("keepScreenOn") ?: false
         )
     }
 
@@ -147,6 +165,7 @@ fun AppearanceScreen(
 
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             LargeTopAppBar(
                 title = { Text("Appearance") },
@@ -237,11 +256,36 @@ fun AppearanceScreen(
                                 useDynamicColor = checked
                             }
                         ),
-
-
-                        )
+                    )
 
                 )
+
+                SettingSection(
+                    title = "Display",
+                    tiles = listOf(
+                        SettingTile.SwitchTile(
+                            leading = {
+                                SettingsTileIcon(R.drawable.lock_clock)
+                            },
+                            title = "Prevent screen sleep",
+                            description = "Keeps the device awake while the app is running",
+                            checked = keepScreenOn,
+                            onCheckedChange = { checked ->
+                                PreferencesHelper.setBool("keepScreenOn", checked)
+                                keepScreenOn = checked
+
+                                if (checked) {
+                                    activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                    SnackbarManager.showMessage("Device will stay awake while the app is open")
+                                } else {
+                                    activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                    SnackbarManager.showMessage("Device will sleep after the default timeout")
+                                }
+                            }
+                        )
+                    )
+                )
+
             }
 
         }
@@ -268,7 +312,6 @@ fun AppearanceScreen(
                         )
                     }
                 }
-
             ) {
 
                 Column(

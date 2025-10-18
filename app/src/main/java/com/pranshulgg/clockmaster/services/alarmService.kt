@@ -25,6 +25,11 @@ import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.compose.ui.graphics.Color
 import com.pranshulgg.clockmaster.MainActivity
+import com.pranshulgg.clockmaster.helpers.AlarmScheduler
+import com.pranshulgg.clockmaster.roomDB.AppDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Date
 
 class AlarmServiceForeground : Service() {
@@ -59,6 +64,9 @@ class AlarmServiceForeground : Service() {
         val soundUri =
             soundUriString?.let { Uri.parse(it) } ?: Settings.System.DEFAULT_ALARM_ALERT_URI
         val snoozeTime = intent.getIntExtra("snoozeTime", 10)
+
+
+
 
         if (intent?.action == ACTION_STOP) {
             stopSelf()

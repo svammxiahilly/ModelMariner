@@ -1,6 +1,9 @@
 package com.pranshulgg.clockmaster.screens
 
+import android.icu.text.DateFormat
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,10 +54,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.helpers.PreferencesHelper
 import com.pranshulgg.clockmaster.models.TimerState
 import com.pranshulgg.clockmaster.models.TimersViewModel
 import com.pranshulgg.clockmaster.services.TimerAlarmService
@@ -61,9 +67,14 @@ import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.Symbol
 import com.pranshulgg.clockmaster.ui.components.Tooltip
 import com.pranshulgg.clockmaster.utils.bottomPadding
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FullscreenTimerScreen(
@@ -99,7 +110,7 @@ fun FullscreenTimerScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = bgcolor,
                 ),
-                title = { Text(timer.label) },
+                title = { Text(timer.label, maxLines = 2, overflow = TextOverflow.Ellipsis) },
                 actions = {
                     Tooltip(
                         "Exit fullscreen",
@@ -167,15 +178,50 @@ fun FullscreenTimerScreen(
 
                 )
 
-                Text(
-                    text = text,
-                    fontSize = fontSize.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Text(
+                            text = text,
+                            fontSize = fontSize.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .offset(y = (-60).dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Symbol(
+                                R.drawable.notification_sound,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 19.dp
+                            )
+                            Text(
+                                getEndTime(timer.remainingMillis / 1000),
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
+                    }
+
+
+                }
+
             }
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(100.dp))
             Column(
                 Modifier.padding(end = 18.dp, start = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -302,12 +348,25 @@ fun FullscreenTimerScreen(
 
                 }
 
-                Spacer(Modifier.height(bottomPadding() + 12.dp))
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
 
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+private fun getEndTime(remainingSeconds: Long): String {
+    val is24HourFormat = PreferencesHelper.getBool("is24hr") ?: false
+    val now = LocalDateTime.now()
+    val endTime = now.plusSeconds(remainingSeconds)
+
+    val pattern = if (is24HourFormat) "HH:mm" else "hh:mm a"
+    val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
+
+    return endTime.format(formatter)
+}
+
 
 private fun formatMillis(ms: Long): String {
     val s = TimeUnit.MILLISECONDS.toSeconds(ms) % 60

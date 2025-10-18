@@ -28,6 +28,7 @@ import androidx.core.view.WindowCompat
 import android.view.View
 import com.pranshulgg.clockmaster.receiver.AlarmReceiver
 import com.pranshulgg.clockmaster.services.AlarmServiceForeground
+import android.view.WindowManager
 
 class AlarmActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
@@ -35,6 +36,14 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wakeLock = pm.newWakeLock(
+            PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "clockmaster:alarmScreenLock"
+        )
+        wakeLock.acquire(10 * 60 * 1000L)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -57,19 +66,34 @@ class AlarmActivity : AppCompatActivity() {
             window.navigationBarColor = android.graphics.Color.TRANSPARENT
         }
 
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+//            setShowWhenLocked(true)
+//            setTurnScreenOn(true)
+//            val km = getSystemService(KeyguardManager::class.java)
+//            km?.requestDismissKeyguard(this, null)
+//        } else {
+//            window.addFlags(
+//                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+//                        or android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+//                        or android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+//            )
+//        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
-            val km = getSystemService(KeyguardManager::class.java)
-            km?.requestDismissKeyguard(this, null)
+            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            keyguardManager.requestDismissKeyguard(this, null)
         } else {
+            @Suppress("DEPRECATION")
             window.addFlags(
-                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                        or android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                        or android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
+
 
         setContentView(R.layout.activity_alarm)
 

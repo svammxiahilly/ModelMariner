@@ -1,5 +1,6 @@
 package com.pranshulgg.clockmaster.ui.components
 
+import android.content.Intent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -17,16 +18,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.ScreenSaverActivity
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownMenu(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Tooltip("More options", preferredPosition = TooltipAnchorPosition.Below, spacing = 10.dp) {
         IconButton(
@@ -48,7 +52,7 @@ fun DropdownMenu(navController: NavController) {
         DropdownMenuItem(
             text = { DropDownMenuText("Screen saver") },
             onClick = {
-
+                context.startActivity(Intent(context, ScreenSaverActivity::class.java))
             },
             leadingIcon = { DropDownMenuIcon(R.drawable.mobile_text_2_filled) }
         )

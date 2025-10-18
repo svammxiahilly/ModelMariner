@@ -327,48 +327,8 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
             Spacer(Modifier.height(130.dp))
         }
 
-//        item {
-//
-//
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 16.dp, vertical = 8.dp),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.SpaceBetween
-//            ) {
-//                Column {
-//                    Text("Keep service running", fontWeight = FontWeight.W600)
-//                    Text(
-//                        "Ensures alarms work even if app is closed",
-//                        style = MaterialTheme.typography.bodySmall,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//                }
-//
-//                Switch(
-//                    checked = keepServiceRunning,
-//                    onCheckedChange = { checked ->
-//                        keepServiceRunning = checked
-//
-//                        val intent = Intent(context, AlarmAlwaysForegroundService::class.java)
-//
-//                        if (checked) {
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                context.startForegroundService(intent)
-//                            } else {
-//                                context.startService(intent)
-//                            }
-//                        } else {
-//                            context.stopService(intent)
-//                        }
-//                    }
-//                )
-//            }
 
-//        }
     }
 
 
 }
-

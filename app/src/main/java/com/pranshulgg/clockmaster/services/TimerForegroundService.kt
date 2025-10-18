@@ -1,6 +1,7 @@
 package com.pranshulgg.clockmaster.services
 
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
 import android.media.AudioAttributes
@@ -90,6 +91,7 @@ class TimerForegroundService : Service() {
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
         createChannel()

@@ -45,6 +45,10 @@
             android:theme="@style/alarmActivityTheme"
             android:turnScreenOn="true" />
 
+        <activity
+            android:name=".ScreenSaverActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <receiver
             android:name=".receiver.AlarmReceiver"
