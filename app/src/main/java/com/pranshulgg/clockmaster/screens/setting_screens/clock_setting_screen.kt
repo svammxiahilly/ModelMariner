@@ -58,6 +58,12 @@ fun ClockSettings(
         )
     }
 
+    var currentWorldClockStyle by remember {
+        mutableStateOf(
+            PreferencesHelper.getString("WorldClockStyle") ?: "Digital"
+        )
+    }
+
     Scaffold(
         topBar = {
             LargeTopAppBar(
@@ -111,8 +117,17 @@ fun ClockSettings(
                                 }
                             }
                         ),
-
-                        )
+                        SettingTile.DialogOptionTile(
+                            leading = { SettingsTileIcon(R.drawable.farsight_digital) },
+                            title = "Clock style",
+                            options = listOf("Digital", "Analog"),
+                            selectedOption = currentWorldClockStyle,
+                            onOptionSelected = { selectedOption ->
+                                currentWorldClockStyle = selectedOption
+                                PreferencesHelper.setString("WorldClockStyle", selectedOption)
+                            }
+                        ),
+                    )
 
 
                 )

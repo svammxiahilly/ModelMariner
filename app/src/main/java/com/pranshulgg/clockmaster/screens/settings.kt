@@ -133,7 +133,9 @@ fun SettingsPage(navController: NavController) {
                             color = colors.screenSaverTile,
                             leading = R.drawable.mobile_text_2_filled,
                             onColor = colors.OnScreenSaverTile,
-                            onClick = {}
+                            onClick = {
+                                navController.navigate("OpenScreenSaverSettingScreen")
+                            }
                         ),
                         SettingTile.CategoryTile(
                             title = "Pomodoro",
@@ -141,7 +143,9 @@ fun SettingsPage(navController: NavController) {
                             color = colors.pomodoroTile,
                             leading = R.drawable.nest_clock_farsight_analog_filled,
                             onColor = colors.OnPomodoroTile,
-                            onClick = {}
+                            onClick = {
+                                navController.navigate("OpenPomodoroSettingScreen")
+                            }
                         ),
                     )
                 )

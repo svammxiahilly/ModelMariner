@@ -52,6 +52,7 @@ fun DropdownMenu(navController: NavController) {
         DropdownMenuItem(
             text = { DropDownMenuText("Screen saver") },
             onClick = {
+                expanded = false
                 context.startActivity(Intent(context, ScreenSaverActivity::class.java))
             },
             leadingIcon = { DropDownMenuIcon(R.drawable.mobile_text_2_filled) }
@@ -74,7 +75,10 @@ fun DropdownMenu(navController: NavController) {
         )
         DropdownMenuItem(
             text = { DropDownMenuText("Pomodoro") },
-            onClick = {},
+            onClick = {
+                expanded = false
+                navController.navigate("OpenPomodoroScreen")
+            },
             leadingIcon = { DropDownMenuIcon(R.drawable.nest_clock_farsight_analog_filled) }
         )
     }

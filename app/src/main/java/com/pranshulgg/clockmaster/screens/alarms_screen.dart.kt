@@ -8,15 +8,18 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -65,13 +68,12 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     }
     val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
     val daysOfWeekShort = listOf("S", "M", "T", "W", "T", "F", "S")
+    val daysOfWeekSelected = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "St")
 
     val context = LocalContext.current
 
-    fun repeatDaysText(days: List<Int>): String {
-        if (days.isEmpty()) return "One time"
-        if (days.size == 7) return "Every day"
-        return days.sorted().joinToString(", ") { daysOfWeek[it] }
+    fun repeatDaysTextSelected(days: List<Int>): String {
+        return days.sorted().joinToString(", ") { daysOfWeekSelected[it] }
     }
 
     val alarms by alarmViewModel.alarms.collectAsState(initial = emptyList())
@@ -211,73 +213,129 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                     },
 
                     content = {
-                        Surface(
-                            color = tileColor,
-                            shape = RoundedCornerShape(22.dp)
+//                        Surface(
+//                            color = tileColor,
+//                            shape = RoundedCornerShape(22.dp)
+//                        ) {
+//                            Row(
+//                                horizontalArrangement = Arrangement.SpaceBetween,
+//                                verticalAlignment = Alignment.Bottom,
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(
+//                                        end = 16.dp,
+//                                        start = 16.dp,
+//                                        bottom = 10.dp,
+//                                        top = 10.dp,
+//                                    ),
+//                            ) {
+//                                Column {
+//                                    Text(
+//                                        text = repeatDaysText(alarm.repeatDays),
+//                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                                    )
+//                                    Row(
+//                                        verticalAlignment = Alignment.Bottom,
+//                                        horizontalArrangement = Arrangement.Center
+//                                    ) {
+//                                        Text(
+//                                            text = hourMinute,
+//                                            fontSize = 46.sp,
+//                                            color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+//                                            modifier = Modifier.alignByBaseline()
+//                                        )
+//
+//                                        amPm?.let {
+//                                            Spacer(modifier = Modifier.width(3.dp))
+//                                            Text(
+//                                                text = amPm,
+//                                                fontSize = 24.sp,
+//                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+//
+//                                                modifier = Modifier.alignByBaseline()
+//                                            )
+//                                        }
+//
+//
+//                                    }
+//
+//
+//                                    if (alarm.label.isNotEmpty())
+//                                        Text(
+//                                            text = alarm.label,
+//                                            color = MaterialTheme.colorScheme.onSurface
+//                                        )
+//
+//                                }
+//
+//                                Switch(
+//
+//                                    checked = isEnabled,
+//                                    thumbContent = {
+//                                        if (isEnabled) {
+//                                            Symbol(
+//                                                com.pranshulgg.clockmaster.R.drawable.notifications_active,
+//                                                size = SwitchDefaults.IconSize,
+//                                                color = MaterialTheme.colorScheme.primary
+//                                            )
+//                                        }
+//                                    },
+//                                    onCheckedChange = { checked ->
+//                                        isEnabled = checked
+//                                        alarmViewModel.updateAlarm(alarm.copy(enabled = checked))
+//                                        try {
+//                                            if (checked) {
+//                                                AlarmScheduler.scheduleAlarm(
+//                                                    context,
+//                                                    alarm.id,
+//                                                    dayOfWeek = alarm.repeatDays,
+//                                                    hour = alarm.hour,
+//                                                    minute = alarm.minute,
+//                                                    label = alarm.label,
+//                                                    soundUri = alarm.sound
+//                                                )
+//                                            } else {
+//                                                AlarmScheduler.cancelAlarm(context, alarm.id)
+//                                            }
+//
+//                                        } catch (e: SecurityException) {
+//                                            Toast.makeText(
+//                                                context,
+//                                                "Unable to schedule exact alarm",
+//                                                Toast.LENGTH_SHORT
+//                                            ).show()
+//                                        }
+//
+//                                    },
+
+//                                    )
+
+//                            }
+
+
+//                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                .fillMaxWidth()
+                                .height(if (alarm.label.isNotEmpty()) 180.dp else 150.dp)
                         ) {
                             Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        end = 16.dp,
-                                        start = 16.dp,
-                                        bottom = 10.dp,
-                                        top = 10.dp,
-                                    ),
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    space = 10.dp,
+                                    alignment = Alignment.CenterHorizontally
+                                ),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
-                                    Text(
-                                        text = repeatDaysText(alarm.repeatDays),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.Bottom,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(
-                                            text = hourMinute,
-                                            fontSize = 46.sp,
-                                            color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.alignByBaseline()
-                                        )
-
-                                        amPm?.let {
-                                            Spacer(modifier = Modifier.width(3.dp))
-                                            Text(
-                                                text = amPm,
-                                                fontSize = 24.sp,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-
-                                                modifier = Modifier.alignByBaseline()
-                                            )
-                                        }
-
-
-                                    }
-
-
-                                    if (alarm.label.isNotEmpty())
-                                        Text(
-                                            text = alarm.label,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-
-                                }
-
-                                Switch(
-
+                                OutlinedToggleButton(
                                     checked = isEnabled,
-                                    thumbContent = {
-                                        if (isEnabled) {
-                                            Symbol(
-                                                com.pranshulgg.clockmaster.R.drawable.notifications_active,
-                                                size = SwitchDefaults.IconSize,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                        }
-                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(46.dp),
                                     onCheckedChange = { checked ->
                                         isEnabled = checked
                                         alarmViewModel.updateAlarm(alarm.copy(enabled = checked))
@@ -305,12 +363,59 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                         }
 
                                     },
+                                    colors = ToggleButtonDefaults.toggleButtonColors(
+                                        checkedContainerColor = MaterialTheme.colorScheme.primary,
 
+                                        )
+                                ) {
+                                    Symbol(
+                                        if (isEnabled) R.drawable.alarm_filled else R.drawable.alarm_outlined,
+                                        color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                        size = 24.dp
                                     )
+                                }
 
+                                Column {
+                                    if (alarm.label.isNotEmpty())
+                                        Text(
+                                            text = alarm.label,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+//                                    Text("6:30 am", fontSize = 60.sp, fontWeight = FontWeight.Bold)
+
+                                    Row(
+                                        verticalAlignment = Alignment.Bottom,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            text = hourMinute,
+                                            fontSize = 60.sp,
+                                            color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.alignByBaseline(),
+                                            fontWeight = FontWeight.Bold
+                                        )
+
+                                        amPm?.let {
+                                            Spacer(modifier = Modifier.width(3.dp))
+                                            Text(
+                                                text = amPm,
+                                                fontSize = 24.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.alignByBaseline()
+                                            )
+                                        }
+
+
+                                    }
+                                    Row {
+                                        DaysBox(
+                                            selectedDays = alarm.repeatDays.sorted()
+                                                .map { daysOfWeekSelected[it] }
+                                        )
+
+                                    }
+                                }
                             }
-
-
                         }
 
 
@@ -331,4 +436,35 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     }
 
 
+}
+
+
+@Composable
+fun DaysBox(
+    selectedDays: List<String>
+) {
+    val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+
+    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        for (day in days) {
+            val isSelected = selectedDays.contains(day)
+            Box(
+                modifier = Modifier
+                    .height(height = 50.dp)
+                    .weight(1f)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.tertiary
+                        else Color.Transparent
+                    )
+                    .border(1.dp, MaterialTheme.colorScheme.tertiary, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    day, color = if (isSelected) MaterialTheme.colorScheme.onTertiary
+                    else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
+                )
+            }
+        }
+    }
 }

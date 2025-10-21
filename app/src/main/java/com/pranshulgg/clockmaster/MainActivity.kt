@@ -44,12 +44,15 @@ import com.pranshulgg.clockmaster.screens.AboutScreen
 import com.pranshulgg.clockmaster.screens.FullscreenTimerScreen
 import com.pranshulgg.clockmaster.screens.HomeScreen
 import com.pranshulgg.clockmaster.screens.PolicyPage
+import com.pranshulgg.clockmaster.screens.PomodoroScreen
 import com.pranshulgg.clockmaster.screens.SettingsPage
 import com.pranshulgg.clockmaster.screens.TermsPage
 import com.pranshulgg.clockmaster.screens.TimezoneSearchPage
 import com.pranshulgg.clockmaster.screens.setting_screens.AlarmSettings
 import com.pranshulgg.clockmaster.screens.setting_screens.AppearanceScreen
 import com.pranshulgg.clockmaster.screens.setting_screens.ClockSettings
+import com.pranshulgg.clockmaster.screens.setting_screens.PomodoroSettings
+import com.pranshulgg.clockmaster.screens.setting_screens.ScreenSaverSettings
 import com.pranshulgg.clockmaster.ui.theme.ClockMasterTheme
 import com.pranshulgg.clockmaster.utils.NavTransitions
 
@@ -112,6 +115,7 @@ class MainActivity : ComponentActivity() {
                     PreferencesHelper.getBool("useExpressiveColor") ?: true
                 )
             }
+
             val context = LocalContext.current;
 
             ClockMasterTheme(
@@ -146,6 +150,7 @@ class MainActivity : ComponentActivity() {
 
                         ) {
                         HomeScreen(navController, viewModelTimezone = timezoneviewModel)
+
                     }
                     composable(
                         "OpenSettings",
@@ -188,6 +193,23 @@ class MainActivity : ComponentActivity() {
 
                         ) {
                         AlarmSettings(
+                            navController,
+                        )
+                    }
+
+                    composable(
+                        "OpenScreenSaverSettingScreen",
+
+                        ) {
+                        ScreenSaverSettings(
+                            navController,
+                        )
+                    }
+                    composable(
+                        "OpenPomodoroSettingScreen",
+
+                        ) {
+                        PomodoroSettings(
                             navController,
                         )
                     }
@@ -238,6 +260,15 @@ class MainActivity : ComponentActivity() {
                         "OpenPrivacyPolicyScreen",
                     ) {
                         PolicyPage(navController = navController)
+                    }
+
+                    composable(
+                        "OpenPomodoroScreen",
+
+                        ) {
+                        PomodoroScreen(
+                            navController = navController
+                        )
                     }
                 }
             }

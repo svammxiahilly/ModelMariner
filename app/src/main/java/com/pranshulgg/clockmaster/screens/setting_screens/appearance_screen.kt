@@ -259,6 +259,7 @@ fun AppearanceScreen(
                     )
 
                 )
+                Spacer(Modifier.height(10.dp))
 
                 SettingSection(
                     title = "Display",

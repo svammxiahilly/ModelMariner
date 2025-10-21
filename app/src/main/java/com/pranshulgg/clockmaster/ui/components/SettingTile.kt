@@ -67,7 +67,8 @@ sealed class SettingTile {
         val options: List<String>,
         val selectedOption: String?,
         val onOptionSelected: (String) -> Unit,
-        val optionLabel: (String) -> String = { it }
+        val optionLabel: (String) -> String = { it },
+        val dialogTitle: String? = null
     ) : SettingTile()
 
     data class ActionTile(
@@ -185,7 +186,8 @@ fun SettingSection(
                     options = tile.options,
                     selectedOption = tile.selectedOption,
                     onOptionSelected = tile.onOptionSelected,
-                    optionLabel = tile.optionLabel
+                    optionLabel = tile.optionLabel,
+                    dialogTitle = tile.dialogTitle
                 )
 
                 is SettingTile.ActionTile -> ActionTile(
