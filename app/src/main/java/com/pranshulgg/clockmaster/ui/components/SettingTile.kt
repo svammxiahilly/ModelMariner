@@ -123,7 +123,7 @@ fun SettingSection(
         title?.let {
             Text(
                 text = it,
-                modifier = Modifier.padding(bottom = 10.dp, top = 10.dp, start = 3.dp),
+                modifier = Modifier.padding(bottom = 5.dp, top = 5.dp, start = 3.dp),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.W700

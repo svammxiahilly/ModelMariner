@@ -124,7 +124,7 @@ fun TimersScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(end = 12.dp, start = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
 
         items(timers, key = { it.id }) { timer ->

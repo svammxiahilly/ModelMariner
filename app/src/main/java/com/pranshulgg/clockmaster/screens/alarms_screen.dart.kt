@@ -9,6 +9,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,10 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pranshulgg.clockmaster.helpers.AlarmScheduler
 import com.pranshulgg.clockmaster.helpers.PreferencesHelper
@@ -32,7 +36,9 @@ import com.pranshulgg.clockmaster.models.AlarmViewModel
 import com.pranshulgg.clockmaster.ui.components.EmptyContainerPlaceholder
 import com.pranshulgg.clockmaster.ui.components.Symbol
 import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.roomDB.AlarmEntity
 import com.pranshulgg.clockmaster.services.AlarmAlwaysForegroundService
+import com.pranshulgg.clockmaster.ui.components.AlarmBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -61,6 +67,15 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
         )
     }
 
+
+    val tonedDown = Color(
+        ColorUtils.blendARGB(
+            MaterialTheme.colorScheme.surfaceContainerHigh.toArgb(),
+            MaterialTheme.colorScheme.surface.toArgb(),
+            0.6f
+        )
+    )
+
     var darkTheme by remember {
         mutableStateOf(
             PreferencesHelper.getBool("dark_theme") ?: false
@@ -73,8 +88,11 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     val context = LocalContext.current
 
     fun repeatDaysTextSelected(days: List<Int>): String {
-        return days.sorted().joinToString(", ") { daysOfWeekSelected[it] }
+        return days.sorted().joinToString(", ") { daysOfWeekShort[it] }
     }
+
+    var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
+    var showEditSheet by remember { mutableStateOf(false) }
 
     val alarms by alarmViewModel.alarms.collectAsState(initial = emptyList())
 
@@ -87,7 +105,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
 
     LazyColumn(
         modifier = Modifier.padding(end = 12.dp, start = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
 
         items(alarms, key = { it.id }) { alarm ->
@@ -315,15 +333,23 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
 
 //                        }
 
+
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(24.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                .background(
+                                    tonedDown
+                                )
+
                                 .fillMaxWidth()
-                                .height(if (alarm.label.isNotEmpty()) 180.dp else 150.dp)
+                                .height(if (alarm.label.isNotEmpty()) 160.dp else 140.dp)
+                                .clickable {
+                                    editingAlarm = alarm
+                                    showEditSheet = true
+                                }
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(12.dp),
                                 horizontalArrangement = Arrangement.spacedBy(
                                     space = 10.dp,
                                     alignment = Alignment.CenterHorizontally
@@ -334,7 +360,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                     checked = isEnabled,
                                     contentPadding = PaddingValues(0.dp),
                                     modifier = Modifier
-                                        .fillMaxHeight()
+                                        .height(140.dp)
                                         .width(46.dp),
                                     onCheckedChange = { checked ->
                                         isEnabled = checked
@@ -375,12 +401,23 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                     )
                                 }
 
-                                Column {
+                                Column(
+                                    horizontalAlignment = Alignment.Start
+                                ) {
                                     if (alarm.label.isNotEmpty())
-                                        Text(
-                                            text = alarm.label,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
+//                                        Spacer(Modifier.height(10.dp))
+                                        Box(
+                                            Modifier
+                                                .clip(RoundedCornerShape(5.dp))
+                                                .background(MaterialTheme.colorScheme.surface)
+                                                .padding(start = 5.dp, end = 5.dp)
+                                        ) {
+                                            Text(
+                                                text = alarm.label,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontSize = 15.sp
+                                            )
+                                        }
 //                                    Text("6:30 am", fontSize = 60.sp, fontWeight = FontWeight.Bold)
 
                                     Row(
@@ -410,11 +447,14 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                     Row {
                                         DaysBox(
                                             selectedDays = alarm.repeatDays.sorted()
-                                                .map { daysOfWeekSelected[it] }
+                                                .map { daysOfWeekShort[it] }
                                         )
 
                                     }
+
+
                                 }
+
                             }
                         }
 
@@ -436,6 +476,13 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     }
 
 
+    if (showEditSheet && editingAlarm != null) {
+        AlarmBottomSheet(
+            onDismiss = { showEditSheet = false },
+            use24hr = use24HourFormat,
+            alarmToEdit = editingAlarm
+        )
+    }
 }
 
 
@@ -443,27 +490,48 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
 fun DaysBox(
     selectedDays: List<String>
 ) {
-    val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+    val days = listOf("S", "M", "T", "W", "T", "F", "S")
 
-    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        for (day in days) {
-            val isSelected = selectedDays.contains(day)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(
+            space = 3.dp,
+            alignment = Alignment.CenterHorizontally
+        ), modifier = Modifier.fillMaxWidth()
+    ) {
+        if (selectedDays.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .height(height = 50.dp)
+                    .height(height = 40.dp)
                     .weight(1f)
                     .clip(CircleShape)
                     .background(
-                        if (isSelected) MaterialTheme.colorScheme.tertiary
-                        else Color.Transparent
-                    )
-                    .border(1.dp, MaterialTheme.colorScheme.tertiary, CircleShape),
+                        MaterialTheme.colorScheme.surface
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    day, color = if (isSelected) MaterialTheme.colorScheme.onTertiary
-                    else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
+                    "One time", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp
                 )
+            }
+        } else {
+            for (day in days) {
+                val isSelected = selectedDays.contains(day)
+                Box(
+                    modifier = Modifier
+                        .height(height = 40.dp)
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        day, color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp
+                    )
+                }
             }
         }
     }

@@ -342,7 +342,9 @@ class PomodoroService : Service() {
 
     private fun broadcastState() {
         val i = Intent(BROADCAST_ACTION_STATE).apply {
-            setPackage(packageName)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setPackage(packageName) //Setting the package breaks the timer on Android < 12
+            }
             putExtra(EXTRA_MODE, currentMode)
             putExtra(EXTRA_REMAIN_MS, remainingMs)
             putExtra(EXTRA_RUNNING, isRunning)

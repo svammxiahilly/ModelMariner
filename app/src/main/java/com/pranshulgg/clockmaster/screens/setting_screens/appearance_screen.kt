@@ -130,6 +130,12 @@ fun AppearanceScreen(
         )
     }
 
+    var CurrentDefaultSelectedTab by remember {
+        mutableStateOf(
+            PreferencesHelper.getString("DefaultSelectedTab") ?: "Alarm"
+        )
+    }
+
 
     fun hideColorSheet() {
         scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -284,6 +290,27 @@ fun AppearanceScreen(
                                 }
                             }
                         )
+                    )
+                )
+                Spacer(Modifier.height(10.dp))
+
+                SettingSection(
+                    title = "On-start",
+                    tiles = listOf(
+                        SettingTile.DialogOptionTile(
+                            leading = { SettingsTileIcon(R.drawable.tabs) },
+                            title = "Default selected tab",
+                            options = listOf("Alarm", "World clock", "Stopwatch", "Timer"),
+                            selectedOption = CurrentDefaultSelectedTab,
+                            onOptionSelected = { selectedOption ->
+                                CurrentDefaultSelectedTab = selectedOption
+                                PreferencesHelper.setString(
+                                    "DefaultSelectedTab",
+                                    selectedOption
+                                )
+
+                            }
+                        ),
                     )
                 )
 

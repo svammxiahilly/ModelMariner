@@ -70,24 +70,39 @@ import kotlin.math.roundToInt
 fun AlarmBottomSheet(
     onDismiss: () -> Unit = {},
     alarmViewModel: AlarmViewModel = viewModel(),
-    use24hr: Boolean = false
+    use24hr: Boolean = false,
+    alarmToEdit: AlarmEntity? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
     val scope = rememberCoroutineScope()
 
+
     val now = LocalTime.now()
-    var hour by remember { mutableIntStateOf(now.hour) }
-    var minute by remember { mutableIntStateOf(now.minute) }
-    var label by remember { mutableStateOf("") }
-    var soundUri by remember { mutableStateOf<String?>(null) }
-    var soundTitle by remember { mutableStateOf("Default") }
-    var repeatDays by remember { mutableStateOf(listOf<Int>()) }
+//    var hour by remember { mutableIntStateOf(now.hour) }
+//    var minute by remember { mutableIntStateOf(now.minute) }
+//    var label by remember { mutableStateOf("") }
+//    var soundUri by remember { mutableStateOf<String?>(null) }
+//    var soundTitle by remember { mutableStateOf("Default") }
+//    var repeatDays by remember { mutableStateOf(listOf<Int>()) }
     var showTimePicker by remember { mutableStateOf(false) }
     var useInputMode by remember { mutableStateOf(false) }
-    var selectedValueSnooze by remember { mutableStateOf(10f) }
-    var vibrate by remember { mutableStateOf(false) }
+//    var selectedValueSnooze by remember { mutableStateOf(10f) }
+//    var vibrate by remember { mutableStateOf(false) }
+
+    var hour by remember { mutableIntStateOf(alarmToEdit?.hour ?: LocalTime.now().hour) }
+    var minute by remember { mutableIntStateOf(alarmToEdit?.minute ?: LocalTime.now().minute) }
+    var label by remember { mutableStateOf(alarmToEdit?.label ?: "") }
+    var soundUri by remember { mutableStateOf(alarmToEdit?.sound) }
+    var soundTitle by remember { mutableStateOf(if (alarmToEdit?.sound != null) "Custom" else "Default") }
+    var repeatDays by remember { mutableStateOf(alarmToEdit?.repeatDays ?: listOf()) }
+    var vibrate by remember { mutableStateOf(alarmToEdit?.vibrate ?: false) }
+    var selectedValueSnooze by remember {
+        mutableStateOf(
+            alarmToEdit?.snoozeTime?.toFloat() ?: 10f
+        )
+    }
 
     val launchSoundPicker = rememberAlarmSoundPickerLauncher { uri, title ->
 
@@ -338,35 +353,36 @@ fun AlarmBottomSheet(
                     )
                 }
                 Button(
+                    modifier = Modifier.defaultMinSize(minWidth = 90.dp, minHeight = 45.dp),
                     onClick = {
                         if (canScheduleExactAlarms(context)) {
-                            alarmViewModel.addAlarm(
-                                context,
-                                AlarmEntity(
-                                    hour = hour,
-                                    minute = minute,
-                                    repeatDays = repeatDays,
-                                    label = label,
-                                    sound = soundUri,
-                                    snoozeTime = selectedValueSnooze.toInt()
-                                )
+                            val newAlarm = AlarmEntity(
+                                id = alarmToEdit?.id ?: 0,
+                                hour = hour,
+                                minute = minute,
+                                repeatDays = repeatDays,
+                                label = label,
+                                sound = soundUri,
+                                vibrate = vibrate,
+                                snoozeTime = selectedValueSnooze.toInt()
                             )
-                            scope.launch {
-                                sheetState.hide()
-                            }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    onDismiss()
-                                }
+
+                            if (alarmToEdit != null) {
+                                alarmViewModel.updateAlarm(newAlarm)
+                            } else {
+                                alarmViewModel.addAlarm(context, newAlarm)
+                            }
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) onDismiss()
                             }
                         } else {
                             showPermissionDialog = true
                         }
                     },
-
                     shapes = ButtonDefaults.shapes(),
-                    modifier = Modifier.defaultMinSize(minWidth = 90.dp, minHeight = 45.dp),
                 ) {
-                    Text("Save", fontSize = 16.sp)
+                    Text(if (alarmToEdit != null) "Update" else "Save", fontSize = 16.sp)
                 }
             }
         }

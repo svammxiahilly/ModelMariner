@@ -151,7 +151,7 @@ fun WorldClockScreen(viewModel: TimezoneViewModel) {
                         currentTimeMs = currentTime,
                         useAnalog = useAnalog
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(6.dp))
                 }
                 item {
                     Spacer(Modifier.height(130.dp))
