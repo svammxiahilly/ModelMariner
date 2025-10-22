@@ -156,3 +156,14 @@ export class ReportNavigator {
    */
   policyCostDelta(policy: string): number {
     const pr = this.policy(policy);
+    return pr ? pr.simulation.totals.cost_delta_usd : 0;
+  }
+
+  /** Rank models for a task by their mean quality (descending). */
+  qualityRanking(task: string): { model: string; quality: number }[] {
+    return this.reliabilityForTask(task)
+      .filter((a) => a.successes > 0)
+      .map((a) => ({ model: a.model, quality: a.mean_quality }))
+      .sort((a, b) => b.quality - a.quality);
+  }
+}
