@@ -248,3 +248,19 @@ func cmdValidate(args []string) error {
 	}
 	return nil
 }
+
+// loadTraces opens a JSONL file and ingests it. Under strict mode a single bad
+// line aborts the run; otherwise bad lines are collected and skipped.
+func loadTraces(path string, strict bool) (trace.IngestResult, error) {
+	fh, err := os.Open(path)
+	if err != nil {
+		return trace.IngestResult{}, fmt.Errorf("opening traces: %w", err)
+	}
+	defer fh.Close()
+	opts := trace.DefaultOptions()
+	opts.SkipInvalid = !strict
+	res, err := trace.Ingest(fh, opts)
+	if err != nil {
+		return res, err
+	}
+	if strict && res.Rejected > 0 {
