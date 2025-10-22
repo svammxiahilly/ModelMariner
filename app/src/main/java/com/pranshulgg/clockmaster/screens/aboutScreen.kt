@@ -272,7 +272,7 @@ fun CheckforupdateBtn() {
 
                 }) {
                 Text(
-                    "v2.1.0",
+                    "v2.1.1",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
