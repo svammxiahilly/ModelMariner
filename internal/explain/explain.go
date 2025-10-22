@@ -104,3 +104,14 @@ func rejectionLine(r routing.RejectedCandidate) string {
 	}
 	return fmt.Sprintf("%s — %s", r.Model, strings.Join(parts, "; "))
 }
+
+func componentBreakdown(comp map[string]float64) string {
+	keys := make([]string, 0, len(comp))
+	for k := range comp {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	parts := make([]string, 0, len(keys))
+	for _, k := range keys {
+		parts = append(parts, fmt.Sprintf("%s=%.4f", k, comp[k]))
+	}
