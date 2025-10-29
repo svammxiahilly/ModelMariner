@@ -233,7 +233,7 @@ fun TimezoneList(query: String, viewModel: TimezoneViewModel, navController: Nav
                 trailingContent = {
                     Text(
                         time,
-                        fontSize = 28.sp,
+                        fontSize = 24.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

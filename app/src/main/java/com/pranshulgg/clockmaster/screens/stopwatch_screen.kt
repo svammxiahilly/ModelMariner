@@ -106,28 +106,19 @@ fun StopwatchScreen() {
             modifier = Modifier
                 .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(if (laps.isEmpty()) 60.dp else 20.dp))
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = formatted,
-                    fontSize = (screenWidth.value / 3.2).sp,
+                    fontSize = (screenWidth.value / 4.6).sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-
-            if (laps.isEmpty()) {
-                Spacer(Modifier.height(20.dp))
-                Text(
-                    "No laps",
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.alpha(0.5f)
-                )
-            }
+            
 
             LazyRow(
                 modifier = Modifier
@@ -153,7 +144,7 @@ fun StopwatchScreen() {
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(80.dp)
+                                .width(96.dp)
                                 .height(100.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -361,7 +352,9 @@ fun getLapColor(index: Int, laps: List<Long>, colorScheme: ColorScheme): Color {
 
 private fun formatElapsed(ms: Long): String {
     val totalSec = ms / 1000
-    val seconds = (totalSec % 60).toInt()
     val minutes = (totalSec / 60).toInt()
-    return String.format("%02d:%02d", minutes, seconds)
+    val seconds = (totalSec % 60).toInt()
+    val millis = (ms % 1000) / 10 // hundredths of a second (00–99)
+    return String.format("%02d:%02d.%02d", minutes, seconds, millis)
 }
+
