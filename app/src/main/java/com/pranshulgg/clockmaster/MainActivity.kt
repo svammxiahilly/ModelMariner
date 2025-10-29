@@ -1,6 +1,7 @@
 package com.pranshulgg.clockmaster
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -53,6 +54,7 @@ import com.pranshulgg.clockmaster.screens.setting_screens.AppearanceScreen
 import com.pranshulgg.clockmaster.screens.setting_screens.ClockSettings
 import com.pranshulgg.clockmaster.screens.setting_screens.PomodoroSettings
 import com.pranshulgg.clockmaster.screens.setting_screens.ScreenSaverSettings
+import com.pranshulgg.clockmaster.services.AlarmAlwaysForegroundService
 import com.pranshulgg.clockmaster.ui.theme.ClockMasterTheme
 import com.pranshulgg.clockmaster.utils.NavTransitions
 
@@ -78,6 +80,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             KeepScreenOnEffect(PreferencesHelper.getBool("keepScreenOn") ?: false)
 
+
+            val isServiceOn = PreferencesHelper.getBool("keepServiceRunning") ?: false
+
+            val intent =
+                Intent(applicationContext, AlarmAlwaysForegroundService::class.java)
+
+            if (isServiceOn) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    applicationContext.startForegroundService(intent)
+                } else {
+                    applicationContext.startService(intent)
+                }
+            }
+            
             val snackbarHostState = remember { SnackbarHostState() }
             val database = AppDatabase.getDatabase(applicationContext)
             val repository = TimezoneRepository(database.timezoneDao())
