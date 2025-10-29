@@ -71,16 +71,16 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
         ) {
             Text(
                 text = formattedTime,
-                fontSize = 65.sp,
+                fontSize = 80.sp,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.alignByBaseline()
             )
 
             if (!use24hr) {
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = separateAmPm,
-                    fontSize = 30.sp,
+                    fontSize = 36.sp,
                     color = MaterialTheme.colorScheme.onSurface,
 
                     modifier = Modifier.alignByBaseline()

@@ -1,17 +1,14 @@
 package com.pranshulgg.clockmaster.screens
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Space
-import androidx.compose.animation.core.animateFloatAsState
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -22,67 +19,54 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SplitButtonDefaults
-import androidx.compose.material3.SplitButtonLayout
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTooltipState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.pranshulgg.clockmaster.R
-import com.pranshulgg.clockmaster.helpers.SnackbarManager
-import com.pranshulgg.clockmaster.ui.components.Symbol
-import com.pranshulgg.clockmaster.utils.topPadding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SplitButtonDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
+import com.pranshulgg.clockmaster.R
+import com.pranshulgg.clockmaster.ui.components.Symbol
 import com.pranshulgg.clockmaster.utils.bottomPadding
+import com.pranshulgg.clockmaster.utils.topPadding
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import java.net.HttpURLConnection
+import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +107,11 @@ fun AboutScreen(snackbarHostState: SnackbarHostState, navController: NavControll
                                 fontSize = 24.sp,
                                 color = MaterialTheme.colorScheme.secondary
                             )
-                            CheckforupdateBtn()
+                            CheckForUpdateBtn(
+                                currentVersion = "v2.1.2",
+                                githubRepo = "PranshulGG/ClockMaster",
+                                snackbarHostState = snackbarHostState
+                            )
                         }
                         Image(
                             painter = painterResource(id = R.drawable.app_icon_prev),
@@ -259,59 +247,106 @@ fun AboutScreen(snackbarHostState: SnackbarHostState, navController: NavControll
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun CheckforupdateBtn() {
-    var checked by remember { mutableStateOf(false) }
-    val size = SplitButtonDefaults.ExtraSmallContainerHeight
-    SplitButtonLayout(
-        leadingButton = {
-            SplitButtonDefaults.LeadingButton(
-                modifier = Modifier.heightIn(size),
-                shapes = SplitButtonDefaults.leadingButtonShapesFor(size),
-                contentPadding = SplitButtonDefaults.leadingButtonContentPaddingFor(size),
-                onClick = {
+fun CheckForUpdateBtn(
+    currentVersion: String,
+    githubRepo: String = "PranshulGG/ClockMaster",
+    snackbarHostState: SnackbarHostState? = null
+) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isChecking by remember { mutableStateOf(false) }
+    val size = SplitButtonDefaults.SmallContainerHeight
 
-                }) {
-                Text(
-                    "v2.1.1",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
+    val showMessage: suspend (String) -> Unit = { msg ->
+        if (snackbarHostState != null) {
+            snackbarHostState.showSnackbar(msg)
+        } else {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
             }
-        },
-        trailingButton = {
-            val description = "Check updates"
-            TooltipBox(
-                positionProvider =
-                    TooltipDefaults.rememberTooltipPositionProvider(
-                        TooltipAnchorPosition.Below,
-                        spacingBetweenTooltipAndAnchor = 10.dp
-                    ),
-                tooltip = { PlainTooltip { Text(description) } },
-                state = rememberTooltipState(),
-            ) {
-                SplitButtonDefaults.TrailingButton(
-                    checked = checked,
-                    onCheckedChange = { checked = it },
-                    modifier =
-                        Modifier
-                            .heightIn(size)
-                            .semantics {
-                                stateDescription = if (checked) "Expanded" else "Collapsed"
-                                contentDescription = description
-                            },
-                    shapes = SplitButtonDefaults.trailingButtonShapesFor(size),
-                ) {
-                    Symbol(
-                        R.drawable.refresh,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        size = 19.dp
-                    )
+        }
+    }
+
+    fun openReleasesPage() {
+        val url = "https://github.com/$githubRepo/releases"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        ctx.startActivity(intent)
+    }
+
+    suspend fun fetchLatestStableTag(repo: String): String? = withContext(Dispatchers.IO) {
+        val apiUrl = "https://api.github.com/repos/$repo/releases"
+        val url = URL(apiUrl)
+        var conn: HttpURLConnection? = null
+        try {
+            conn = (url.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 10_000
+                readTimeout = 10_000
+                setRequestProperty("Accept", "application/vnd.github+json")
+                setRequestProperty("User-Agent", "Compose-App")
+            }
+
+            if (conn.responseCode != HttpURLConnection.HTTP_OK) {
+                throw Exception("HTTP ${conn.responseCode}")
+            }
+
+            val body = conn.inputStream.bufferedReader().use { it.readText() }
+            val arr = JSONArray(body)
+            for (i in 0 until arr.length()) {
+                val obj = arr.getJSONObject(i)
+                val prerelease = obj.optBoolean("prerelease", false)
+                if (!prerelease) {
+                    return@withContext obj.optString("tag_name", null)
                 }
             }
-        },
-    )
-}
+            return@withContext null
+        } finally {
+            conn?.disconnect()
+        }
+    }
 
+    OutlinedButton(
+
+        modifier = Modifier.heightIn(size),
+//        contentPadding = SplitButtonDefaults.leadingButtonContentPaddingFor(size),
+        shapes = ButtonDefaults.shapes(),
+        onClick = {
+            if (isChecking) return@OutlinedButton
+            scope.launch {
+                isChecking = true
+                try {
+                    val latest = fetchLatestStableTag(githubRepo)
+                    delay(300)
+
+                    if (latest != null && latest != currentVersion) {
+                        showMessage("New version available: $latest")
+                        delay(800)
+                        openReleasesPage()
+                    } else {
+                        showMessage("You are using the latest version!")
+                    }
+                } catch (t: Throwable) {
+                    showMessage("Error checking for updates")
+                    t.printStackTrace()
+                } finally {
+                    isChecking = false
+                }
+            }
+        }
+    ) {
+        Symbol(R.drawable.refresh, size = 17.dp, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Text(
+            if (isChecking) "Checking..." else currentVersion,
+            fontSize = 15.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+
+}
 
 @Composable
 fun IconAvatarLeading(icon: Int) {
