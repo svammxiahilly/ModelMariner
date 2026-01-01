@@ -264,3 +264,19 @@ func loadTraces(path string, strict bool) (trace.IngestResult, error) {
 		return res, err
 	}
 	if strict && res.Rejected > 0 {
+		return res, fmt.Errorf("%d invalid line(s) under --strict mode", res.Rejected)
+	}
+	return res, nil
+}
+
+func printUsage(w *os.File) {
+	fmt.Fprint(w, `modelmariner — offline LLM trace evaluation & routing-policy compiler
+
+USAGE
+  modelmariner analyze  --traces FILE [--policy FILE] [--out DIR] [--format json|text|both] [--strict] [--with-timestamp]
+  modelmariner validate --traces FILE [--strict]
+  modelmariner version
+
+COMMANDS
+  analyze   Ingest traces, compute reliability & Pareto frontiers, evaluate
+            policies, simulate routing, and emit report/policy artifacts.
