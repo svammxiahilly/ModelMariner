@@ -50,4 +50,4 @@ For any questions or feedback, feel free to open an issue on GitHub or contact p
 
 # ©️ License
 
-This project is licensed under the GPL-3.0 license. See the `LICENSE` file for details.
+This project is licensed under the Apache License 2.0. See the `LICENSE` file for details.
