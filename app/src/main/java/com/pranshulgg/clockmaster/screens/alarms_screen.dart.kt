@@ -25,6 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +43,7 @@ import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.roomDB.AlarmEntity
 import com.pranshulgg.clockmaster.services.AlarmAlwaysForegroundService
 import com.pranshulgg.clockmaster.ui.components.AlarmBottomSheet
+import com.pranshulgg.clockmaster.ui.theme.RobotoFlexWide
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -47,7 +52,10 @@ import java.util.Locale
 
 
 @SuppressLint("DefaultLocale")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTextApi::class
+)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
@@ -104,7 +112,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
     }
 
     LazyColumn(
-        modifier = Modifier.padding(end = 12.dp, start = 12.dp),
+        modifier = Modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
 
@@ -168,7 +176,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                 }
                             }, shapes = ButtonDefaults.shapes()
                         ) {
-                            Text("Delete", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                            Text("Delete", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     dismissButton = {
@@ -176,7 +184,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                             showDialog = false
                             scope.launch { dismissState.reset() }
                         }, shapes = ButtonDefaults.shapes()) {
-                            Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                            Text("Cancel", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     title = { Text("Delete alarm") },
@@ -231,114 +239,11 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                     },
 
                     content = {
-//                        Surface(
-//                            color = tileColor,
-//                            shape = RoundedCornerShape(22.dp)
-//                        ) {
-//                            Row(
-//                                horizontalArrangement = Arrangement.SpaceBetween,
-//                                verticalAlignment = Alignment.Bottom,
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(
-//                                        end = 16.dp,
-//                                        start = 16.dp,
-//                                        bottom = 10.dp,
-//                                        top = 10.dp,
-//                                    ),
-//                            ) {
-//                                Column {
-//                                    Text(
-//                                        text = repeatDaysText(alarm.repeatDays),
-//                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                                    )
-//                                    Row(
-//                                        verticalAlignment = Alignment.Bottom,
-//                                        horizontalArrangement = Arrangement.Center
-//                                    ) {
-//                                        Text(
-//                                            text = hourMinute,
-//                                            fontSize = 46.sp,
-//                                            color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-//                                            modifier = Modifier.alignByBaseline()
-//                                        )
-//
-//                                        amPm?.let {
-//                                            Spacer(modifier = Modifier.width(3.dp))
-//                                            Text(
-//                                                text = amPm,
-//                                                fontSize = 24.sp,
-//                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-//
-//                                                modifier = Modifier.alignByBaseline()
-//                                            )
-//                                        }
-//
-//
-//                                    }
-//
-//
-//                                    if (alarm.label.isNotEmpty())
-//                                        Text(
-//                                            text = alarm.label,
-//                                            color = MaterialTheme.colorScheme.onSurface
-//                                        )
-//
-//                                }
-//
-//                                Switch(
-//
-//                                    checked = isEnabled,
-//                                    thumbContent = {
-//                                        if (isEnabled) {
-//                                            Symbol(
-//                                                com.pranshulgg.clockmaster.R.drawable.notifications_active,
-//                                                size = SwitchDefaults.IconSize,
-//                                                color = MaterialTheme.colorScheme.primary
-//                                            )
-//                                        }
-//                                    },
-//                                    onCheckedChange = { checked ->
-//                                        isEnabled = checked
-//                                        alarmViewModel.updateAlarm(alarm.copy(enabled = checked))
-//                                        try {
-//                                            if (checked) {
-//                                                AlarmScheduler.scheduleAlarm(
-//                                                    context,
-//                                                    alarm.id,
-//                                                    dayOfWeek = alarm.repeatDays,
-//                                                    hour = alarm.hour,
-//                                                    minute = alarm.minute,
-//                                                    label = alarm.label,
-//                                                    soundUri = alarm.sound
-//                                                )
-//                                            } else {
-//                                                AlarmScheduler.cancelAlarm(context, alarm.id)
-//                                            }
-//
-//                                        } catch (e: SecurityException) {
-//                                            Toast.makeText(
-//                                                context,
-//                                                "Unable to schedule exact alarm",
-//                                                Toast.LENGTH_SHORT
-//                                            ).show()
-//                                        }
-//
-//                                    },
-
-//                                    )
-
-//                            }
-
-
-//                        }
-
-
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(
-                                    tonedDown
+                                    MaterialTheme.colorScheme.surfaceBright
                                 )
 
                                 .fillMaxWidth()
@@ -429,7 +334,15 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                                             fontSize = 60.sp,
                                             color = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.alignByBaseline(),
-                                            fontWeight = FontWeight.Bold
+                                            fontFamily = FontFamily(
+                                                Font(
+                                                    R.font.roboto_flex,
+                                                    variationSettings = FontVariation.Settings(
+                                                        FontVariation.width(150f),
+                                                        FontVariation.weight(1000)
+                                                    )
+                                                )
+                                            ),
                                         )
 
                                         amPm?.let {
@@ -468,9 +381,9 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
             }
 
         }
-        item {
-            Spacer(Modifier.height(130.dp))
-        }
+//        item {
+//            Spacer(Modifier.height(130.dp))
+//        }
 
 
     }
@@ -505,7 +418,7 @@ fun DaysBox(
                     .weight(1f)
                     .clip(CircleShape)
                     .background(
-                        MaterialTheme.colorScheme.surface
+                        MaterialTheme.colorScheme.surfaceContainer
                     ),
                 contentAlignment = Alignment.Center
             ) {
