@@ -20,6 +20,8 @@ fun ActionTile(
     shapes: RoundedCornerShape,
     onClick: () -> Unit,
     colorDesc: Color = Color.Unspecified,
+    danger: Boolean = false,
+    itemBgColor: Color
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -31,9 +33,14 @@ fun ActionTile(
             ),
             leadingContent = leading,
             colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                containerColor = if (danger) MaterialTheme.colorScheme.errorContainer else itemBgColor
             ),
-            headlineContent = { Text(headline) },
+            headlineContent = {
+                Text(
+                    headline,
+                    color = if (danger) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
+                )
+            },
             supportingContent = {
 
                 if (description != null) {
