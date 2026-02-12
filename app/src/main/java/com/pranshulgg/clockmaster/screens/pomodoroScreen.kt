@@ -21,6 +21,10 @@ import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,7 +39,10 @@ import com.pranshulgg.clockmaster.services.TimerAlarmService
 import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.Symbol
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTextApi::class
+)
 @Composable
 fun PomodoroScreen(viewModel: PomodoroViewModel = viewModel(), navController: NavController) {
     val context = LocalContext.current.applicationContext
@@ -194,7 +201,15 @@ fun PomodoroScreen(viewModel: PomodoroViewModel = viewModel(), navController: Na
                 Text(
                     text = text,
                     fontSize = fontSize.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily(
+                        Font(
+                            R.font.roboto_flex,
+                            variationSettings = FontVariation.Settings(
+                                FontVariation.width(150f),
+                                FontVariation.weight(1000)
+                            )
+                        )
+                    ),
                     textAlign = TextAlign.Center
                 )
 
@@ -256,7 +271,7 @@ fun PomodoroScreen(viewModel: PomodoroViewModel = viewModel(), navController: Na
                     overflowIndicator = { menuState ->
                         FilledIconButton(
                             onClick = {
-                                if (menuState.isExpanded) {
+                                if (menuState.isShowing) {
                                     menuState.dismiss()
                                 } else {
                                     menuState.show()
