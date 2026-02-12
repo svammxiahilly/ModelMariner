@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +22,7 @@ fun DialogTextFieldTile(
     placeholder: String,
     placeholderTextField: String,
     shapes: RoundedCornerShape,
+    itemBgColor: Color
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var textFieldValue by remember { mutableStateOf(initialText) }
@@ -32,7 +34,7 @@ fun DialogTextFieldTile(
         ListItem(
             modifier = Modifier.clickable { showDialog = true },
             colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                containerColor = itemBgColor
             ),
             leadingContent = leading,
             headlineContent = { Text(headline) },
@@ -73,7 +75,7 @@ fun DialogTextFieldTile(
                     },
                     shapes = ButtonDefaults.shapes()
                 ) {
-                    Text("Save", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                    Text("Save", style = MaterialTheme.typography.labelLarge)
                 }
             },
             dismissButton = {
@@ -81,7 +83,7 @@ fun DialogTextFieldTile(
                     onClick = { showDialog = false },
                     shapes = ButtonDefaults.shapes()
                 ) {
-                    Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                    Text("Cancel", style = MaterialTheme.typography.labelLarge)
                 }
             }
         )
