@@ -129,7 +129,7 @@ fun AlarmBottomSheet(
 
 
     ModalBottomSheet(
-        containerColor = MaterialTheme.colorScheme.surface,
+        scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f),
         onDismissRequest = {
             scope.launch {
                 sheetState.hide()
@@ -210,7 +210,7 @@ fun AlarmBottomSheet(
                             minute = timePickerState.minute
                             showTimePicker = false
                         }, shapes = ButtonDefaults.shapes()) {
-                            Text("Confirm", fontWeight = FontWeight.W600, fontSize = 15.sp)
+                            Text("Confirm", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     dismissButton = {
@@ -219,7 +219,7 @@ fun AlarmBottomSheet(
                             onClick = { showTimePicker = false },
                             shapes = ButtonDefaults.shapes()
                         ) {
-                            Text("Cancel", fontWeight = FontWeight.W600, fontSize = 15.sp)
+                            Text("Cancel", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     text = {
@@ -249,12 +249,12 @@ fun AlarmBottomSheet(
                     val selected = index in repeatDays
                     ToggleButton(
                         checked = selected,
-                        colors = ToggleButtonDefaults.toggleButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                            checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-
-                            ),
+//                        colors = ToggleButtonDefaults.toggleButtonColors(
+//                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+//                            checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+//                            checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+//
+//                            ),
                         onCheckedChange = {
                             repeatDays =
                                 if (it) repeatDays + index else repeatDays - index
