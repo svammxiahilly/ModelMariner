@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.2.10-2.0.2"
+    id("com.google.devtools.ksp") version "2.3.4"
     alias(libs.plugins.aboutLibraries)
 }
 
@@ -14,8 +14,8 @@ android {
         applicationId = "com.pranshulgg.clockmaster"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20
-        versionName = "2.1.2"
+        versionCode = 22
+        versionName = "2.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
