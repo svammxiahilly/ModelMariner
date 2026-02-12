@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
@@ -35,6 +36,7 @@ import androidx.navigation.NavController
 import com.pranshulgg.clockmaster.R
 import com.pranshulgg.clockmaster.ScreenSaverActivity
 import com.pranshulgg.clockmaster.services.StopwatchForegroundService
+import com.pranshulgg.clockmaster.utils.Radius
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -76,12 +78,12 @@ fun DropdownMenu(navController: NavController) {
                     showPermissionDialog = false
                     permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 }) {
-                    Text("Grant", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                    Text("Grant")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPermissionDialog = false }) {
-                    Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                    Text("Cancel")
                 }
             }
         )
@@ -101,8 +103,9 @@ fun DropdownMenu(navController: NavController) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
-        shape = RoundedCornerShape(16.dp),
-        offset = DpOffset(x = (-10).dp, y = (-48).dp)
+        shape = RoundedCornerShape(Radius.Large),
+        offset = DpOffset(x = (-10).dp, y = (-48).dp),
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer
     ) {
         DropdownMenuItem(
             text = { DropDownMenuText("Screen saver") },
@@ -155,11 +158,13 @@ fun DropdownMenu(navController: NavController) {
 fun DropDownMenuText(text: String) =
     Text(
         text,
-        fontSize = 16.sp,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.padding(end = 10.dp)
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
     )
 
 @Composable
 fun DropDownMenuIcon(icon: Int) =
-    Symbol(icon, color = MaterialTheme.colorScheme.onSurface, size = 22.dp, paddingStart = 3.dp)
+    Symbol(
+        icon,
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
+    )
