@@ -23,6 +23,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,7 +41,7 @@ import com.pranshulgg.clockmaster.ui.components.Symbol
 import java.sql.Date
 
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalTextApi::class)
 @Composable
 fun StopwatchScreen() {
     val ctx = LocalContext.current
@@ -108,17 +112,28 @@ fun StopwatchScreen() {
         ) {
             Spacer(Modifier.height(if (laps.isEmpty()) 60.dp else 20.dp))
             Box(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(fraction = if (laps.isEmpty()) 0.4f else 0.2f),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = formatted,
-                    fontSize = (screenWidth.value / 4.6).sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = (screenWidth.value / 5).sp,
+                    fontFamily = FontFamily(
+                        Font(
+                            R.font.roboto_flex,
+                            variationSettings = FontVariation.Settings(
+                                FontVariation.width(150f),
+                                FontVariation.weight(1000),
+                                FontVariation.Setting("YTFI", 999f)
+                            )
+                        )
+                    ),
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            
+
 
             LazyRow(
                 modifier = Modifier
@@ -139,7 +154,8 @@ fun StopwatchScreen() {
                             width = 1.5.dp,
                             color = MaterialTheme.colorScheme.outlineVariant
                         ),
-                        shape = RoundedCornerShape(22.dp)
+                        shape = RoundedCornerShape(22.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
 
                     ) {
                         Box(
@@ -228,105 +244,137 @@ fun StopwatchScreen() {
 
                 }
 
-                val interactionSources = remember { List(2) { MutableInteractionSource() } }
-
-
-                ButtonGroup(
-
-                    overflowIndicator = { menuState ->
-                        FilledIconButton(
-                            onClick = {
-                                if (menuState.isExpanded) {
-                                    menuState.dismiss()
-                                } else {
-                                    menuState.show()
-                                }
+//                val interactionSources = remember { List(2) { MutableInteractionSource() } }
+//
+//
+//                ButtonGroup(
+//
+//                    overflowIndicator = { menuState ->
+//                        FilledIconButton(
+//                            onClick = {
+//                                if (menuState.isShowing) {
+//                                    menuState.dismiss()
+//                                } else {
+//                                    menuState.show()
+//                                }
+//                            }
+//                        ) {
+//
+//                        }
+//                    }
+//                ) {
+//                    customItem(
+//                        {
+//                            ToggleButton(
+//                                interactionSource = interactionSources[0],
+//                                modifier = Modifier
+//                                    .weight(1f)
+//                                    .height(ButtonDefaults.LargeContainerHeight - 5.dp)
+//                                    .animateWidth(interactionSources[0]),
+//                                colors = ToggleButtonDefaults.toggleButtonColors(
+//                                    containerColor = MaterialTheme.colorScheme.primary,
+//                                ),
+//                                checked = isRunning,
+//
+//                                shapes = ToggleButtonDefaults.shapes(),
+////                                onClick = {
+////                                    val i =
+////                                        Intent(ctx, StopwatchForegroundService::class.java).apply {
+////                                            action = StopwatchForegroundService.ACTION_RESET
+////                                        }
+////                                    ctx.startService(i)
+//                                onCheckedChange = { checked ->
+//                                    if (checked) {
+//                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                                            val permissionCheck = ContextCompat.checkSelfPermission(
+//                                                context,
+//                                                android.Manifest.permission.POST_NOTIFICATIONS
+//                                            )
+//                                            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+//                                                pendingId = System.currentTimeMillis().toString()
+//                                                showPermissionDialog = true
+//                                                return@ToggleButton
+//                                            }
+//                                        }
+//                                        val i =
+//                                            Intent(
+//                                                ctx,
+//                                                StopwatchForegroundService::class.java
+//                                            ).apply {
+//                                                action =
+//                                                    StopwatchForegroundService.ACTION_START_FOREGROUND
+//                                            }
+//                                        ContextCompat.startForegroundService(ctx, i)
+//                                    } else {
+//
+//
+//                                        val i =
+//                                            Intent(
+//                                                ctx,
+//                                                StopwatchForegroundService::class.java
+//                                            ).apply {
+//                                                action = StopwatchForegroundService.ACTION_PAUSE
+//                                            }
+//                                        ctx.startService(i)
+//
+//                                    }
+//
+//                                }
+////                                }
+//                            ) {
+//
+//                                Text(
+//                                    text = if (!isRunning) "Start" else "Pause",
+//                                    fontSize = 26.sp,
+//                                    color = MaterialTheme.colorScheme.onPrimary
+//                                )
+//
+//                            }
+//                        },
+//                        { state ->
+//
+//                        }
+//                    )
+//
+//                    customItem(
+//                        {
+                Button(
+                    enabled = isRunning,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonDefaults.LargeContainerHeight - 5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    ),
+                    shapes = ButtonDefaults.shapes(),
+                    onClick = {
+                        val i =
+                            Intent(ctx, StopwatchForegroundService::class.java).apply {
+                                action = StopwatchForegroundService.ACTION_LAP
                             }
-                        ) {
-
-                        }
+                        ctx.startService(i)
                     }
+
                 ) {
-                    customItem(
-                        {
-                            Button(
-                                interactionSource = interactionSources[0],
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(ButtonDefaults.LargeContainerHeight - 5.dp)
-                                    .animateWidth(interactionSources[0]),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                ),
 
-                                shapes = ButtonDefaults.shapes(),
-                                onClick = {
-                                    val i =
-                                        Intent(ctx, StopwatchForegroundService::class.java).apply {
-                                            action = StopwatchForegroundService.ACTION_RESET
-                                        }
-                                    ctx.startService(i)
-                                }
-                            ) {
-
-                                Text(
-                                    text = "Reset",
-                                    fontSize = 26.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-
-                            }
-                        },
-                        { state ->
-
-                        }
-                    )
-
-                    customItem(
-                        {
-                            Button(
-                                enabled = isRunning,
-                                interactionSource = interactionSources[1],
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(ButtonDefaults.LargeContainerHeight - 5.dp)
-                                    .animateWidth(interactionSources[1]),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                ),
-                                shapes = ButtonDefaults.shapes(),
-                                onClick = {
-                                    val i =
-                                        Intent(ctx, StopwatchForegroundService::class.java).apply {
-                                            action = StopwatchForegroundService.ACTION_LAP
-                                        }
-                                    ctx.startService(i)
-                                }
-
-                            ) {
-
-                                Text(
-                                    text = "Lap",
-                                    fontSize = 26.sp,
-                                    color = if (isRunning) {
-                                        MaterialTheme.colorScheme.onSurface
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                    }
-                                )
-
-                            }
-                        },
-                        { state ->
-
+                    Text(
+                        text = "Lap",
+                        fontSize = 26.sp,
+                        color = if (isRunning) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         }
                     )
 
                 }
+//                        },
+//                        { state ->
+//
+//                        }
+//                    )
 
 
-
-                Spacer(Modifier.height(20.dp))
             }
 
         }
