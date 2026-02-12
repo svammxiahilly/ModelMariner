@@ -9,9 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.ColorUtils
 import com.pranshulgg.clockmaster.ui.components.tiles.ActionTile
 import com.pranshulgg.clockmaster.ui.components.tiles.CategoryTile
 import com.pranshulgg.clockmaster.ui.components.tiles.DialogOptionTile
@@ -20,6 +22,8 @@ import com.pranshulgg.clockmaster.ui.components.tiles.DialogTextFieldTile
 import com.pranshulgg.clockmaster.ui.components.tiles.SingleSwitchTile
 import com.pranshulgg.clockmaster.ui.components.tiles.SwitchTile
 import com.pranshulgg.clockmaster.ui.components.tiles.TextTile
+import com.pranshulgg.clockmaster.ui.theme.RobotoFlexWide
+import com.pranshulgg.clockmaster.utils.Radius
 
 sealed class SettingTile {
     abstract val title: String
@@ -77,6 +81,7 @@ sealed class SettingTile {
         val leading: (@Composable (() -> Unit))? = null,
         val onClick: () -> Unit,
         val colorDesc: Color = Color.Unspecified,
+        val danger: Boolean = false
     ) : SettingTile()
 
 
@@ -109,15 +114,20 @@ sealed class SettingTile {
 
 @Composable
 fun SettingSection(
-    tiles: List<SettingTile>,
+    tiles: List<SettingTile?>,
     title: String? = null,
     primarySwitch: Boolean = false,
     noPadding: Boolean = false,
-    errorTile: Boolean = false
+    errorTile: Boolean = false,
+    isModalOption: Boolean = false,
 ) {
+
+    val itemBgColor =
+        if (isModalOption) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceBright
+
     Column(
         modifier = Modifier
-            .padding(horizontal = if (noPadding) 0.dp else 12.dp),
+            .padding(horizontal = if (noPadding) 0.dp else 16.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         title?.let {
@@ -140,23 +150,23 @@ fun SettingSection(
 
 
             val shape = when {
-                primarySwitch -> RoundedCornerShape(50.dp)
-                isOnly -> RoundedCornerShape(18.dp)
+                primarySwitch -> RoundedCornerShape(Radius.Full)
+                isOnly -> RoundedCornerShape(Radius.Large)
                 isFirst -> RoundedCornerShape(
-                    topStart = 18.dp,
-                    topEnd = 18.dp,
-                    bottomStart = 2.6.dp,
-                    bottomEnd = 2.6.dp
+                    topStart = Radius.Large,
+                    topEnd = Radius.Large,
+                    bottomStart = Radius.ExtraSmall,
+                    bottomEnd = Radius.ExtraSmall
                 )
 
                 isLast -> RoundedCornerShape(
-                    topStart = 2.6.dp,
-                    topEnd = 2.6.dp,
-                    bottomStart = 18.dp,
-                    bottomEnd = 18.dp
+                    topStart = Radius.ExtraSmall,
+                    topEnd = Radius.ExtraSmall,
+                    bottomStart = Radius.Large,
+                    bottomEnd = Radius.Large
                 )
 
-                else -> RoundedCornerShape(2.6.dp)
+                else -> RoundedCornerShape(Radius.ExtraSmall)
             }
 
             when (tile) {
@@ -164,7 +174,8 @@ fun SettingSection(
                     headline = tile.title,
                     description = tile.description,
                     leading = tile.leading,
-                    shapes = shape
+                    shapes = shape,
+                    itemBgColor = itemBgColor
                 )
 
                 is SettingTile.CategoryTile -> CategoryTile(
@@ -174,7 +185,8 @@ fun SettingSection(
                     shapes = shape,
                     color = tile.color,
                     iconColor = tile.onColor,
-                    onClick = tile.onClick
+                    onClick = tile.onClick,
+                    itemBgColor = itemBgColor
                 )
 
 
@@ -187,7 +199,8 @@ fun SettingSection(
                     selectedOption = tile.selectedOption,
                     onOptionSelected = tile.onOptionSelected,
                     optionLabel = tile.optionLabel,
-                    dialogTitle = tile.dialogTitle
+                    dialogTitle = tile.dialogTitle,
+                    itemBgColor = itemBgColor
                 )
 
                 is SettingTile.ActionTile -> ActionTile(
@@ -196,7 +209,9 @@ fun SettingSection(
                     leading = tile.leading,
                     shapes = shape,
                     onClick = tile.onClick,
-                    colorDesc = tile.colorDesc
+                    colorDesc = tile.colorDesc,
+                    danger = tile.danger,
+                    itemBgColor = itemBgColor
                 )
 
                 is SettingTile.SwitchTile -> SwitchTile(
@@ -206,7 +221,8 @@ fun SettingSection(
                     checked = tile.checked,
                     onCheckedChange = tile.onCheckedChange,
                     shapes = shape,
-                    switchEnabled = tile.enabled
+                    switchEnabled = tile.enabled,
+                    itemBgColor = itemBgColor
                 )
 
                 is SettingTile.SingleSwitchTile -> SingleSwitchTile(
@@ -215,7 +231,8 @@ fun SettingSection(
                     leading = tile.leading,
                     checked = tile.checked,
                     onCheckedChange = tile.onCheckedChange,
-                    switchEnabled = tile.enabled
+                    switchEnabled = tile.enabled,
+                    itemBgColor = itemBgColor
                 )
 
                 is SettingTile.DialogTextFieldTile -> DialogTextFieldTile(
@@ -226,8 +243,8 @@ fun SettingSection(
                     onTextSubmitted = tile.onTextSubmitted,
                     placeholder = tile.placeholder,
                     placeholderTextField = tile.placeholderTextField,
-                    initialText = tile.initialText
-
+                    initialText = tile.initialText,
+                    itemBgColor = itemBgColor
                 )
 
                 is SettingTile.DialogSliderTile -> DialogSliderTile(
@@ -241,9 +258,11 @@ fun SettingSection(
                     steps = tile.steps,
                     labelFormatter = tile.labelFormatter,
                     dialogTitle = tile.dialogTitle,
-                    isDescriptionAsValue = tile.isDescriptionAsValue
-
+                    isDescriptionAsValue = tile.isDescriptionAsValue,
+                    itemBgColor = itemBgColor
                 )
+
+                else -> null
             }
         }
     }
