@@ -50,6 +50,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,7 +68,10 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalTextApi::class
+)
 @Composable
 fun TimerItemRow(
     timer: TimerItem,
@@ -93,16 +100,8 @@ fun TimerItemRow(
         )
     }
 
-    val tonedDown = Color(
-        ColorUtils.blendARGB(
-            MaterialTheme.colorScheme.surfaceContainerHigh.toArgb(),
-            MaterialTheme.colorScheme.surface.toArgb(),
-            0.6f
-        )
-    )
-
     val tileColor =
-        if (timer.remainingMillis.toInt() == 0) if (useExpressiveColor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer else tonedDown
+        if (timer.remainingMillis.toInt() == 0) if (useExpressiveColor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceBright
 
     val animatedProgress by
     animateFloatAsState(
@@ -178,8 +177,16 @@ fun TimerItemRow(
                     Text(
                         formatMillis(timer.remainingMillis),
                         fontSize = 40.sp,
-                        fontWeight = FontWeight.W700,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily(
+                            Font(
+                                R.font.roboto_flex,
+                                variationSettings = FontVariation.Settings(
+                                    FontVariation.width(150f),
+                                    FontVariation.weight(1000)
+                                )
+                            )
+                        ),
                     )
                 }
 
@@ -198,12 +205,12 @@ fun TimerItemRow(
                             modifier = Modifier.size(42.dp, 35.dp),
                             onClick = { showEdit = true },
                             shapes = IconButtonDefaults.shapes(),
-                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                         ) {
                             Symbol(
-                                R.drawable.edit, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                R.drawable.edit,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 size = 18.dp
-
                             )
                         }
                     }
@@ -219,7 +226,7 @@ fun TimerItemRow(
                                 onReset(timer.id)
                             },
                             shapes = IconButtonDefaults.shapes(),
-                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                         ) {
                             Symbol(
                                 R.drawable.refresh,
