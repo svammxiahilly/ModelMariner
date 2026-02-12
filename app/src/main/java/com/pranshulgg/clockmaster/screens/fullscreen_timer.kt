@@ -52,6 +52,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -75,7 +79,10 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTextApi::class
+)
 @Composable
 fun FullscreenTimerScreen(
     timerId: String,
@@ -188,7 +195,15 @@ fun FullscreenTimerScreen(
                         Text(
                             text = text,
                             fontSize = fontSize.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily(
+                                Font(
+                                    R.font.roboto_flex,
+                                    variationSettings = FontVariation.Settings(
+                                        FontVariation.width(150f),
+                                        FontVariation.weight(1000)
+                                    )
+                                )
+                            ),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -265,7 +280,7 @@ fun FullscreenTimerScreen(
                     overflowIndicator = { menuState ->
                         FilledIconButton(
                             onClick = {
-                                if (menuState.isExpanded) {
+                                if (menuState.isShowing) {
                                     menuState.dismiss()
                                 } else {
                                     menuState.show()
