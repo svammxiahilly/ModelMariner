@@ -1,5 +1,6 @@
 package com.pranshulgg.clockmaster.screens
 
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -26,6 +27,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +47,7 @@ import com.pranshulgg.clockmaster.helpers.SnackbarManager
 import com.pranshulgg.clockmaster.models.HomeViewModel
 import com.pranshulgg.clockmaster.models.TimersViewModel
 import com.pranshulgg.clockmaster.models.TimezoneViewModel
+import com.pranshulgg.clockmaster.services.StopwatchForegroundService
 import com.pranshulgg.clockmaster.services.TimerForegroundService
 import com.pranshulgg.clockmaster.ui.components.AddTimerSheet
 import com.pranshulgg.clockmaster.ui.components.AlarmBottomSheet
@@ -72,8 +75,12 @@ fun HomeScreen(
 
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
                 title = {
                     Text(appBarTitles[selectedItem])
                 },
@@ -83,47 +90,62 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = selectedItem != 2,
-                enter = scaleIn(
-                    initialScale = 0.8f,
-                    animationSpec = motionScheme.defaultSpatialSpec()
-                ) + fadeIn(),
-                exit = scaleOut(
-                    targetScale = 0.8f,
-                    animationSpec = motionScheme.defaultSpatialSpec()
-                ) + fadeOut(),
-            ) {
-                FloatingActionButton(
-
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    modifier = Modifier.size(80.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        0.dp,
-                        pressedElevation = 0.dp,
-                    ),
-                    onClick = {
-                        when (selectedItem) {
-                            0 -> showSheetAlarm = true
-                            1 -> navController.navigate("OpenTimezoneSearch")
-                            3 -> showingAddTimer = true
-                        }
-                    },
-                ) {
-                    Symbol(
-                        R.drawable.add,
-                        size = 30.dp,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                }
-            }
+//            AnimatedVisibility(
+//                visible = selectedItem != 2,
+//                enter = scaleIn(
+//                    initialScale = 0.8f,
+//                    animationSpec = motionScheme.defaultSpatialSpec()
+//                ) + fadeIn(),
+//                exit = scaleOut(
+//                    targetScale = 0.8f,
+//                    animationSpec = motionScheme.defaultSpatialSpec()
+//                ) + fadeOut(),
+//            ) {
+//                FloatingActionButton(
+//
+//                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+//                    modifier = Modifier.size(80.dp),
+//                    shape = RoundedCornerShape(20.dp),
+//                    elevation = FloatingActionButtonDefaults.elevation(
+//                        0.dp,
+//                        pressedElevation = 0.dp,
+//                    ),
+//                    onClick = {
+//                        when (selectedItem) {
+//                            0 -> showSheetAlarm = true
+//                            1 -> navController.navigate("OpenTimezoneSearch")
+//                            3 -> showingAddTimer = true
+//                        }
+//                    },
+//                ) {
+//                    Symbol(
+//                        R.drawable.add,
+//                        size = 30.dp,
+//                        color = MaterialTheme.colorScheme.onTertiaryContainer
+//                    )
+//                }
+//            }
 
         },
         bottomBar = {
             BottomNav(
                 selectedItem = selectedItem,
-                onItemSelected = { index -> viewModel.selectedItem = index }
+                onItemSelected = { index -> viewModel.selectedItem = index },
+                onClick = {
+                    when (selectedItem) {
+                        0 -> showSheetAlarm = true
+                        1 -> navController.navigate("OpenTimezoneSearch")
+                        3 -> showingAddTimer = true
+                        else -> {
+                            val resetIntent =
+                                Intent(context, StopwatchForegroundService::class.java).apply {
+                                    action = StopwatchForegroundService.ACTION_RESET
+                                }
+                            context.startService(resetIntent)
+
+                        }
+                    }
+                }
             )
         }
     ) { innerPadding ->
