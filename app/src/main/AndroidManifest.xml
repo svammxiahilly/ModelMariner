@@ -89,6 +89,28 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback|dataSync" />
 
+
+        <receiver
+            android:name=".home_widgets.DigitalClockWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/digital_clock_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".home_widgets.AnalogClockWidgetProvider"
+            android:exported="false">
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/analog_clock_widget_info" />
+        </receiver>
+
+
     </application>
 
 
