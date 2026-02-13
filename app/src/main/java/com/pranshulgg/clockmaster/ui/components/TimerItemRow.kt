@@ -79,8 +79,34 @@ fun TimerItemRow(
     onReset: (String) -> Unit,
     onDelete: (String) -> Unit,
     onEditLabel: (String, String) -> Unit,
-    onOpenFullscreen: (TimerItem) -> Unit
+    onOpenFullscreen: (TimerItem) -> Unit,
+    index: Int,
+    results: List<TimerItem>,
 ) {
+
+    val isOnly = results.singleOrNull() == timer
+    val isFirst = index == 0
+    val isLast = index == results.lastIndex
+
+    val shape = when {
+        isOnly -> RoundedCornerShape(16.dp)
+        isFirst -> RoundedCornerShape(
+            topStart = 16.dp,
+            topEnd = 16.dp,
+            bottomStart = 4.dp,
+            bottomEnd = 4.dp
+        )
+
+        isLast -> RoundedCornerShape(
+            topStart = 4.dp,
+            topEnd = 4.dp,
+            bottomStart = 16.dp,
+            bottomEnd = 16.dp
+        )
+
+        else -> RoundedCornerShape(4.dp)
+    }
+
     var showEdit by remember { mutableStateOf(false) }
     var newLabel by remember { mutableStateOf(timer.label) }
 
@@ -111,10 +137,10 @@ fun TimerItemRow(
         )
     Surface(
         color = tileColor,
-        shape = RoundedCornerShape(22.dp),
+        shape = shape,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(shape)
             .clickable(
                 onClick = { onOpenFullscreen(timer) },
 
@@ -176,13 +202,13 @@ fun TimerItemRow(
                     )
                     Text(
                         formatMillis(timer.remainingMillis),
-                        fontSize = 40.sp,
+                        fontSize = 38.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontFamily = FontFamily(
                             Font(
                                 R.font.roboto_flex,
                                 variationSettings = FontVariation.Settings(
-                                    FontVariation.width(150f),
+                                    FontVariation.width(130f),
                                     FontVariation.weight(1000)
                                 )
                             )
