@@ -123,8 +123,8 @@ fun TimersScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(end = 12.dp, start = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
 
         items(timers, key = { it.id }) { timer ->
@@ -154,7 +154,7 @@ fun TimersScreen(
                                 }
                             }, shapes = ButtonDefaults.shapes()
                         ) {
-                            Text("Delete", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                            Text("Delete", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     dismissButton = {
@@ -162,7 +162,7 @@ fun TimersScreen(
                             showDialog = false
                             scope.launch { dismissState.reset() }
                         }, shapes = ButtonDefaults.shapes()) {
-                            Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                            Text("Cancel", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     title = { Text("Delete timer") },
@@ -190,7 +190,7 @@ fun TimersScreen(
                             else -> MaterialTheme.colorScheme.surface
                         }
                         Surface(
-                            shape = RoundedCornerShape(22.dp)
+                            shape = RoundedCornerShape(50.dp)
                         ) {
                             Box(
                                 Modifier
@@ -264,7 +264,9 @@ fun TimersScreen(
                                 }
 
                                 navController.navigate("fullscreen/${t.id}")
-                            }
+                            },
+                            results = timers,
+                            index = timers.indexOf(timer)
                         )
                     }
                 )
