@@ -108,7 +108,7 @@ fun AboutScreen(snackbarHostState: SnackbarHostState, navController: NavControll
                                 color = MaterialTheme.colorScheme.secondary
                             )
                             CheckForUpdateBtn(
-                                currentVersion = "v2.1.3",
+                                currentVersion = "v2.2.0",
                                 githubRepo = "PranshulGG/ClockMaster",
                                 snackbarHostState = snackbarHostState
                             )
