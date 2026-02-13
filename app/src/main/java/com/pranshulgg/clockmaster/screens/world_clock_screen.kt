@@ -134,7 +134,7 @@ fun WorldClockScreen(viewModel: TimezoneViewModel) {
 
 
             LazyColumn(
-                modifier = Modifier.padding(end = 12.dp, start = 12.dp)
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
                 items(timezoneList, key = { it.zoneId }) { timezone ->
 
@@ -149,9 +149,11 @@ fun WorldClockScreen(viewModel: TimezoneViewModel) {
                         time = time,
                         onDelete = { tz -> viewModel.removeTimezone(timezone.zoneId) },
                         currentTimeMs = currentTime,
-                        useAnalog = useAnalog
+                        useAnalog = useAnalog,
+                        results = timezoneList,
+                        index = timezoneList.indexOf(timezone)
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(2.dp))
                 }
                 item {
                     Spacer(Modifier.height(130.dp))
@@ -167,15 +169,21 @@ fun WorldClockScreen(viewModel: TimezoneViewModel) {
 
 @Composable
 
-fun TimezoneRow(timezone: Timezone, time: String, currentTimeMs: Long, useAnalog: Boolean) {
+fun TimezoneRow(
+    timezone: Timezone,
+    time: String,
+    currentTimeMs: Long,
+    useAnalog: Boolean,
+    shape: RoundedCornerShape
+) {
 
     Surface(
-        shape = RoundedCornerShape(22.dp)
+        shape = shape
     ) {
 
         ListItem(
             colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                containerColor = MaterialTheme.colorScheme.surfaceBright
             ),
             headlineContent = {
                 Text(
@@ -221,7 +229,9 @@ fun DismissibleTimezoneRow(
     time: String,
     onDelete: (Timezone) -> Unit,
     currentTimeMs: Long,
-    useAnalog: Boolean
+    useAnalog: Boolean,
+    results: List<Timezone>,
+    index: Int
 ) {
     var visible by remember { mutableStateOf(true) }
 
@@ -233,6 +243,29 @@ fun DismissibleTimezoneRow(
     )
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
+
+    val isOnly = results.singleOrNull() == timezone
+    val isFirst = index == 0
+    val isLast = index == results.lastIndex
+
+    val shape = when {
+        isOnly -> RoundedCornerShape(16.dp)
+        isFirst -> RoundedCornerShape(
+            topStart = 16.dp,
+            topEnd = 16.dp,
+            bottomStart = 4.dp,
+            bottomEnd = 4.dp
+        )
+
+        isLast -> RoundedCornerShape(
+            topStart = 4.dp,
+            topEnd = 4.dp,
+            bottomStart = 16.dp,
+            bottomEnd = 16.dp
+        )
+
+        else -> RoundedCornerShape(4.dp)
+    }
 
     if (showDialog) {
         AlertDialog(
@@ -251,7 +284,7 @@ fun DismissibleTimezoneRow(
                         }
                     }, shapes = ButtonDefaults.shapes()
                 ) {
-                    Text("Delete", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                    Text("Delete", style = MaterialTheme.typography.labelLarge)
                 }
             },
             dismissButton = {
@@ -259,7 +292,7 @@ fun DismissibleTimezoneRow(
                     showDialog = false
                     scope.launch { dismissState.reset() }
                 }, shapes = ButtonDefaults.shapes()) {
-                    Text("Cancel", fontWeight = FontWeight.W600, fontSize = 16.sp)
+                    Text("Cancel", style = MaterialTheme.typography.labelLarge)
                 }
             },
             title = { Text("Delete Timezone") },
@@ -296,7 +329,7 @@ fun DismissibleTimezoneRow(
                     else -> MaterialTheme.colorScheme.surface
                 }
                 Surface(
-                    shape = RoundedCornerShape(22.dp)
+                    shape = RoundedCornerShape(50)
                 ) {
                     Box(
                         Modifier
@@ -316,7 +349,7 @@ fun DismissibleTimezoneRow(
             },
 
             content = {
-                TimezoneRow(timezone, time, currentTimeMs, useAnalog)
+                TimezoneRow(timezone, time, currentTimeMs, useAnalog, shape)
             }
 
         )
