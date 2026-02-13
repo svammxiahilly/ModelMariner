@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
                     applicationContext.startService(intent)
                 }
             }
-            
+
             val snackbarHostState = remember { SnackbarHostState() }
             val database = AppDatabase.getDatabase(applicationContext)
             val repository = TimezoneRepository(database.timezoneDao())
@@ -144,7 +144,7 @@ class MainActivity : ComponentActivity() {
                     if (darkTheme) R.color.black else R.color.white
                 )
                 NavHost(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer),
                     navController = navController, startDestination = "main",
                     enterTransition = {
                         NavTransitions.enter(motionScheme)
