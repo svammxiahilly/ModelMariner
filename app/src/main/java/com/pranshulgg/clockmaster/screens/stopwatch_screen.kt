@@ -374,6 +374,7 @@ fun StopwatchScreen() {
 //                        }
 //                    )
 
+                Spacer(Modifier.height(130.dp))
 
             }
 
