@@ -113,10 +113,33 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
 
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
 
         items(alarms, key = { it.id }) { alarm ->
+
+            val isOnly = alarms.singleOrNull() == alarm
+            val isFirst = alarms.indexOf(alarm) == 0
+            val isLast = alarms.indexOf(alarm) == alarms.lastIndex
+
+            val shape = when {
+                isOnly -> RoundedCornerShape(16.dp)
+                isFirst -> RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = 4.dp,
+                    bottomEnd = 4.dp
+                )
+
+                isLast -> RoundedCornerShape(
+                    topStart = 4.dp,
+                    topEnd = 4.dp,
+                    bottomStart = 16.dp,
+                    bottomEnd = 16.dp
+                )
+
+                else -> RoundedCornerShape(4.dp)
+            }
 
 //        alarms.forEach { alarm ->
             val hourMinute: String
@@ -219,7 +242,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                             else -> MaterialTheme.colorScheme.surface
                         }
                         Surface(
-                            shape = RoundedCornerShape(22.dp)
+                            shape = RoundedCornerShape(50.dp)
                         ) {
                             Box(
                                 Modifier
@@ -241,7 +264,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
                     content = {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(24.dp))
+                                .clip(shape)
                                 .background(
                                     MaterialTheme.colorScheme.surfaceBright
                                 )
@@ -381,9 +404,9 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel = viewModel()) {
             }
 
         }
-//        item {
-//            Spacer(Modifier.height(130.dp))
-//        }
+        item {
+            Spacer(Modifier.height(130.dp))
+        }
 
 
     }
