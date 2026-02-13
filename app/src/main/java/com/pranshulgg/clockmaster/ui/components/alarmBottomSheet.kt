@@ -280,6 +280,7 @@ fun AlarmBottomSheet(
 
 
             SettingSection(
+                isModalOption = true,
                 noPadding = true,
                 tiles = listOf(
                     SettingTile.DialogTextFieldTile(
