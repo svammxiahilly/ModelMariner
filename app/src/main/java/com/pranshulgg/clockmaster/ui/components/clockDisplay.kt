@@ -17,14 +17,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pranshulgg.clockmaster.R
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
     Column(
@@ -61,6 +69,8 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
             SimpleDateFormat("EEE, MMM dd", Locale.getDefault())
         }
 
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp.dp
         val formattedTime = currentLocalTime.format(Date(currentTime))
         val formattedDate = currentLocalDate.format(Date(currentTime))
         val separateAmPm = currentAmPm.format(Date(currentTime))
@@ -71,9 +81,18 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
         ) {
             Text(
                 text = formattedTime,
-                fontSize = 80.sp,
+                fontSize = (screenWidth.value / 6).sp,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.alignByBaseline()
+                modifier = Modifier.alignByBaseline(),
+                fontFamily = FontFamily(
+                    Font(
+                        R.font.roboto_flex,
+                        variationSettings = FontVariation.Settings(
+                            FontVariation.weight(1000),
+                            FontVariation.Setting("YTFI", 999f)
+                        )
+                    )
+                ),
             )
 
             if (!use24hr) {
@@ -94,6 +113,7 @@ fun ClockDisplayText(use24hr: Boolean = false, showSeconds: Boolean = false) {
             fontSize = 22.sp,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface
 
 
