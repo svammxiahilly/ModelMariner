@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/widget_analog_clock"
+    android:minWidth="150dp"
+    android:minHeight="150dp"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />
+
+
+
