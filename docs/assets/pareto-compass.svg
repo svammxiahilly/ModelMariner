@@ -70,3 +70,8 @@
     <!-- frontier polyline -->
     <polyline points="210,360 250,300 360,210 470,170" fill="none" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 5" opacity="0.6">
       <animate attributeName="stroke-dashoffset" values="0;22" dur="1.5s" repeatCount="indefinite"/>
+    </polyline>
+
+    <!-- dominated point (dimmed, no pulse) -->
+    <g transform="translate(320 330)" opacity="0.5">
+      <circle r="6" fill="#64748b"/>
