@@ -63,3 +63,9 @@ demo: report ## Run the full pipeline then render the dashboard overview.
 	cd dashboard && npm install --silent && npm run build --silent && \
 		node dist/dashboard.js ../$(OUT_DIR)/report.json overview
 
+.PHONY: ci
+ci: fmt-check vet test dashboard ## Everything CI runs.
+
+.PHONY: clean
+clean: ## Remove build artifacts (keeps committed testdata).
+	rm -rf $(BIN_DIR) dashboard/dist dashboard/node_modules
