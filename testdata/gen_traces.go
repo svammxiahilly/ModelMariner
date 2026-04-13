@@ -128,3 +128,10 @@ func main() {
 	_ = math.Pi
 }
 
+func pickError(rng *rand.Rand) string {
+	kinds := []string{"timeout", "rate_limit", "content_filter", "server_error"}
+	return kinds[rng.Intn(len(kinds))]
+}
+
+func clamp01(x float64) float64 {
+	if x < 0 {
