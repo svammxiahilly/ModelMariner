@@ -73,3 +73,11 @@
   },
   {
     "schema": "modelmariner/v1",
+    "policy": "quality-first",
+    "routes": [
+      {
+        "task": "code-review-comment",
+        "model": "galleon-max",
+        "score": 0.85,
+        "margin": 0.05792322303883979
+      },
