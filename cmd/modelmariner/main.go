@@ -280,3 +280,19 @@ USAGE
 COMMANDS
   analyze   Ingest traces, compute reliability & Pareto frontiers, evaluate
             policies, simulate routing, and emit report/policy artifacts.
+  validate  Ingest and validate traces only; report accepted/rejected counts.
+  version   Print the compiler version.
+
+FLAGS (analyze)
+  --traces, -t   Path to a JSONL trace file (required).
+  --policy, -p   Path to a JSON policy set. When omitted, only reliability and
+                 Pareto analysis are produced.
+  --out, -o      Directory to write report.json, report.txt, and policies.json.
+  --format       Output written to stdout: json, text, or both (default both).
+  --strict       Treat any invalid trace line as a fatal error.
+  --with-timestamp  Include a wall-clock generation time (breaks determinism).
+
+modelmariner is fully offline: it reasons only over recorded traces and never
+contacts a model provider.
+`)
+}
