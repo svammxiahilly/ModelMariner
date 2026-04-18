@@ -56,3 +56,9 @@
       "tasks": ["draft-legal-clause", "code-review-comment"],
       "constraints": {
         "min_quality": 0.85,
+        "min_reliability": 0.9
+      },
+      "preference": {
+        "weights": [
+          { "objective": "quality", "weight": 0.6 },
+          { "objective": "reliability", "weight": 0.25 },
