@@ -16,3 +16,5 @@
   "engines": {
     "node": ">=20"
   },
+  "devDependencies": {
+    "typescript": "5.6.3",
