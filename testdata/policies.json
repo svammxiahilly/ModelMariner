@@ -62,3 +62,9 @@
         "weights": [
           { "objective": "quality", "weight": 0.6 },
           { "objective": "reliability", "weight": 0.25 },
+          { "objective": "cost", "weight": 0.15 }
+        ]
+      }
+    }
+  ]
+}
