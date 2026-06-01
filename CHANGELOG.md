@@ -42,3 +42,7 @@ recorded LLM traces, entirely offline.
 - **TypeScript navigation dashboard** (`dashboard/`): strictly-typed,
   dependency-light terminal consumer with `overview`, `task`, `model`,
   `policy`, and `routes` views; schema-guarded against incompatible reports.
+- **Synthetic corpus**: 1,400-line deterministic trace fleet across five models
+  and five tasks with realistic, non-trivial trade-offs.
+- **Docs**: nautical `README.md`, `docs/TRACE.md` schema reference, and two
+  self-contained animated SVGs (no remote media).
