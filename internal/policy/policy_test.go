@@ -138,3 +138,10 @@ func TestAppliesToScoping(t *testing.T) {
 
 func TestZeroSampleModelIneligible(t *testing.T) {
 	a := agg("dead", 0.1, 100, 0.9, 0.9, 0)
+	a.Successes = 0
+	p := Policy{Name: "p", Preference: Preference{Weights: []Weight{{ObjCost, 1}}}}
+	evals := Evaluate(p, []reliability.Aggregate{a})
+	if evals[0].Eligible {
+		t.Error("model with no successes must be ineligible")
+	}
+}
