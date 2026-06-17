@@ -288,3 +288,24 @@ func normalize(rec Record, line int, opts Options) (Trace, []ValidationError) {
 	if quality < 0 {
 		quality = 0
 	}
+	if quality > opts.MaxQuality {
+		quality = opts.MaxQuality
+	}
+
+	return Trace{
+		Model:      model,
+		Task:       task,
+		Provider:   strings.TrimSpace(rec.Provider),
+		Region:     strings.TrimSpace(rec.Region),
+		Prompt:     rec.Tokens.Prompt,
+		Completion: rec.Tokens.Completion,
+		CostUSD:    *rec.CostUSD,
+		LatencyMS:  *rec.LatencyMS,
+		Quality:    quality,
+		Error:      rec.Error,
+		ErrorKind:  strings.TrimSpace(rec.ErrorKind),
+		Privacy:    rec.Privacy,
+		Timestamp:  strings.TrimSpace(rec.Timestamp),
+		Line:       line,
+	}, nil
+}
