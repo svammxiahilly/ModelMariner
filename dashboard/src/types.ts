@@ -129,3 +129,15 @@ export interface PolicyReport {
   description?: string;
   simulation: Simulation;
   explanations: Explanation[];
+}
+
+export interface Report {
+  schema: string;
+  generated?: string;
+  input: InputSummary;
+  reliability: ReliabilityAggregate[];
+  pareto: ParetoFrontier[];
+  policies: PolicyReport[];
+}
+
+export const SCHEMA_VERSION = "modelmariner/v1";
