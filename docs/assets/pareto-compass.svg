@@ -75,3 +75,9 @@
     <!-- dominated point (dimmed, no pulse) -->
     <g transform="translate(320 330)" opacity="0.5">
       <circle r="6" fill="#64748b"/>
+      <text x="10" y="4" fill="#64748b">dominated</text>
+    </g>
+  </g>
+
+  <text x="310" y="440" text-anchor="middle" font-family="monospace" font-size="11" fill="#94a3b8">cyan vessels ride the frontier · grey vessel is dominated and never chosen</text>
+</svg>
