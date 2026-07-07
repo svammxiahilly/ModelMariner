@@ -393,3 +393,34 @@ Go coverage sits comfortably above the waterline across every engine package
 cases covering the navigator and every render view. Tests assert the *behavior*
 that matters: budgets disqualify, privacy caps hold, dominated models drop off
 the frontier, Wilson bounds reward evidence, and reports stay deterministic.
+
+---
+
+## Project layout
+
+```
+modelmariner/
+├── cmd/modelmariner/        # CLI entrypoint + integration tests
+├── internal/
+│   ├── trace/               # ingestion, validation, privacy tiers
+│   ├── reliability/         # aggregation, Wilson bounds, percentiles
+│   ├── pareto/              # dominance & frontier analysis
+│   ├── policy/              # policy language + hard-constraint evaluator
+│   ├── routing/             # winner selection + trace replay
+│   ├── explain/             # decision rationale
+│   └── report/              # deterministic JSON/text + artifacts
+├── dashboard/               # TypeScript navigation dashboard
+│   ├── src/                 # types, navigator, renderer, tests
+│   ├── package.json
+│   └── tsconfig.json
+├── docs/
+│   ├── TRACE.md             # authoritative format reference
+│   └── assets/              # two animated SVGs (no remote media)
+├── testdata/
+│   ├── fleet.jsonl          # 1,400-line synthetic corpus
+│   ├── gen_traces.go        # deterministic corpus generator
+│   ├── policies.json        # four example policies
+│   └── output/              # committed sample report artifacts
+├── .github/workflows/ci.yml
+├── Makefile
+├── go.mod
