@@ -81,3 +81,12 @@
         "score": 0.85,
         "margin": 0.05792322303883979
       },
+      {
+        "task": "draft-legal-clause",
+        "model": "clipper-pro",
+        "score": 0.9047886549802896,
+        "margin": 0.05478865498028962
+      }
+    ]
+  }
+]
