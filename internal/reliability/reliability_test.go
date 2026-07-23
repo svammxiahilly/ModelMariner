@@ -82,3 +82,10 @@ func TestForTaskFiltersDeterministically(t *testing.T) {
 	}
 	sum := Compute(traces)
 	t1 := sum.ForTask("t1")
+	if len(t1) != 2 {
+		t.Fatalf("want 2 aggregates for t1, got %d", len(t1))
+	}
+	if t1[0].Model != "a" || t1[1].Model != "b" {
+		t.Errorf("aggregates not sorted by model: %v %v", t1[0].Model, t1[1].Model)
+	}
+}
