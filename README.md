@@ -424,3 +424,33 @@ modelmariner/
 ├── .github/workflows/ci.yml
 ├── Makefile
 ├── go.mod
+├── LICENSE
+├── CHANGELOG.md
+└── README.md
+```
+
+---
+
+## Design decisions worth defending
+
+**Why the Wilson lower bound instead of raw success rate?**
+Because a model that succeeded 9 out of 10 times has *not* proven itself the way
+one that succeeded 90 out of 100 has. The Wilson score interval's lower bound
+folds sample size into the estimate, so thinly-sampled vessels cannot bluff their
+way onto the frontier. `wilsonLowerBound(9,10) < wilsonLowerBound(90,100)`, and a
+test pins exactly that.
+
+**Why replay traces instead of trusting the aggregates?**
+Aggregates answer "how does this model behave on average?" Replay answers "what
+would this specific routing decision have delivered against the record we hold?"
+The second is the honest question. Simulation never invents a data point; it only
+re-reads observations already in hand, which is why it stays deterministic.
+
+**Why are constraints hard rather than weighted?**
+Because a budget is a budget and a privacy tier is the law. A soft-penalty router
+will, given a high enough quality score, quietly route restricted data to a cloud
+model. ModelMariner structurally cannot. Constraints disqualify; preferences only
+rank the survivors.
+
+**Why only the standard library?**
+Fewer dependencies mean fewer surprises, a smaller supply-chain surface, and a
