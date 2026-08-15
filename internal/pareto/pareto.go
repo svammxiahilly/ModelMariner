@@ -124,3 +124,16 @@ func markDominance(points []Point) {
 			points[i].DominatedBy = dominators
 		}
 	}
+}
+
+// dominates reports whether point a Pareto-dominates point b: a is no worse on
+// every objective and strictly better on at least one.
+func dominates(a, b Point) bool {
+	noWorse := lessEqualCost(a.CostUSD, b.CostUSD) &&
+		lessEqualCost(a.LatencyMS, b.LatencyMS) &&
+		greaterEqual(a.Quality, b.Quality) &&
+		greaterEqual(a.Reliability, b.Reliability)
+	if !noWorse {
+		return false
+	}
+	strictlyBetter := strictlyLess(a.CostUSD, b.CostUSD) ||
