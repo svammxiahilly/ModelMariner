@@ -93,3 +93,13 @@ func TestNoEligibleWhenAllViolate(t *testing.T) {
 func TestTotalsDelta(t *testing.T) {
 	traces := buildTraces()
 	sum := reliability.Compute(traces)
+	p := policy.Policy{
+		Name:       "quality",
+		Preference: policy.Preference{Weights: []policy.Weight{{Objective: policy.ObjQuality, Weight: 1}}},
+	}
+	sim := Simulate(p, sum, traces)
+	want := sim.Totals.RealizedCostUSD - sim.Totals.BaselineCostUSD
+	if sim.Totals.CostDeltaUSD != want {
+		t.Errorf("cost delta mismatch: %v vs %v", sim.Totals.CostDeltaUSD, want)
+	}
+}
