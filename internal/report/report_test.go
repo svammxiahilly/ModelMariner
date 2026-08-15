@@ -94,3 +94,9 @@ func TestCompilePolicyArtifacts(t *testing.T) {
 	arts := CompilePolicyArtifacts(sims)
 	if len(arts) != 1 || len(arts[0].Routes) != 1 {
 		t.Fatalf("unexpected artifacts: %+v", arts)
+	}
+	if arts[0].Routes[0].Model != "premium" {
+		t.Errorf("compiled route should target premium, got %s", arts[0].Routes[0].Model)
+	}
+	b, err := ArtifactsJSON(arts)
+	if err != nil {
