@@ -11,3 +11,4 @@ dashboard/package-lock.json
 
 # Editor/OS noise
 .DS_Store
+*.swp
