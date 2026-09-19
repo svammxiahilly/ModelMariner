@@ -100,3 +100,10 @@ func TestCompilePolicyArtifacts(t *testing.T) {
 	}
 	b, err := ArtifactsJSON(arts)
 	if err != nil {
+		t.Fatal(err)
+	}
+	if !json.Valid(b) {
+		t.Error("artifacts JSON invalid")
+	}
+	_ = r
+}
