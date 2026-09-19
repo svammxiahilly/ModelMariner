@@ -115,3 +115,14 @@ func componentBreakdown(comp map[string]float64) string {
 	for _, k := range keys {
 		parts = append(parts, fmt.Sprintf("%s=%.4f", k, comp[k]))
 	}
+	return strings.Join(parts, ", ")
+}
+
+// All builds explanations for a full simulation.
+func All(sim routing.Simulation) []Explanation {
+	out := make([]Explanation, 0, len(sim.Decisions))
+	for _, d := range sim.Decisions {
+		out = append(out, For(d))
+	}
+	return out
+}
