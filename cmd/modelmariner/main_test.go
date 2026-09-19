@@ -71,3 +71,9 @@ func TestParseAnalyzeFlags(t *testing.T) {
 		t.Errorf("bad flag parse: %+v", f)
 	}
 	if !f.deterministic {
+		t.Error("determinism should default on")
+	}
+	if _, err := parseAnalyzeFlags([]string{"--traces", "a", "--format", "xml"}); err == nil {
+		t.Error("expected bad format rejection")
+	}
+}
