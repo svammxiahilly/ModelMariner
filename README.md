@@ -454,3 +454,34 @@ rank the survivors.
 
 **Why only the standard library?**
 Fewer dependencies mean fewer surprises, a smaller supply-chain surface, and a
+binary that compiles anywhere Go does. For a tool whose whole value proposition is
+*trustworthy, reproducible decisions*, that discipline is the point.
+
+---
+
+## FAQ from the crow's nest
+
+**Does ModelMariner call any model provider?**
+No. It has no networking code in the decision path and needs none. It reasons
+purely over recorded traces.
+
+**Can it route in real time?**
+It is a *compiler*. It produces a routing table (`policies.json`) that a runtime
+can load and apply. ModelMariner itself makes the decision offline, once, so you
+can review it before it ever touches production traffic.
+
+**What happens when no model satisfies a policy?**
+The task is reported as `unrouted` with the reason, both in the report and in the
+compiled artifact. Silence would be a bug; a loud, explained non-decision is a
+feature.
+
+**How do I bring my own traces?**
+Emit newline-delimited JSON matching the schema in
+[`docs/TRACE.md`](docs/TRACE.md) and point `--traces` at it. Run `validate` first
+to catch malformed lines.
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE). Fair winds and following seas. ⚓
