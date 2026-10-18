@@ -485,3 +485,9 @@ to catch malformed lines.
 ## License
 
 Released under the [MIT License](LICENSE). Fair winds and following seas. ⚓
+
+## Determinism
+
+Given the same corpus, the report is byte-identical: the frontier identity is the model id, ties are
+ordered by score and then name, and header time is authoritative over span clocks. The CI smoke test
+compares report signatures to keep this true.
