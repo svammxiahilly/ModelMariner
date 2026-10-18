@@ -23,6 +23,9 @@ build: ## Compile the CLI into ./bin.
 	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/$(BINARY) $(CMD)
 
 .PHONY: test
+test-race: ## Run the Go tests under the race detector (slower; catches shared-state bugs)
+	go test -race ./...
+
 test: ## Run all Go unit tests.
 	go test ./... -count=1
 

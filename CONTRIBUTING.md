@@ -7,6 +7,7 @@ Thanks for looking. A few things that make a change easy to take:
 3. Run the checks before opening the PR:
 - `go vet ./...`
 - `go test ./...`
+- `make test-race` before touching anything that shares state across goroutines
 - `go build -o bin/modelmariner ./cmd/modelmariner`
 - dashboard: `npm --prefix dashboard ci && npm --prefix dashboard test`
 4. Add a test for the behaviour you changed.
