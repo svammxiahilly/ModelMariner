@@ -155,3 +155,9 @@ no eligible candidate appear under `unrouted` with the reason.
   }
 ]
 ```
+
+## Time precedence
+
+The trace header is authoritative: when a span's clock disagrees with the header, the span time is
+treated as relative and is rebased onto the header. Everything downstream (pacing, reliability
+windows, the smoke-test signature) inherits this rule, so the same corpus always scores the same.
