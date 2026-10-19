@@ -8,6 +8,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Docs
 
+- Determinism contract and tie ordering (ModelMariner).
+
 - Time precedence and the determinism contract written down.
 
 ## [1.0.0] — 2026-08-31

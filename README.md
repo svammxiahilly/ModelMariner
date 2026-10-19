@@ -491,3 +491,6 @@ Released under the [MIT License](LICENSE). Fair winds and following seas. ⚓
 Given the same corpus, the report is byte-identical: the frontier identity is the model id, ties are
 ordered by score and then name, and header time is authoritative over span clocks. The CI smoke test
 compares report signatures to keep this true.
+
+Release notes live in [CHANGELOG.md](CHANGELOG.md); the determinism contract above is what the
+smoke test enforces.
